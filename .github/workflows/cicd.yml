@@ -1,8 +1,6 @@
 name: Onetime CI/CD with Gradle
 
 on:
-  push:
-    branches: [ "main", "develop" ]
   pull_request:
     branches: [ "main", "develop" ]
 
