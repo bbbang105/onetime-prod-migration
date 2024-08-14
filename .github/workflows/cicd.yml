@@ -1,0 +1,57 @@
+name: Onetime CI/CD with Gradle
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: ⏱️Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: ⏱️Gradle Caching - 빌드 시간 향상
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: ⏱️gradle build를 위한 권한을 부여합니다.
+        run: chmod +x gradlew
+
+      - name: ⏱️gradle build 중입니다.
+        run: ./gradlew build -x test
+
+      - name: ⏱️NCP Container Registry에 로그인 후, docker image build 후 NCP Container Registry에 push합니다.
+        run: |
+          docker login -u ${{ secrets.NCP_API_ACCESS_KEY }} -p ${{ secrets.NCP_API_SECRET_KEY }} ${{secrets.NCP_CONTAINER_REGISTRY_PUBLIC_ENDPOINT}}
+          docker build -f Dockerfile -t ${{ secrets.NCP_CONTAINER_REGISTRY_PUBLIC_ENDPOINT }}/${{ secrets.NCP_CONTAINER_REGISTRY_IMAGE }} .
+          docker push ${{ secrets.NCP_CONTAINER_REGISTRY_PUBLIC_ENDPOINT }}/${{ secrets.NCP_CONTAINER_REGISTRY_IMAGE }}
+
+      - name: ⏱️NCP Container Registry에서 pull 후 deploy합니다.
+        uses: appleboy/ssh-action@master
+        with:
+          username: ${{ secrets.NCP_SERVER_USERNAME }}
+          password: ${{ secrets.NCP_SERVER_PASSWORD }}
+          host: ${{ secrets.NCP_SERVER_HOST }}
+          port: ${{ secrets.NCP_SERVER_PORT }}
+          script: |
+            chmod 777 ./deploy.sh
+            ./deploy.sh
+            docker image prune -f
