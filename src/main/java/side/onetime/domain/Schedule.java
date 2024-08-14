@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import side.onetime.global.common.dao.BaseEntity;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -20,8 +21,8 @@ public class Schedule extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "members_id", foreignKey = @ForeignKey(name = "schedules_fk_members_id"))
-    private Member member;
+    @JoinColumn(name = "events_id", foreignKey = @ForeignKey(name = "schedules_fk_events_id"))
+    private Event event;
 
     @Column(name = "date", nullable = false)
     private LocalDateTime date;
@@ -32,19 +33,14 @@ public class Schedule extends BaseEntity {
     @Column(name = "time", nullable = false)
     private LocalDateTime time;
 
-    @Column(name = "is_selected", nullable = false)
-    private Boolean isSelected;
+    @OneToMany(mappedBy = "schedule",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Selection> selections;
 
     @Builder
-    public Schedule(Member member, LocalDateTime date, String day, LocalDateTime time) {
-        this.member = member;
+    public Schedule(Event event, LocalDateTime date, String day, LocalDateTime time) {
+        this.event = event;
         this.date = date;
         this.day = day;
         this.time = time;
-        this.isSelected = false;
-    }
-
-    public void updateIsSelected(boolean isSelected) {
-        this.isSelected = isSelected;
     }
 }
