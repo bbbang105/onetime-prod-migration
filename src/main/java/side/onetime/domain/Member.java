@@ -30,7 +30,7 @@ public class Member extends BaseEntity {
     private String pin;
 
     @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Schedule> schedules;
+    private List<Selection> selections;
 
     @Builder
     public Member(Event event, String name, String pin) {
