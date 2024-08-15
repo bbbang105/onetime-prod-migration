@@ -9,9 +9,13 @@ import side.onetime.global.common.dto.ReasonDto;
 @Getter
 @AllArgsConstructor
 public enum SuccessStatus implements BaseCode {
-    // 전역 응답 코드
+    // Global
     _OK(HttpStatus.OK, "200", "성공입니다."),
-    _CREATED(HttpStatus.CREATED, "201", "생성에 성공했습니다.");
+    _CREATED(HttpStatus.CREATED, "201", "생성에 성공했습니다."),
+    // Event
+    _CREATED_EVENT(HttpStatus.CREATED, "201", "이벤트 생성에 성공했습니다."),
+    _GET_EVENT(HttpStatus.OK, "200", "이벤트 조회에 성공했습니다.")
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;

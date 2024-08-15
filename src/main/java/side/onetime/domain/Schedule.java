@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import side.onetime.global.common.dao.BaseEntity;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
@@ -24,20 +24,20 @@ public class Schedule extends BaseEntity {
     @JoinColumn(name = "events_id", foreignKey = @ForeignKey(name = "schedules_fk_events_id"))
     private Event event;
 
-    @Column(name = "date", nullable = false)
-    private LocalDateTime date;
+    @Column(name = "date")
+    private String date;
 
-    @Column(name = "day", nullable = false, length = 10)
+    @Column(name = "day", length = 10)
     private String day;
 
     @Column(name = "time", nullable = false)
-    private LocalDateTime time;
+    private LocalTime time;
 
     @OneToMany(mappedBy = "schedule",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
     @Builder
-    public Schedule(Event event, LocalDateTime date, String day, LocalDateTime time) {
+    public Schedule(Event event, String date, String day, LocalTime time) {
         this.event = event;
         this.date = date;
         this.day = day;
