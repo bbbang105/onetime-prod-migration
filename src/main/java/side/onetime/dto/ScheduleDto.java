@@ -34,4 +34,27 @@ public class ScheduleDto {
         private String day;
         private List<LocalTime> times;
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class CreateDateScheduleRequest {
+        private String eventId;
+        private String memberId;
+        private List<DateSchedule> dateSchedules;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class DateSchedule {
+        private String date;
+        private List<LocalTime> times;
+    }
 }
