@@ -25,4 +25,13 @@ public class ScheduleController {
         scheduleService.createDaySchedules(createDayScheduleRequest);
         return ApiResponse.onSuccess(SuccessStatus._CREATED_DAY_SCHEDULES);
     }
+
+    // 날짜 스케줄 등록 API
+    @PostMapping("/date")
+    public ResponseEntity<ApiResponse<SuccessStatus>> createDateSchedules(
+            @RequestBody ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest) {
+
+        scheduleService.createDateSchedules(createDateScheduleRequest);
+        return ApiResponse.onSuccess(SuccessStatus._CREATED_DATE_SCHEDULES);
+    }
 }

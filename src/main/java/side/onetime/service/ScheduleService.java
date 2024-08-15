@@ -56,4 +56,34 @@ public class ScheduleService {
         selectionRepository.flush();
         selectionRepository.saveAll(selections);
     }
+
+    // 요일 스케줄 등록 메서드
+    @Transactional
+    public void createDateSchedules(ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest) {
+        Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.getEventId()))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+        Member member = memberRepository.findByMemberId(UUID.fromString(createDateScheduleRequest.getMemberId()))
+                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+
+        List<ScheduleDto.DateSchedule> dateSchedules = createDateScheduleRequest.getDateSchedules();
+        List<Selection> selections = new ArrayList<>();
+        for (ScheduleDto.DateSchedule dateSchedule : dateSchedules) {
+            String date = dateSchedule.getDate();
+            List<LocalTime> times = dateSchedule.getTimes();
+            List<Schedule> schedules = scheduleRepository.findAllByEventAndDate(event, date)
+                    .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
+
+            for (Schedule schedule : schedules) {
+                if (times.contains(schedule.getTime())) {
+                    selections.add(Selection.builder()
+                            .member(member)
+                            .schedule(schedule)
+                            .build());
+                }
+            }
+        }
+        selectionRepository.deleteAllByMember(member);
+        selectionRepository.flush();
+        selectionRepository.saveAll(selections);
+    }
 }
