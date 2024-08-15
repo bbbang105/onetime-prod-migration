@@ -17,7 +17,10 @@ public enum SuccessStatus implements BaseCode {
     _GET_EVENT(HttpStatus.OK, "200", "이벤트 조회에 성공했습니다."),
     // Member
     _LOGIN_MEMBER(HttpStatus.OK, "200", "멤버 로그인에 성공했습니다."),
-    _IS_POSSIBLE_NAME(HttpStatus.OK, "200", "멤버 이름 중복 확인에 성공했습니다.")
+    _IS_POSSIBLE_NAME(HttpStatus.OK, "200", "멤버 이름 중복 확인에 성공했습니다."),
+    // Schedule
+    _CREATED_DAY_SCHEDULES(HttpStatus.CREATED, "201", "요일 스케줄 등록에 성공했습니다."),
+    _CREATED_DATE_SCHEDULES(HttpStatus.CREATED, "201", "날짜 스케줄 등록에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;

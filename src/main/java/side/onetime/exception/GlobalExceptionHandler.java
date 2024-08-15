@@ -25,4 +25,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         MemberErrorResult errorResult = e.getMemberErrorResult();
         return ApiResponse.onFailure(errorResult);
     }
+
+    // Schedule
+    @ExceptionHandler(ScheduleException.class)
+    public ResponseEntity<ApiResponse<BaseErrorCode>> handleScheduleException(ScheduleException e) {
+        ScheduleErrorResult errorResult = e.getScheduleErrorResult();
+        return ApiResponse.onFailure(errorResult);
+    }
 }

@@ -2,7 +2,6 @@ package side.onetime.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.Event;
 import side.onetime.domain.Member;
@@ -16,7 +15,6 @@ import side.onetime.repository.MemberRepository;
 
 import java.util.UUID;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MemberService {
@@ -39,7 +37,7 @@ public class MemberService {
             member = loginMemberRequest.to(event);
             memberRepository.save(member);
         }
-        return MemberDto.LoginMemberResponse.of(member);
+        return MemberDto.LoginMemberResponse.of(member, event);
     }
 
     // 멤버 이름 중복 체크 메서드
