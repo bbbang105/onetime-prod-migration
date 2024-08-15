@@ -39,7 +39,7 @@ public class MemberService {
             member = loginMemberRequest.to(event);
             memberRepository.save(member);
         }
-        return MemberDto.LoginMemberResponse.of(member);
+        return MemberDto.LoginMemberResponse.of(member, event);
     }
 
     // 멤버 이름 중복 체크 메서드

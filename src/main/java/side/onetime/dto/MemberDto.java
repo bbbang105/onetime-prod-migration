@@ -42,10 +42,12 @@ public class MemberDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class LoginMemberResponse {
         private String memberId;
+        private String category;
 
-        public static MemberDto.LoginMemberResponse of(Member member) {
-            return MemberDto.LoginMemberResponse.builder()
+        public static MemberDto.LoginMemberResponse of(Member member, Event event) {
+            return LoginMemberResponse.builder()
                     .memberId(String.valueOf(member.getMemberId()))
+                    .category(event.getCategory().name())
                     .build();
         }
     }
