@@ -11,10 +11,18 @@ import side.onetime.global.common.code.BaseErrorCode;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+
     // Event
     @ExceptionHandler(EventException.class)
     public ResponseEntity<ApiResponse<BaseErrorCode>> handleTokenException(EventException e) {
         EventErrorResult errorResult = e.getEventErrorResult();
+        return ApiResponse.onFailure(errorResult);
+    }
+
+    // Member
+    @ExceptionHandler(MemberException.class)
+    public ResponseEntity<ApiResponse<BaseErrorCode>> handleMemberException(MemberException e) {
+        MemberErrorResult errorResult = e.getMemberErrorResult();
         return ApiResponse.onFailure(errorResult);
     }
 }

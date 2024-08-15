@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import side.onetime.global.common.dao.BaseEntity;
 
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -23,6 +24,9 @@ public class Member extends BaseEntity {
     @JoinColumn(name = "events_id", foreignKey = @ForeignKey(name = "members_fk_events_id"))
     private Event event;
 
+    @Column(name = "members_uuid", columnDefinition = "BINARY(16)", unique = true)
+    private UUID memberId;
+
     @Column(name = "name", nullable = false)
     private String name;
 
@@ -33,8 +37,9 @@ public class Member extends BaseEntity {
     private List<Selection> selections;
 
     @Builder
-    public Member(Event event, String name, String pin) {
+    public Member(Event event, UUID memberId, String name, String pin) {
         this.event = event;
+        this.memberId = memberId;
         this.name = name;
         this.pin = pin;
     }
