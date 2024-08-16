@@ -70,6 +70,17 @@ public class ScheduleDto {
     public static class DateSchedule {
         private String date;
         private List<LocalTime> times;
+
+        public static DateSchedule of(List<Selection> selections) {
+            List<LocalTime> times = new ArrayList<>();
+            for (Selection selection : selections) {
+                times.add(selection.getSchedule().getTime());
+            }
+            return DateSchedule.builder()
+                    .date(selections.get(0).getSchedule().getDate())
+                    .times(times)
+                    .build();
+        }
     }
 
     @Builder
@@ -86,6 +97,24 @@ public class ScheduleDto {
             return PerDaySchedulesResponse.builder()
                     .name(member.getName())
                     .daySchedules(daySchedules)
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class PerDateSchedulesResponse {
+        private String name;
+        private List<DateSchedule> dateSchedules;
+
+        public static PerDateSchedulesResponse of(Member member, List<DateSchedule> dateSchedules) {
+            return PerDateSchedulesResponse.builder()
+                    .name(member.getName())
+                    .dateSchedules(dateSchedules)
                     .build();
         }
     }

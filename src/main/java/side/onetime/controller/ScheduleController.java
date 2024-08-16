@@ -42,4 +42,13 @@ public class ScheduleController {
         List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = scheduleService.getAllDaySchedules(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DAY_SCHEDULES, perDaySchedulesResponses);
     }
+
+    // 전체 날짜 스케줄 조회 API
+    @GetMapping("/date/{event_id}")
+    public ResponseEntity<ApiResponse<List<ScheduleDto.PerDateSchedulesResponse>>> getAllDateSchedules(
+            @PathVariable("event_id") String eventId) {
+
+        List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = scheduleService.getAllDateSchedules(eventId);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DATE_SCHEDULES, perDateSchedulesResponses);
+    }
 }

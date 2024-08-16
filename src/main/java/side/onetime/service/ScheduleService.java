@@ -110,4 +110,29 @@ public class ScheduleService {
         }
         return perDaySchedulesResponses;
     }
+
+    // 전체 날짜 스케줄 반환 메서드
+    public List<ScheduleDto.PerDateSchedulesResponse> getAllDateSchedules(String eventId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+
+        List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
+
+        for (Member member : members) {
+            Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
+                    .collect(Collectors.groupingBy(
+                            selection -> selection.getSchedule().getDate(),
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ));
+
+            List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                    .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+                    .collect(Collectors.toList());
+            perDateSchedulesResponses.add(ScheduleDto.PerDateSchedulesResponse.of(member, dateSchedules));
+        }
+        return perDateSchedulesResponses;
+    }
 }
