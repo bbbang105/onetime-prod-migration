@@ -32,4 +32,11 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ScheduleErrorResult errorResult = e.getScheduleErrorResult();
         return ApiResponse.onFailure(errorResult);
     }
+
+    // Selection
+    @ExceptionHandler(SelectionException.class)
+    public ResponseEntity<ApiResponse<BaseErrorCode>> handleSelectionException(SelectionException e) {
+        SelectionErrorResult errorResult = e.getSelectionErrorResult();
+        return ApiResponse.onFailure(errorResult);
+    }
 }
