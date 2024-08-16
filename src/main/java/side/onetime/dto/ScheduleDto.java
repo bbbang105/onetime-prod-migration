@@ -7,8 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import side.onetime.domain.Member;
+import side.onetime.domain.Selection;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ScheduleDto {
@@ -33,6 +36,17 @@ public class ScheduleDto {
     public static class DaySchedule {
         private String day;
         private List<LocalTime> times;
+
+        public static DaySchedule of(List<Selection> selections) {
+            List<LocalTime> times = new ArrayList<>();
+            for (Selection selection : selections) {
+                times.add(selection.getSchedule().getTime());
+            }
+            return DaySchedule.builder()
+                    .day(selections.get(0).getSchedule().getDay())
+                    .times(times)
+                    .build();
+        }
     }
 
     @Builder
@@ -56,5 +70,23 @@ public class ScheduleDto {
     public static class DateSchedule {
         private String date;
         private List<LocalTime> times;
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class PerDaySchedulesResponse {
+        private String name;
+        private List<DaySchedule> daySchedules;
+
+        public static PerDaySchedulesResponse of(Member member, List<DaySchedule> daySchedules) {
+            return PerDaySchedulesResponse.builder()
+                    .name(member.getName())
+                    .daySchedules(daySchedules)
+                    .build();
+        }
     }
 }

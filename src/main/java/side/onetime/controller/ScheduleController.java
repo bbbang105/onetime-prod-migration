@@ -2,14 +2,13 @@ package side.onetime.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.ScheduleDto;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.constant.SuccessStatus;
 import side.onetime.service.ScheduleService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/schedules")
@@ -33,5 +32,14 @@ public class ScheduleController {
 
         scheduleService.createDateSchedules(createDateScheduleRequest);
         return ApiResponse.onSuccess(SuccessStatus._CREATED_DATE_SCHEDULES);
+    }
+
+    // 전체 요일 스케줄 조회 API
+    @GetMapping("/day/{event_id}")
+    public ResponseEntity<ApiResponse<List<ScheduleDto.PerDaySchedulesResponse>>> getAllDaySchedules(
+            @PathVariable("event_id") String eventId) {
+
+        List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = scheduleService.getAllDaySchedules(eventId);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DAY_SCHEDULES, perDaySchedulesResponses);
     }
 }
