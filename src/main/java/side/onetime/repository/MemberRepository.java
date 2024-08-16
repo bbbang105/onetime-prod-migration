@@ -20,4 +20,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "JOIN FETCH s.schedule sch " +
             "WHERE m.event = :event")
     List<Member> findAllWithSelectionsAndSchedulesByEvent(@Param("event") Event event);
+    @Query("SELECT m FROM Member m JOIN FETCH m.selections WHERE m.memberId = :memberId")
+    Optional<Member> findByMemberIdWithSelections(@Param("memberId") UUID memberId);
 }

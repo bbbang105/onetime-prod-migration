@@ -22,6 +22,7 @@ public enum SuccessStatus implements BaseCode {
     _CREATED_DAY_SCHEDULES(HttpStatus.CREATED, "201", "요일 스케줄 등록에 성공했습니다."),
     _CREATED_DATE_SCHEDULES(HttpStatus.CREATED, "201", "날짜 스케줄 등록에 성공했습니다."),
     _GET_ALL_DAY_SCHEDULES(HttpStatus.OK, "200", "전체 요일 스케줄 조회에 성공했습니다."),
+    _GET_MEMBER_DAY_SCHEDULES(HttpStatus.OK, "200", "개인 요일 스케줄 조회에 성공했습니다."),
     _GET_ALL_DATE_SCHEDULES(HttpStatus.OK, "200", "전체 날짜 스케줄 조회에 성공했습니다.")
     ;
 

@@ -43,6 +43,16 @@ public class ScheduleController {
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DAY_SCHEDULES, perDaySchedulesResponses);
     }
 
+    // 개인 요일 스케줄 조회 API
+    @GetMapping("/day/{event_id}/{member_id}")
+    public ResponseEntity<ApiResponse<ScheduleDto.PerDaySchedulesResponse>> getMemberDaySchedules(
+            @PathVariable("event_id") String eventId,
+            @PathVariable("member_id") String memberId) {
+
+        ScheduleDto.PerDaySchedulesResponse perDaySchedulesResponse = scheduleService.getMemberDaySchedules(eventId, memberId);
+        return ApiResponse.onSuccess(SuccessStatus._GET_MEMBER_DAY_SCHEDULES, perDaySchedulesResponse);
+    }
+
     // 전체 날짜 스케줄 조회 API
     @GetMapping("/date/{event_id}")
     public ResponseEntity<ApiResponse<List<ScheduleDto.PerDateSchedulesResponse>>> getAllDateSchedules(
