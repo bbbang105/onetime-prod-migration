@@ -160,4 +160,27 @@ public class ScheduleService {
         }
         return perDateSchedulesResponses;
     }
+
+    // 개인 날짜 스케줄 반환 메서드
+    @Transactional
+    public ScheduleDto.PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
+                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+
+        Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
+                .collect(Collectors.groupingBy(
+                        selection -> selection.getSchedule().getDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+                .collect(Collectors.toList());
+
+        return ScheduleDto.PerDateSchedulesResponse.of(member, dateSchedules);
+    }
 }
