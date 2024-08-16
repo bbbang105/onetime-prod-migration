@@ -15,9 +15,8 @@ import side.onetime.repository.ScheduleRepository;
 import side.onetime.repository.SelectionRepository;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -57,7 +56,7 @@ public class ScheduleService {
         selectionRepository.saveAll(selections);
     }
 
-    // 요일 스케줄 등록 메서드
+    // 날짜 스케줄 등록 메서드
     @Transactional
     public void createDateSchedules(ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.getEventId()))
@@ -85,5 +84,103 @@ public class ScheduleService {
         selectionRepository.deleteAllByMember(member);
         selectionRepository.flush();
         selectionRepository.saveAll(selections);
+    }
+
+    // 전체 요일 스케줄 반환 메서드
+    @Transactional
+    public List<ScheduleDto.PerDaySchedulesResponse> getAllDaySchedules(String eventId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+
+        List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
+
+        for (Member member : members) {
+            Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
+                    .collect(Collectors.groupingBy(
+                            selection -> selection.getSchedule().getDay(),
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ));
+
+            List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                    .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+                    .collect(Collectors.toList());
+            perDaySchedulesResponses.add(ScheduleDto.PerDaySchedulesResponse.of(member, daySchedules));
+        }
+        return perDaySchedulesResponses;
+    }
+
+    // 개인 요일 스케줄 반환 메서드
+    @Transactional
+    public ScheduleDto.PerDaySchedulesResponse getMemberDaySchedules(String eventId, String memberId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
+                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+
+        Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
+                .collect(Collectors.groupingBy(
+                        selection -> selection.getSchedule().getDay(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+                .collect(Collectors.toList());
+
+        return ScheduleDto.PerDaySchedulesResponse.of(member, daySchedules);
+    }
+
+    // 전체 날짜 스케줄 반환 메서드
+    @Transactional
+    public List<ScheduleDto.PerDateSchedulesResponse> getAllDateSchedules(String eventId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+
+        List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
+
+        for (Member member : members) {
+            Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
+                    .collect(Collectors.groupingBy(
+                            selection -> selection.getSchedule().getDate(),
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ));
+
+            List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                    .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+                    .collect(Collectors.toList());
+            perDateSchedulesResponses.add(ScheduleDto.PerDateSchedulesResponse.of(member, dateSchedules));
+        }
+        return perDateSchedulesResponses;
+    }
+
+    // 개인 날짜 스케줄 반환 메서드
+    @Transactional
+    public ScheduleDto.PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
+                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+
+        Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
+                .collect(Collectors.groupingBy(
+                        selection -> selection.getSchedule().getDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+                .collect(Collectors.toList());
+
+        return ScheduleDto.PerDateSchedulesResponse.of(member, dateSchedules);
     }
 }
