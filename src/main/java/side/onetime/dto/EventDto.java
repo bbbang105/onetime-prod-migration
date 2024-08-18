@@ -23,8 +23,8 @@ public class EventDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class CreateEventRequest {
         private String title;
-        private LocalTime startTime;
-        private LocalTime endTime;
+        private String startTime;
+        private String endTime;
         private Category category;
         private List<String> ranges;
 

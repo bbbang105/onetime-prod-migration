@@ -31,13 +31,13 @@ public class Schedule extends BaseEntity {
     private String day;
 
     @Column(name = "time", nullable = false)
-    private LocalTime time;
+    private String time;
 
     @OneToMany(mappedBy = "schedule",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
     @Builder
-    public Schedule(Event event, String date, String day, LocalTime time) {
+    public Schedule(Event event, String date, String day, String time) {
         this.event = event;
         this.date = date;
         this.day = day;

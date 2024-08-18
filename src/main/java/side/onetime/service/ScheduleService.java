@@ -38,7 +38,7 @@ public class ScheduleService {
         List<Selection> selections = new ArrayList<>();
         for (ScheduleDto.DaySchedule daySchedule : daySchedules) {
             String day = daySchedule.getDay();
-            List<LocalTime> times = daySchedule.getTimes();
+            List<String> times = daySchedule.getTimes();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDay(event, day)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DAY_SCHEDULES));
 
@@ -68,7 +68,7 @@ public class ScheduleService {
         List<Selection> selections = new ArrayList<>();
         for (ScheduleDto.DateSchedule dateSchedule : dateSchedules) {
             String date = dateSchedule.getDate();
-            List<LocalTime> times = dateSchedule.getTimes();
+            List<String> times = dateSchedule.getTimes();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDate(event, date)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
 
