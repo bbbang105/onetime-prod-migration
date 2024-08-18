@@ -42,7 +42,7 @@ public class EventService {
 
     // 날짜 스케줄을 생성하고 저장하는 메서드
     @Transactional
-    protected void createAndSaveDateSchedules(Event event, List<String> ranges, LocalTime startTime, LocalTime endTime) {
+    protected void createAndSaveDateSchedules(Event event, List<String> ranges, String startTime, String endTime) {
         List<LocalTime> timeSets = dateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = new ArrayList<>();
         for (String range : ranges) {
@@ -50,7 +50,7 @@ public class EventService {
                 Schedule schedule = Schedule.builder()
                         .event(event)
                         .date(range)
-                        .time(time)
+                        .time(String.valueOf(time))
                         .build();
                 schedules.add(schedule);
             }
@@ -60,7 +60,7 @@ public class EventService {
 
     // 요일 스케줄을 생성하고 저장하는 메서드
     @Transactional
-    protected void createAndSaveDaySchedules(Event event, List<String> ranges, LocalTime startTime, LocalTime endTime) {
+    protected void createAndSaveDaySchedules(Event event, List<String> ranges, String startTime, String endTime) {
         List<LocalTime> timeSets = dateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = new ArrayList<>();
         for (String range : ranges) {
@@ -68,7 +68,7 @@ public class EventService {
                 Schedule schedule = Schedule.builder()
                         .event(event)
                         .day(range)
-                        .time(time)
+                        .time(String.valueOf(time))
                         .build();
                 schedules.add(schedule);
             }
