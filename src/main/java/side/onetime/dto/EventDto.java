@@ -23,8 +23,8 @@ public class EventDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class CreateEventRequest {
         private String title;
-        private LocalTime startTime;
-        private LocalTime endTime;
+        private String startTime;
+        private String endTime;
         private Category category;
         private List<String> ranges;
 
@@ -63,10 +63,18 @@ public class EventDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class GetEventResponse {
         private String title;
+        private String startTime;
+        private String endTime;
+        private Category category;
+        private List<String> ranges;
 
-        public static GetEventResponse of(Event event) {
+        public static GetEventResponse of(Event event, List<String> ranges) {
             return GetEventResponse.builder()
                     .title(event.getTitle())
+                    .startTime(event.getStartTime())
+                    .endTime(event.getEndTime())
+                    .category(event.getCategory())
+                    .ranges(ranges)
                     .build();
         }
     }

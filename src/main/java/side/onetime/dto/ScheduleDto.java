@@ -35,10 +35,10 @@ public class ScheduleDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DaySchedule {
         private String day;
-        private List<LocalTime> times;
+        private List<String> times;
 
         public static DaySchedule of(List<Selection> selections) {
-            List<LocalTime> times = new ArrayList<>();
+            List<String> times = new ArrayList<>();
             for (Selection selection : selections) {
                 times.add(selection.getSchedule().getTime());
             }
@@ -69,10 +69,10 @@ public class ScheduleDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DateSchedule {
         private String date;
-        private List<LocalTime> times;
+        private List<String> times;
 
         public static DateSchedule of(List<Selection> selections) {
-            List<LocalTime> times = new ArrayList<>();
+            List<String> times = new ArrayList<>();
             for (Selection selection : selections) {
                 times.add(selection.getSchedule().getTime());
             }
