@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ScheduleRepository extends JpaRepository<Schedule,Long> {
+    Optional<List<Schedule>> findAllByEvent(Event event);
     Optional<List<Schedule>> findAllByEventAndDay(Event event, String day);
     Optional<List<Schedule>> findAllByEventAndDate(Event event, String date);
 }

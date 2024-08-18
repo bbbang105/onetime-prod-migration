@@ -8,6 +8,8 @@ import side.onetime.domain.Schedule;
 import side.onetime.dto.EventDto;
 import side.onetime.exception.EventErrorResult;
 import side.onetime.exception.EventException;
+import side.onetime.exception.ScheduleErrorResult;
+import side.onetime.exception.ScheduleException;
 import side.onetime.global.common.constant.Category;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.ScheduleRepository;
@@ -81,6 +83,32 @@ public class EventService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
-        return EventDto.GetEventResponse.of(event);
+        List<Schedule> schedules = scheduleRepository.findAllByEvent(event)
+                .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_ALL_SCHEDULES));
+
+        List<String> ranges;
+        if (event.getCategory().equals(Category.DATE)) {
+            ranges = getDateRanges(schedules);
+        } else {
+            ranges = getDayRanges(schedules);
+        }
+
+        return EventDto.GetEventResponse.of(event, ranges);
+    }
+
+    private List<String> getDateRanges(List<Schedule> schedules) {
+        return schedules.stream()
+                .map(Schedule::getDate)
+                .filter(date -> date != null && !date.isEmpty())
+                .distinct()
+                .toList();
+    }
+
+    private List<String> getDayRanges(List<Schedule> schedules) {
+        return schedules.stream()
+                .map(Schedule::getDay)
+                .filter(day -> day != null && !day.isEmpty())
+                .distinct()
+                .toList();
     }
 }
