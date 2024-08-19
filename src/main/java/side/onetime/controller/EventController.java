@@ -31,4 +31,13 @@ public class EventController {
         EventDto.GetEventResponse getEventResponse = eventService.getEvent(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_EVENT, getEventResponse);
     }
+
+    // 참여자 조회 API
+    @GetMapping("/{event_id}/participants")
+    public ResponseEntity<ApiResponse<EventDto.GetParticipantsResponse>> getParticipants(
+            @PathVariable("event_id") String eventId) {
+
+        EventDto.GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
+        return ApiResponse.onSuccess(SuccessStatus._GET_PARTICIPANTS, getParticipantsResponse);
+    }
 }

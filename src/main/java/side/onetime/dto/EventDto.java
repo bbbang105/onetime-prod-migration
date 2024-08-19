@@ -8,10 +8,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import side.onetime.domain.Event;
+import side.onetime.domain.Member;
 import side.onetime.global.common.constant.Category;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EventDto {
     @Builder
@@ -74,6 +76,26 @@ public class EventDto {
                     .endTime(event.getEndTime())
                     .category(event.getCategory())
                     .ranges(ranges)
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class GetParticipantsResponse {
+        private List<String> names;
+
+        public static GetParticipantsResponse of(List<Member> members) {
+            List<String> names = members.stream()
+                    .map(Member::getName)
+                    .collect(Collectors.toList());
+
+            return GetParticipantsResponse.builder()
+                    .names(names)
                     .build();
         }
     }

@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.Event;
+import side.onetime.domain.Member;
 import side.onetime.domain.Schedule;
 import side.onetime.dto.EventDto;
 import side.onetime.exception.EventErrorResult;
@@ -110,5 +111,15 @@ public class EventService {
                 .filter(day -> day != null && !day.isEmpty())
                 .distinct()
                 .toList();
+    }
+
+    // 참여자 조회 메서드
+    @Transactional
+    public EventDto.GetParticipantsResponse getParticipants(String eventId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+        List<Member> members = event.getMembers();
+
+        return EventDto.GetParticipantsResponse.of(members);
     }
 }
