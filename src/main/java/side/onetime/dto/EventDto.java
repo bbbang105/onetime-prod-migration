@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import side.onetime.domain.Event;
 import side.onetime.global.common.constant.Category;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 

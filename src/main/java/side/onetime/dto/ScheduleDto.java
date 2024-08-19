@@ -1,6 +1,7 @@
 package side.onetime.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
@@ -10,7 +11,6 @@ import lombok.NoArgsConstructor;
 import side.onetime.domain.Member;
 import side.onetime.domain.Selection;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +24,7 @@ public class ScheduleDto {
     public static class CreateDayScheduleRequest {
         private String eventId;
         private String memberId;
+        @JsonProperty("schedules")
         private List<DaySchedule> daySchedules;
     }
 
@@ -34,6 +35,7 @@ public class ScheduleDto {
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DaySchedule {
+        @JsonProperty("time_point")
         private String day;
         private List<String> times;
 
@@ -58,6 +60,7 @@ public class ScheduleDto {
     public static class CreateDateScheduleRequest {
         private String eventId;
         private String memberId;
+        @JsonProperty("schedules")
         private List<DateSchedule> dateSchedules;
     }
 
@@ -68,6 +71,7 @@ public class ScheduleDto {
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class DateSchedule {
+        @JsonProperty("time_point")
         private String date;
         private List<String> times;
 
@@ -91,6 +95,7 @@ public class ScheduleDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class PerDaySchedulesResponse {
         private String name;
+        @JsonProperty("schedules")
         private List<DaySchedule> daySchedules;
 
         public static PerDaySchedulesResponse of(Member member, List<DaySchedule> daySchedules) {
@@ -109,6 +114,7 @@ public class ScheduleDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class PerDateSchedulesResponse {
         private String name;
+        @JsonProperty("schedules")
         private List<DateSchedule> dateSchedules;
 
         public static PerDateSchedulesResponse of(Member member, List<DateSchedule> dateSchedules) {
