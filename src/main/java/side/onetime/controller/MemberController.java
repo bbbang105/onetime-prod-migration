@@ -14,6 +14,15 @@ import side.onetime.service.MemberService;
 public class MemberController {
     private final MemberService memberService;
 
+    // 멤버 등록 API
+    @PostMapping("/action-register")
+    public ResponseEntity<ApiResponse<MemberDto.RegisterMemberResponse>> registerMember(
+            @RequestBody MemberDto.RegisterMemberRequest registerMemberRequest) {
+
+        MemberDto.RegisterMemberResponse registerMemberResponse = memberService.registerMember(registerMemberRequest);
+        return ApiResponse.onSuccess(SuccessStatus._REGISTER_MEMBER, registerMemberResponse);
+    }
+
     // 멤버 로그인 API
     @PostMapping("/action-login")
     public ResponseEntity<ApiResponse<MemberDto.LoginMemberResponse>> loginMember(
