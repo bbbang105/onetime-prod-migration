@@ -28,15 +28,9 @@ public class MemberService {
         Event event = eventRepository.findByEventId(eventId)
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
-        // 이미 있는 유저인 경우 반환, 없을 경우 생성
-        Member member;
-        if (memberRepository.existsByEventAndNameAndPin(event, loginMemberRequest.getName(), loginMemberRequest.getPin())) {
-            member = memberRepository.findByEventAndNameAndPin(event, loginMemberRequest.getName(), loginMemberRequest.getPin())
-                    .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
-        } else {
-            member = loginMemberRequest.to(event);
-            memberRepository.save(member);
-        }
+        Member member = memberRepository.findByEventAndNameAndPin(event, loginMemberRequest.getName(), loginMemberRequest.getPin())
+                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+
         return MemberDto.LoginMemberResponse.of(member, event);
     }
 

@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
-    Boolean existsByEventAndNameAndPin(Event event, String name, String pin);
     Boolean existsByEventAndName(Event event, String name);
     Optional<Member> findByEventAndNameAndPin(Event event, String name, String pin);
     Optional<Member> findByMemberId(UUID memberId);
