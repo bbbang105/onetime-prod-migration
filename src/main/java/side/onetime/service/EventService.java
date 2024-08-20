@@ -37,8 +37,14 @@ public class EventService {
         eventRepository.save(event);
 
         if (createEventRequest.getCategory().equals(Category.DATE)) {
+            if (!isDateFormat(createEventRequest.getRanges().get(0))) {
+                throw new EventException(EventErrorResult._IS_NOT_DATE_FORMAT);
+            }
             createAndSaveDateSchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
         } else {
+            if (isDateFormat(createEventRequest.getRanges().get(0))) {
+                throw new EventException(EventErrorResult._IS_NOT_DAY_FORMAT);
+            }
             createAndSaveDaySchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
         }
 
@@ -207,5 +213,10 @@ public class EventService {
         return category.equals(Category.DAY)
                 ? EventDto.GetMostPossibleTime.dayOf(schedule, curNames, impossibleNames)
                 : EventDto.GetMostPossibleTime.dateOf(schedule, curNames, impossibleNames);
+    }
+
+    // 날짜 포맷인지 검증
+    private boolean isDateFormat(String range) {
+        return Character.isDigit(range.charAt(0));
     }
 }
