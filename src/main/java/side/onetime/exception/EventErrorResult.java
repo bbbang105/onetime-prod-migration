@@ -10,6 +10,8 @@ import side.onetime.global.common.dto.ErrorReasonDto;
 @RequiredArgsConstructor
 public enum EventErrorResult implements BaseErrorCode {
     _NOT_FOUND_EVENT(HttpStatus.NOT_FOUND, "404", "이벤트를 찾을 수 없습니다."),
+    _IS_NOT_DATE_FORMAT(HttpStatus.NOT_FOUND, "404", "날짜 이벤트에 요일을 입력할 수 없습니다."),
+    _IS_NOT_DAY_FORMAT(HttpStatus.NOT_FOUND, "404", "요일 이벤트에 날짜를 입력할 수 없습니다.")
     ;
 
     private final HttpStatus httpStatus;
