@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import side.onetime.domain.Event;
 import side.onetime.domain.Member;
 import side.onetime.domain.Schedule;
+import side.onetime.domain.Selection;
 import side.onetime.dto.EventDto;
 import side.onetime.exception.EventErrorResult;
 import side.onetime.exception.EventException;
@@ -14,18 +15,19 @@ import side.onetime.exception.ScheduleException;
 import side.onetime.global.common.constant.Category;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.ScheduleRepository;
+import side.onetime.repository.SelectionRepository;
 import side.onetime.util.DateUtil;
 
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 public class EventService {
+    private static final int MAX_MOST_POSSIBLE_TIMES_SIZE = 6;
     private final EventRepository eventRepository;
     private final ScheduleRepository scheduleRepository;
+    private final SelectionRepository selectionRepository;
     private final DateUtil dateUtil;
 
     // 이벤트 생성 메서드
@@ -121,5 +123,89 @@ public class EventService {
         List<Member> members = event.getMembers();
 
         return EventDto.GetParticipantsResponse.of(members);
+    }
+
+    // 가장 많이 되는 시간 조회 메서드
+    @Transactional
+    public List<EventDto.GetMostPossibleTime> getMostPossibleTime(String eventId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        List<Member> members = event.getMembers();
+        List<String> allMembersName = members.stream()
+                .map(Member::getName)
+                .toList();
+
+        List<Selection> selections = selectionRepository.findAllSelectionsByEvent(event);
+
+        Map<Schedule, List<String>> scheduleToNamesMap = buildScheduleToNamesMap(selections);
+        int mostPossibleCnt = scheduleToNamesMap.values().stream()
+                .mapToInt(List::size)
+                .max()
+                .orElse(0);
+
+        return buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allMembersName, event.getCategory());
+    }
+
+    // 스케줄과 선택된 참여자 이름 매핑
+    private Map<Schedule, List<String>> buildScheduleToNamesMap(List<Selection> selections) {
+        Map<Schedule, List<String>> map = new LinkedHashMap<>();
+        for (Selection selection : selections) {
+            Schedule schedule = selection.getSchedule();
+            String memberName = selection.getMember().getName();
+
+            map.computeIfAbsent(schedule, k -> new ArrayList<>()).add(memberName);
+        }
+        return map;
+    }
+
+    // 최적 시간대 리스트 생성
+    private List<EventDto.GetMostPossibleTime> buildMostPossibleTimes(Map<Schedule, List<String>> scheduleToNamesMap, int mostPossibleCnt, List<String> allMembersName, Category category) {
+        List<EventDto.GetMostPossibleTime> mostPossibleTimes = new ArrayList<>();
+        EventDto.GetMostPossibleTime previousTime = null;
+
+        for (Map.Entry<Schedule, List<String>> entry : scheduleToNamesMap.entrySet()) {
+            Schedule schedule = entry.getKey();
+            List<String> curNames = entry.getValue();
+
+            if (curNames.size() == mostPossibleCnt) {
+                if (canMergeWithPrevious(previousTime, schedule, curNames, category)) {
+                    previousTime.updateEndTime(schedule.getTime());
+                } else {
+                    List<String> impossibleNames = allMembersName.stream()
+                            .filter(name -> !curNames.contains(name))
+                            .toList();
+
+                    EventDto.GetMostPossibleTime newTime = createMostPossibleTime(schedule, curNames, impossibleNames, category);
+                    mostPossibleTimes.add(newTime);
+                    previousTime = newTime;
+                }
+            }
+
+            if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
+                break;
+            }
+        }
+        return mostPossibleTimes;
+    }
+
+    // 이전 시간대와 병합이 가능한지 확인
+    private boolean canMergeWithPrevious(EventDto.GetMostPossibleTime previousTime, Schedule schedule, List<String> curNames, Category category) {
+        if (previousTime == null) return false;
+
+        boolean isSameTimePoint = category.equals(Category.DAY)
+                ? previousTime.getTimePoint().equals(schedule.getDay())
+                : previousTime.getTimePoint().equals(schedule.getDate());
+
+        return isSameTimePoint
+                && previousTime.getEndTime().equals(schedule.getTime())
+                && new HashSet<>(previousTime.getPossibleNames()).containsAll(curNames);
+    }
+
+    // 새로운 시간대 객체 생성
+    private EventDto.GetMostPossibleTime createMostPossibleTime(Schedule schedule, List<String> curNames, List<String> impossibleNames, Category category) {
+        return category.equals(Category.DAY)
+                ? EventDto.GetMostPossibleTime.dayOf(schedule, curNames, impossibleNames)
+                : EventDto.GetMostPossibleTime.dateOf(schedule, curNames, impossibleNames);
     }
 }

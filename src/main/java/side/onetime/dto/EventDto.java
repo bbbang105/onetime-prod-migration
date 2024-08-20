@@ -9,8 +9,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import side.onetime.domain.Event;
 import side.onetime.domain.Member;
+import side.onetime.domain.Schedule;
 import side.onetime.global.common.constant.Category;
 
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -97,6 +99,48 @@ public class EventDto {
             return GetParticipantsResponse.builder()
                     .names(names)
                     .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class GetMostPossibleTime {
+        private String timePoint;
+        private String startTime;
+        private String endTime;
+        private int possibleCount;
+        private List<String> possibleNames;
+        private List<String> impossibleNames;
+
+        public static GetMostPossibleTime dayOf(Schedule schedule, List<String> possibleNames, List<String> impossibleNames) {
+            return GetMostPossibleTime.builder()
+                    .timePoint(schedule.getDay())
+                    .startTime(schedule.getTime())
+                    .endTime(String.valueOf(LocalTime.parse(schedule.getTime()).plusMinutes(30)))
+                    .possibleCount(possibleNames.size())
+                    .possibleNames(possibleNames)
+                    .impossibleNames(impossibleNames)
+                    .build();
+        }
+
+        public static GetMostPossibleTime dateOf(Schedule schedule, List<String> possibleNames, List<String> impossibleNames) {
+            return GetMostPossibleTime.builder()
+                    .timePoint(schedule.getDate())
+                    .startTime(schedule.getTime())
+                    .endTime(String.valueOf(LocalTime.parse(schedule.getTime()).plusMinutes(30)))
+                    .possibleCount(possibleNames.size())
+                    .possibleNames(possibleNames)
+                    .impossibleNames(impossibleNames)
+                    .build();
+        }
+
+        public void updateEndTime(String endTime) {
+            endTime = String.valueOf(LocalTime.parse(endTime).plusMinutes(30));
+            this.endTime = endTime;
         }
     }
 }
