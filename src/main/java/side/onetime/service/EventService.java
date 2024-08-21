@@ -97,28 +97,18 @@ public class EventService {
 
         List<String> ranges;
         if (event.getCategory().equals(Category.DATE)) {
-            ranges = getDateRanges(schedules);
+            List<String> dateStrings = schedules.stream()
+                    .map(Schedule::getDate)
+                    .toList();
+            ranges = dateUtil.getSortedDateRanges(dateStrings, "yyyy.MM.dd");
         } else {
-            ranges = getDayRanges(schedules);
+            List<String> dayStrings = schedules.stream()
+                    .map(Schedule::getDay)
+                    .toList();
+            ranges = dateUtil.getSortedDayRanges(dayStrings);
         }
 
         return EventDto.GetEventResponse.of(event, ranges);
-    }
-
-    private List<String> getDateRanges(List<Schedule> schedules) {
-        return schedules.stream()
-                .map(Schedule::getDate)
-                .filter(date -> date != null && !date.isEmpty())
-                .distinct()
-                .toList();
-    }
-
-    private List<String> getDayRanges(List<Schedule> schedules) {
-        return schedules.stream()
-                .map(Schedule::getDay)
-                .filter(day -> day != null && !day.isEmpty())
-                .distinct()
-                .toList();
     }
 
     // 참여자 조회 메서드
