@@ -3,9 +3,13 @@ package side.onetime.util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Component
 @RequiredArgsConstructor
@@ -37,5 +41,39 @@ public class DateUtil {
         }
 
         return timeSets;
+    }
+
+    // 날짜를 정렬된 문자열 리스트로 변환하는 메서드
+    public List<String> getSortedDateRanges(List<String> dateStrings, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+
+        return dateStrings.stream()
+                .filter(dateStr -> dateStr != null && !dateStr.isEmpty())
+                .map(dateStr -> {
+                    try {
+                        return LocalDate.parse(dateStr, formatter);
+                    } catch (DateTimeParseException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .sorted()
+                .map(date -> date.format(formatter))
+                .distinct()
+                .toList();
+    }
+
+    // 요일을 정렬된 문자열 리스트로 변환하는 메서드
+    public List<String> getSortedDayRanges(List<String> dayStrings) {
+        List<String> dayOrder = Arrays.asList("일", "월", "화", "수", "목", "금", "토");
+        Map<String, Integer> dayOrderMap = IntStream.range(0, dayOrder.size())
+                .boxed()
+                .collect(Collectors.toMap(dayOrder::get, i -> i));
+
+        return dayStrings.stream()
+                .filter(day -> day != null && !day.isEmpty())
+                .distinct()
+                .sorted(Comparator.comparingInt(dayOrderMap::get))
+                .toList();
     }
 }
