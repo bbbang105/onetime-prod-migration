@@ -20,6 +20,7 @@ import side.onetime.util.DateUtil;
 
 import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -55,17 +56,14 @@ public class EventService {
     @Transactional
     protected void createAndSaveDateSchedules(Event event, List<String> ranges, String startTime, String endTime) {
         List<LocalTime> timeSets = dateUtil.createTimeSets(startTime, endTime);
-        List<Schedule> schedules = new ArrayList<>();
-        for (String range : ranges) {
-            for (LocalTime time : timeSets) {
-                Schedule schedule = Schedule.builder()
-                        .event(event)
-                        .date(range)
-                        .time(String.valueOf(time))
-                        .build();
-                schedules.add(schedule);
-            }
-        }
+        List<Schedule> schedules = ranges.stream()
+                .flatMap(range -> timeSets.stream()
+                        .map(time -> Schedule.builder()
+                                .event(event)
+                                .date(range)
+                                .time(String.valueOf(time))
+                                .build()))
+                .collect(Collectors.toList());
         scheduleRepository.saveAll(schedules);
     }
 
@@ -73,17 +71,14 @@ public class EventService {
     @Transactional
     protected void createAndSaveDaySchedules(Event event, List<String> ranges, String startTime, String endTime) {
         List<LocalTime> timeSets = dateUtil.createTimeSets(startTime, endTime);
-        List<Schedule> schedules = new ArrayList<>();
-        for (String range : ranges) {
-            for (LocalTime time : timeSets) {
-                Schedule schedule = Schedule.builder()
-                        .event(event)
-                        .day(range)
-                        .time(String.valueOf(time))
-                        .build();
-                schedules.add(schedule);
-            }
-        }
+        List<Schedule> schedules = ranges.stream()
+                .flatMap(range -> timeSets.stream()
+                        .map(time -> Schedule.builder()
+                                .event(event)
+                                .day(range)
+                                .time(String.valueOf(time))
+                                .build()))
+                .collect(Collectors.toList());
         scheduleRepository.saveAll(schedules);
     }
 
@@ -95,18 +90,9 @@ public class EventService {
         List<Schedule> schedules = scheduleRepository.findAllByEvent(event)
                 .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_ALL_SCHEDULES));
 
-        List<String> ranges;
-        if (event.getCategory().equals(Category.DATE)) {
-            List<String> dateStrings = schedules.stream()
-                    .map(Schedule::getDate)
-                    .toList();
-            ranges = dateUtil.getSortedDateRanges(dateStrings, "yyyy.MM.dd");
-        } else {
-            List<String> dayStrings = schedules.stream()
-                    .map(Schedule::getDay)
-                    .toList();
-            ranges = dateUtil.getSortedDayRanges(dayStrings);
-        }
+        List<String> ranges = event.getCategory().equals(Category.DATE)
+                ? dateUtil.getSortedDateRanges(schedules.stream().map(Schedule::getDate).toList(), "yyyy.MM.dd")
+                : dateUtil.getSortedDayRanges(schedules.stream().map(Schedule::getDay).toList());
 
         return EventDto.GetEventResponse.of(event, ranges);
     }
@@ -140,19 +126,19 @@ public class EventService {
                 .max()
                 .orElse(0);
 
-        return buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allMembersName, event.getCategory());
+        List<EventDto.GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allMembersName, event.getCategory());
+
+        return dateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
 
     // 스케줄과 선택된 참여자 이름 매핑
     private Map<Schedule, List<String>> buildScheduleToNamesMap(List<Selection> selections) {
-        Map<Schedule, List<String>> map = new LinkedHashMap<>();
-        for (Selection selection : selections) {
-            Schedule schedule = selection.getSchedule();
-            String memberName = selection.getMember().getName();
-
-            map.computeIfAbsent(schedule, k -> new ArrayList<>()).add(memberName);
-        }
-        return map;
+        return selections.stream()
+                .collect(Collectors.groupingBy(
+                        Selection::getSchedule,
+                        LinkedHashMap::new,
+                        Collectors.mapping(selection -> selection.getMember().getName(), Collectors.toList())
+                ));
     }
 
     // 최적 시간대 리스트 생성
