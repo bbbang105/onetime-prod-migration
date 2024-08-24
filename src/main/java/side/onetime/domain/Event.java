@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import side.onetime.global.common.constant.Category;
 import side.onetime.global.common.dao.BaseEntity;
 
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +24,7 @@ public class Event extends BaseEntity {
     @Column(name = "events_uuid", columnDefinition = "BINARY(16)", unique = true)
     private UUID eventId;
 
-    @Column(name = "title", nullable = false, length = 100)
+    @Column(name = "title", nullable = false, length = 30)
     private String title;
 
     @Column(name = "start_time", nullable = false)
