@@ -184,13 +184,13 @@ public class ScheduleService {
         return ScheduleDto.PerDateSchedulesResponse.of(member, dateSchedules);
     }
 
-    // 전체 요일 스케줄 반환 메서드
+    // 멤버 필터링 요일 스케줄 반환 메서드
     @Transactional
-    public List<ScheduleDto.PerDaySchedulesResponse> getFilteredDaySchedules(ScheduleDto.GetFilteredDaySchedulesRequest getFilteredDaySchedulesRequest) {
-        Event event = eventRepository.findByEventId(UUID.fromString(getFilteredDaySchedulesRequest.getEventId()))
+    public List<ScheduleDto.PerDaySchedulesResponse> getFilteredDaySchedules(ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+        Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.getEventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
-        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredDaySchedulesRequest.getNames());
+        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.getNames());
 
         List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
 
@@ -208,5 +208,31 @@ public class ScheduleService {
             perDaySchedulesResponses.add(ScheduleDto.PerDaySchedulesResponse.of(member, daySchedules));
         }
         return perDaySchedulesResponses;
+    }
+
+    // 멤버 필터링 날짜 스케줄 반환 메서드
+    @Transactional
+    public List<ScheduleDto.PerDateSchedulesResponse> getFilteredDateSchedules(ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+        Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.getEventId()))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.getNames());
+
+        List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
+
+        for (Member member : members) {
+            Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
+                    .collect(Collectors.groupingBy(
+                            selection -> selection.getSchedule().getDate(),
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ));
+
+            List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                    .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+                    .collect(Collectors.toList());
+            perDateSchedulesResponses.add(ScheduleDto.PerDateSchedulesResponse.of(member, dateSchedules));
+        }
+        return perDateSchedulesResponses;
     }
 }

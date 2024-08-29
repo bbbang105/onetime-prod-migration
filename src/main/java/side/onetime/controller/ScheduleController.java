@@ -53,6 +53,15 @@ public class ScheduleController {
         return ApiResponse.onSuccess(SuccessStatus._GET_MEMBER_DAY_SCHEDULES, perDaySchedulesResponse);
     }
 
+    // 멤버 필터링 요일 스케줄 조회 API
+    @GetMapping("/day/action-filtering")
+    public ResponseEntity<ApiResponse<List<ScheduleDto.PerDaySchedulesResponse>>> getFilteredDaySchedules(
+            @RequestBody ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+
+        List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = scheduleService.getFilteredDaySchedules(getFilteredSchedulesRequest);
+        return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_DAY_SCHEDULES, perDaySchedulesResponses);
+    }
+
     // 전체 날짜 스케줄 조회 API
     @GetMapping("/date/{event_id}")
     public ResponseEntity<ApiResponse<List<ScheduleDto.PerDateSchedulesResponse>>> getAllDateSchedules(
@@ -72,12 +81,12 @@ public class ScheduleController {
         return ApiResponse.onSuccess(SuccessStatus._GET_MEMBER_DATE_SCHEDULES, perDateSchedulesResponse);
     }
 
-    // 멤버 필터링 요일 스케줄 조회 API
-    @GetMapping("/day/action-filtering")
-    public ResponseEntity<ApiResponse<List<ScheduleDto.PerDaySchedulesResponse>>> getFilteredDaySchedules(
-            @RequestBody ScheduleDto.GetFilteredDaySchedulesRequest getFilteredDaySchedulesRequest) {
+    // 멤버 필터링 날짜 스케줄 조회 API
+    @GetMapping("/date/action-filtering")
+    public ResponseEntity<ApiResponse<List<ScheduleDto.PerDateSchedulesResponse>>> getFilteredDateSchedules(
+            @RequestBody ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
 
-        List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = scheduleService.getFilteredDaySchedules(getFilteredDaySchedulesRequest);
-        return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_DAY_SCHEDULES, perDaySchedulesResponses);
+        List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = scheduleService.getFilteredDateSchedules(getFilteredSchedulesRequest);
+        return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_DATE_SCHEDULES, perDateSchedulesResponses);
     }
 }
