@@ -124,4 +124,15 @@ public class ScheduleDto {
                     .build();
         }
     }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class GetFilteredDaySchedulesRequest {
+        private String eventId;
+        private List<String> names;
+    }
 }
