@@ -131,7 +131,7 @@ public class ScheduleDto {
     @AllArgsConstructor
     @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    public static class GetFilteredDaySchedulesRequest {
+    public static class GetFilteredSchedulesRequest {
         private String eventId;
         private List<String> names;
     }
