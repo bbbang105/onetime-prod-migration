@@ -71,4 +71,13 @@ public class ScheduleController {
         ScheduleDto.PerDateSchedulesResponse perDateSchedulesResponse = scheduleService.getMemberDateSchedules(eventId, memberId);
         return ApiResponse.onSuccess(SuccessStatus._GET_MEMBER_DATE_SCHEDULES, perDateSchedulesResponse);
     }
+
+    // 멤버 필터링 요일 스케줄 조회 API
+    @GetMapping("/day/action-filtering")
+    public ResponseEntity<ApiResponse<List<ScheduleDto.PerDaySchedulesResponse>>> getFilteredDaySchedules(
+            @RequestBody ScheduleDto.GetFilteredDaySchedulesRequest getFilteredDaySchedulesRequest) {
+
+        List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = scheduleService.getFilteredDaySchedules(getFilteredDaySchedulesRequest);
+        return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_DAY_SCHEDULES, perDaySchedulesResponses);
+    }
 }
