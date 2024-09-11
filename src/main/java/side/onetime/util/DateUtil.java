@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 public class DateUtil {
 
     // 30분 단위 타임 셋을 만드는 메서드
-    public List<LocalTime> createTimeSets(String start, String end) {
+    public static List<LocalTime> createTimeSets(String start, String end) {
         List<LocalTime> timeSets = new ArrayList<>();
 
         boolean isEndTimeMidnight = end.equals("24:00");
@@ -43,7 +43,7 @@ public class DateUtil {
     }
 
     // 날짜를 정렬된 문자열 리스트로 변환하는 메서드
-    public List<String> getSortedDateRanges(List<String> dateStrings, String pattern) {
+    public static List<String> getSortedDateRanges(List<String> dateStrings, String pattern) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
         return dateStrings.stream()
@@ -63,7 +63,7 @@ public class DateUtil {
     }
 
     // 요일을 정렬된 문자열 리스트로 변환하는 메서드
-    public List<String> getSortedDayRanges(List<String> dayStrings) {
+    public static List<String> getSortedDayRanges(List<String> dayStrings) {
         List<String> dayOrder = Arrays.asList("일", "월", "화", "수", "목", "금", "토");
         Map<String, Integer> dayOrderMap = IntStream.range(0, dayOrder.size())
                 .boxed()
@@ -77,7 +77,7 @@ public class DateUtil {
     }
 
     // 최적 시간대 리스트를 날짜 또는 요일별로 정렬
-    public List<EventDto.GetMostPossibleTime> sortMostPossibleTimes(List<EventDto.GetMostPossibleTime> mostPossibleTimes, Category category) {
+    public static List<EventDto.GetMostPossibleTime> sortMostPossibleTimes(List<EventDto.GetMostPossibleTime> mostPossibleTimes, Category category) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
         List<String> sortedList;
