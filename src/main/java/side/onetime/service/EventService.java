@@ -29,7 +29,6 @@ public class EventService {
     private final EventRepository eventRepository;
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
-    private final DateUtil dateUtil;
 
     // 이벤트 생성 메서드
     @Transactional
@@ -55,7 +54,7 @@ public class EventService {
     // 날짜 스케줄을 생성하고 저장하는 메서드
     @Transactional
     protected void createAndSaveDateSchedules(Event event, List<String> ranges, String startTime, String endTime) {
-        List<LocalTime> timeSets = dateUtil.createTimeSets(startTime, endTime);
+        List<LocalTime> timeSets = DateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = ranges.stream()
                 .flatMap(range -> timeSets.stream()
                         .map(time -> Schedule.builder()
@@ -70,7 +69,7 @@ public class EventService {
     // 요일 스케줄을 생성하고 저장하는 메서드
     @Transactional
     protected void createAndSaveDaySchedules(Event event, List<String> ranges, String startTime, String endTime) {
-        List<LocalTime> timeSets = dateUtil.createTimeSets(startTime, endTime);
+        List<LocalTime> timeSets = DateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = ranges.stream()
                 .flatMap(range -> timeSets.stream()
                         .map(time -> Schedule.builder()
@@ -91,8 +90,8 @@ public class EventService {
                 .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_ALL_SCHEDULES));
 
         List<String> ranges = event.getCategory().equals(Category.DATE)
-                ? dateUtil.getSortedDateRanges(schedules.stream().map(Schedule::getDate).toList(), "yyyy.MM.dd")
-                : dateUtil.getSortedDayRanges(schedules.stream().map(Schedule::getDay).toList());
+                ? DateUtil.getSortedDateRanges(schedules.stream().map(Schedule::getDate).toList(), "yyyy.MM.dd")
+                : DateUtil.getSortedDayRanges(schedules.stream().map(Schedule::getDay).toList());
 
         return EventDto.GetEventResponse.of(event, ranges);
     }
@@ -128,7 +127,7 @@ public class EventService {
 
         List<EventDto.GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allMembersName, event.getCategory());
 
-        return dateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
+        return DateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
 
     // 스케줄과 선택된 참여자 이름 매핑
