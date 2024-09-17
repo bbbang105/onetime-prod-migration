@@ -9,7 +9,7 @@ import java.math.BigInteger;
 @RequiredArgsConstructor
 public class Base62Util {
     private static final String BASE62_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    private static final String SHORTEN_DOMAIN = "1-ti.me/";
+    private static final String SHORTEN_DOMAIN = "https://1-ti.me/";
     private static final String ORIGINAL_DOMAIN = "https://www.onetime-with-members.com/";
 
     // Base62로 인코딩하는 메서드
