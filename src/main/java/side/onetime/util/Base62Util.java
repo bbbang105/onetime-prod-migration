@@ -9,6 +9,8 @@ import java.math.BigInteger;
 @RequiredArgsConstructor
 public class Base62Util {
     private static final String BASE62_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    private static final String SHORTEN_DOMAIN = "1-ti.me/";
+    private static final String ORIGINAL_DOMAIN = "https://www.onetime-with-members.com/";
 
     // Base62로 인코딩하는 메서드
     public static String encodeToBase62(BigInteger number) {
@@ -46,8 +48,7 @@ public class Base62Util {
         BigInteger number = new BigInteger(cleanedPart, 16); // 16진수에서 숫자로 변환
         String encodedPart = encodeToBase62(number); // Base62로 인코딩
 
-        // "https://www.onetime-with-members.com/" 뒤에 인코딩된 고유값 추가
-        return "onetime-with-members.com/" + encodedPart;
+        return SHORTEN_DOMAIN + encodedPart;
     }
 
     // 단축 -> 원본 URL 변환
@@ -59,8 +60,7 @@ public class Base62Util {
         BigInteger decodedNumber = decodeFromBase62(encodedPart); // Base62 디코딩
         String originalPart = decodedNumber.toString(16); // 16진수로 변환
 
-        // 원본 URL의 고유 부분을 복원할 때, 원래의 형식에 맞춰야 함
-        // '-' 제거된 형식을 원래의 UUID 형태로 복구할 수 있게 조정 (예: 8-4-4-4-12 자리로 맞춤)
+        // '-' 제거된 형식을 원래의 UUID 형태로 복구할 수 있게 조정
         StringBuilder restoredPart = new StringBuilder(originalPart);
 
         // 길이가 32자리가 아닐 경우 앞에 0을 붙여 맞춤
@@ -74,7 +74,6 @@ public class Base62Util {
         restoredPart.insert(18, "-");
         restoredPart.insert(23, "-");
 
-        // 복원된 고유 식별자를 원본 URL에 붙여서 반환
-        return "https://www.onetime-with-members.com/events/" + restoredPart;
+        return ORIGINAL_DOMAIN + "events/" + restoredPart;
     }
 }
