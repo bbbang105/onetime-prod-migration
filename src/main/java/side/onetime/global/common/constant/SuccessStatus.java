@@ -32,7 +32,11 @@ public enum SuccessStatus implements BaseCode {
     _GET_FILTERED_DATE_SCHEDULES(HttpStatus.OK, "200", "멤버 필터링 날짜 스케줄 조회에 성공했습니다."),
     // URL
     _CONVERT_TO_SHORTEN_URL(HttpStatus.CREATED, "201", "단축 URL 변환에 성공했습니다."),
-    _CONVERT_TO_ORIGINAL_URL(HttpStatus.CREATED, "201", "원본 URL 변환에 성공했습니다.")
+    _CONVERT_TO_ORIGINAL_URL(HttpStatus.CREATED, "201", "원본 URL 변환에 성공했습니다."),
+    // Token
+    _REISSUE_TOKENS(HttpStatus.CREATED, "201", "토큰 재발행에 성공했습니다."),
+    // User
+    _ONBOARD_USER(HttpStatus.CREATED, "201", "유저 온보딩에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;
