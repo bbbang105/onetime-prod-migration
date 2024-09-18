@@ -39,4 +39,18 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         SelectionErrorResult errorResult = e.getSelectionErrorResult();
         return ApiResponse.onFailure(errorResult);
     }
+
+    // User
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<ApiResponse<BaseErrorCode>> handleUserException(UserException e) {
+        UserErrorResult errorResult = e.getUserErrorResult();
+        return ApiResponse.onFailure(errorResult);
+    }
+
+    // Token
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<ApiResponse<BaseErrorCode>> handleTokenException(TokenException e) {
+        TokenErrorResult errorResult = e.getTokenErrorResult();
+        return ApiResponse.onFailure(errorResult);
+    }
 }
