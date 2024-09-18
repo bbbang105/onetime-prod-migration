@@ -10,6 +10,8 @@ import org.springframework.security.config.annotation.web.configurers.HttpBasicC
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
+import side.onetime.auth.handler.OAuthLoginFailureHandler;
+import side.onetime.auth.handler.OAuthLoginSuccessHandler;
 
 import java.util.Collections;
 
@@ -17,6 +19,8 @@ import java.util.Collections;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
+    private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
 
     // CORS 설정
     CorsConfigurationSource corsConfigurationSource() {
@@ -39,6 +43,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/**").permitAll()
+                )
+
+                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
+                        oauth
+                                .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
+                                .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
                 );
 
         return httpSecurity.build();
