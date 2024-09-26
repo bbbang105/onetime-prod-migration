@@ -1,12 +1,9 @@
 package side.onetime.util;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-
 import java.math.BigInteger;
 
 @Component
-@RequiredArgsConstructor
 public class Base62Util {
     private static final String BASE62_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
     private static final String SHORTEN_DOMAIN = "https://1-ti.me/";
