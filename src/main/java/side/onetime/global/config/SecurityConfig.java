@@ -14,6 +14,7 @@ import side.onetime.auth.handler.OAuthLoginFailureHandler;
 import side.onetime.auth.handler.OAuthLoginSuccessHandler;
 
 import java.util.Collections;
+import java.util.List;
 
 @RequiredArgsConstructor
 @Configuration
@@ -28,7 +29,11 @@ public class SecurityConfig {
             CorsConfiguration config = new CorsConfiguration();
             config.setAllowedHeaders(Collections.singletonList("*"));
             config.setAllowedMethods(Collections.singletonList("*"));
-            config.setAllowedOriginPatterns(Collections.singletonList("*")); // 허용할 origin
+            config.setAllowedOrigins(List.of(
+                    "http://localhost:5173",
+                    "https://onetime-test.vercel.app",
+                    "https://onetime-with-members.com"
+            ));
             config.setAllowCredentials(true);
             return config;
         };
