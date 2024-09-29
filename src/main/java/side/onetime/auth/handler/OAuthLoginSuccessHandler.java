@@ -20,6 +20,8 @@ import side.onetime.repository.UserRepository;
 import side.onetime.util.JwtUtil;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 @Slf4j
@@ -93,7 +95,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name) throws IOException {
         log.info("신규 유저입니다.");
         String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, ACCESS_TOKEN_EXPIRATION_TIME);
-        String redirectUri = String.format(REGISTER_TOKEN_REDIRECT_URI, registerToken);
+        String redirectUri = String.format(REGISTER_TOKEN_REDIRECT_URI, registerToken, URLEncoder.encode(name, StandardCharsets.UTF_8));
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 
