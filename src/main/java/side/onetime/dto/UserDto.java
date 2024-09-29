@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import side.onetime.domain.User;
 
 public class UserDto {
     @Builder
@@ -34,6 +35,24 @@ public class UserDto {
             return OnboardUserResponse.builder()
                     .accessToken(accessToken)
                     .refreshToken(refreshToken)
+                    .build();
+        }
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class GetUserProfileResponse {
+        private String nickname;
+        private String email;
+
+        public static GetUserProfileResponse of(User user) {
+            return GetUserProfileResponse.builder()
+                    .nickname(user.getNickname())
+                    .email(user.getEmail())
                     .build();
         }
     }

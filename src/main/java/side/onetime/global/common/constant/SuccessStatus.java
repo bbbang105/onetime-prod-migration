@@ -37,6 +37,7 @@ public enum SuccessStatus implements BaseCode {
     _REISSUE_TOKENS(HttpStatus.CREATED, "201", "토큰 재발행에 성공했습니다."),
     // User
     _ONBOARD_USER(HttpStatus.CREATED, "201", "유저 온보딩에 성공했습니다."),
+    _GET_USER_PROFILE(HttpStatus.OK, "200", "유저 정보 조회에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;

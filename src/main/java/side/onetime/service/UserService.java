@@ -64,4 +64,11 @@ public class UserService {
         // 액세스 토큰 반환
         return UserDto.OnboardUserResponse.of(accessToken, refreshToken);
     }
+
+    // 유저 정보 조회 메서드
+    public UserDto.GetUserProfileResponse getUserProfile(String authorizationHeader) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        return UserDto.GetUserProfileResponse.of(user);
+    }
 }
