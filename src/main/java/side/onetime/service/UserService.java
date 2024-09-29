@@ -37,6 +37,7 @@ public class UserService {
         String provider = jwtUtil.getProviderFromToken(registerToken);
         String providerId = jwtUtil.getProviderIdFromToken(registerToken);
         String name = jwtUtil.getNameFromToken(registerToken);
+        String email = jwtUtil.getEmailFromToken(registerToken);
 
         if (onboardUserRequest.getNickname().length() > NICKNAME_LENGTH_LIMIT) {
             throw new UserException(UserErrorResult._NICKNAME_TOO_LONG);
@@ -44,6 +45,7 @@ public class UserService {
 
         User user = User.builder()
                 .name(name)
+                .email(email)
                 .nickname(onboardUserRequest.getNickname())
                 .provider(provider)
                 .providerId(providerId)

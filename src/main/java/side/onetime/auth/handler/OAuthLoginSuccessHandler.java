@@ -81,7 +81,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
         if (existUser == null) {
             // 신규 유저 처리
-            handleNewUser(request, response, provider, providerId, name);
+            handleNewUser(request, response, provider, providerId, name, email);
         } else {
             // 기존 유저 처리
             handleExistingUser(request, response, existUser);
@@ -94,9 +94,9 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     }
 
     // 신규 유저 처리
-    private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name) throws IOException {
+    private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name, String email) throws IOException {
         log.info("신규 유저입니다.");
-        String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, ACCESS_TOKEN_EXPIRATION_TIME);
+        String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email, ACCESS_TOKEN_EXPIRATION_TIME);
         String redirectUri = String.format(REGISTER_TOKEN_REDIRECT_URI, registerToken, URLEncoder.encode(name, StandardCharsets.UTF_8));
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
