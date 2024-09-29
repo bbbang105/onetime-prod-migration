@@ -2,10 +2,7 @@ package side.onetime.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.UserDto;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.constant.SuccessStatus;
@@ -24,5 +21,24 @@ public class UserController {
 
         UserDto.OnboardUserResponse onboardUserResponse = userService.onboardUser(onboardUserRequest);
         return ApiResponse.onSuccess(SuccessStatus._ONBOARD_USER, onboardUserResponse);
+    }
+
+    // 유저 정보 조회 API
+    @GetMapping("/profile")
+    public ResponseEntity<ApiResponse<UserDto.GetUserProfileResponse>> getUserProfile(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        UserDto.GetUserProfileResponse getUserProfileResponse = userService.getUserProfile(authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._GET_USER_PROFILE, getUserProfileResponse);
+    }
+
+    // 유저 정보 수정 API
+    @PatchMapping("/profile/action-update")
+    public ResponseEntity<ApiResponse<SuccessStatus>> updateUserProfile(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody UserDto.UpdateUserProfileRequest updateUserProfileRequest) {
+
+        userService.updateUserProfile(authorizationHeader, updateUserProfileRequest);
+        return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_PROFILE);
     }
 }

@@ -20,6 +20,9 @@ public class User extends BaseEntity {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
+    @Column(name = "email", nullable = false, length = 50)
+    private String email;
+
     @Column(name = "nickname", nullable = false, length = 10)
     private String nickname;
 
@@ -30,10 +33,15 @@ public class User extends BaseEntity {
     private String providerId;
 
     @Builder
-    public User(String name, String nickname, String provider, String providerId) {
+    public User(String name, String email, String nickname, String provider, String providerId) {
         this.name = name;
+        this.email = email;
         this.nickname = nickname;
         this.provider = provider;
         this.providerId = providerId;
+    }
+
+    public void updateNickName(String nickname) {
+        this.nickname = nickname;
     }
 }

@@ -37,6 +37,7 @@ public class UserService {
         String provider = jwtUtil.getProviderFromToken(registerToken);
         String providerId = jwtUtil.getProviderIdFromToken(registerToken);
         String name = jwtUtil.getNameFromToken(registerToken);
+        String email = jwtUtil.getEmailFromToken(registerToken);
 
         if (onboardUserRequest.getNickname().length() > NICKNAME_LENGTH_LIMIT) {
             throw new UserException(UserErrorResult._NICKNAME_TOO_LONG);
@@ -44,6 +45,7 @@ public class UserService {
 
         User user = User.builder()
                 .name(name)
+                .email(email)
                 .nickname(onboardUserRequest.getNickname())
                 .provider(provider)
                 .providerId(providerId)
@@ -61,5 +63,28 @@ public class UserService {
 
         // 액세스 토큰 반환
         return UserDto.OnboardUserResponse.of(accessToken, refreshToken);
+    }
+
+    // 유저 정보 조회 메서드
+    public UserDto.GetUserProfileResponse getUserProfile(String authorizationHeader) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        return UserDto.GetUserProfileResponse.of(user);
+    }
+
+    // 유저 정보 수정 메서드
+    @Transactional
+    public void updateUserProfile(String authorizationHeader, UserDto.UpdateUserProfileRequest updateUserProfileRequest) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        String nickname = updateUserProfileRequest.getNickname();
+
+        if (nickname == null) {
+            throw new UserException(UserErrorResult._NOT_FOUND_REQUEST_NICKNAME);
+        }
+        if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
+            throw new UserException(UserErrorResult._NICKNAME_TOO_LONG);
+        }
+        user.updateNickName(nickname);
+        userRepository.save(user);
     }
 }

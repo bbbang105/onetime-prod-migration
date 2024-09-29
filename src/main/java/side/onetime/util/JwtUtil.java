@@ -44,13 +44,14 @@ public class JwtUtil {
     }
 
     // 레지스터 토큰을 발급하는 메서드
-    public String generateRegisterToken(String provider, String providerId, String name, long expirationMillis) {
+    public String generateRegisterToken(String provider, String providerId, String name, String email, long expirationMillis) {
         log.info("레지스터 토큰이 발행되었습니다.");
 
         return Jwts.builder()
                 .claim("provider", provider)     // 클레임에 provider 추가
                 .claim("providerId", providerId) // 클레임에 providerId 추가
                 .claim("name", name)             // 클레임에 name 추가
+                .claim("email", email)           // 클레임에 email 추가
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(this.getSigningKey())
@@ -92,7 +93,7 @@ public class JwtUtil {
         }
     }
 
-    // 토큰에서 유저를 반환하는 메서드
+    // 헤더에서 유저를 반환하는 메서드
     public User getUserFromHeader(String authorizationHeader) {
         String token = getTokenFromHeader(authorizationHeader);
 
@@ -121,14 +122,14 @@ public class JwtUtil {
     // 토큰에서 providerId를 반환하는 메서드
     public String getProviderIdFromToken(String token) {
         try {
-            String userId = Jwts.parser()
+            String providerId = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .get("providerId", String.class);
             log.info("providerId를 반환합니다.");
-            return userId;
+            return providerId;
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.warn("토큰에서 providerId를 반환하는 도중 에러가 발생했습니다.");
@@ -139,17 +140,35 @@ public class JwtUtil {
     // 토큰에서 name을 반환하는 메서드
     public String getNameFromToken(String token) {
         try {
-            String userId = Jwts.parser()
+            String name = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .get("name", String.class);
             log.info("name을 반환합니다.");
-            return userId;
+            return name;
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.warn("토큰에서 이름을 반환하는 도중 에러가 발생했습니다.");
+            throw new TokenException(TokenErrorResult._INVALID_TOKEN);
+        }
+    }
+
+    // 토큰에서 name을 반환하는 메서드
+    public String getEmailFromToken(String token) {
+        try {
+            String email = Jwts.parser()
+                    .verifyWith(this.getSigningKey())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload()
+                    .get("email", String.class);
+            log.info("email을 반환합니다.");
+            return email;
+        } catch (JwtException | IllegalArgumentException e) {
+            // 토큰이 유효하지 않은 경우
+            log.warn("토큰에서 이메일을 반환하는 도중 에러가 발생했습니다.");
             throw new TokenException(TokenErrorResult._INVALID_TOKEN);
         }
     }
