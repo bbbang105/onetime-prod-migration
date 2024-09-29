@@ -31,4 +31,14 @@ public class UserController {
         UserDto.GetUserProfileResponse getUserProfileResponse = userService.getUserProfile(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_PROFILE, getUserProfileResponse);
     }
+
+    // 유저 정보 수정 API
+    @PatchMapping("/profile/action-update")
+    public ResponseEntity<ApiResponse<SuccessStatus>> updateUserProfile(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestBody UserDto.UpdateUserProfileRequest updateUserProfileRequest) {
+
+        userService.updateUserProfile(authorizationHeader, updateUserProfileRequest);
+        return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_PROFILE);
+    }
 }
