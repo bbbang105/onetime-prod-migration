@@ -40,4 +40,8 @@ public class User extends BaseEntity {
         this.provider = provider;
         this.providerId = providerId;
     }
+
+    public void updateNickName(String nickname) {
+        this.nickname = nickname;
+    }
 }
