@@ -93,7 +93,7 @@ public class JwtUtil {
         }
     }
 
-    // 토큰에서 유저를 반환하는 메서드
+    // 헤더에서 유저를 반환하는 메서드
     public User getUserFromHeader(String authorizationHeader) {
         String token = getTokenFromHeader(authorizationHeader);
 
