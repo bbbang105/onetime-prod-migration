@@ -42,6 +42,7 @@ spring:
             client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
             scope:
               - profile_nickname
+              - account_email
             authorization-grant-type: authorization_code
             redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
             client-name: Kakao

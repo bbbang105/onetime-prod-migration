@@ -75,6 +75,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     private void handleAuthentication(HttpServletRequest request, HttpServletResponse response, OAuth2UserInfo oAuth2UserInfo, String provider) throws IOException {
         String providerId = oAuth2UserInfo.getProviderId();
         String name = oAuth2UserInfo.getName();
+        String email = oAuth2UserInfo.getEmail();
 
         User existUser = userRepository.findByProviderId(providerId);
 
@@ -86,9 +87,10 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
             handleExistingUser(request, response, existUser);
         }
 
-        log.info("유저 이름 : {}", name);
+        log.info("NAME : {}", name);
         log.info("PROVIDER : {}", provider);
         log.info("PROVIDER_ID : {}", providerId);
+        log.info("EMAIL : {}", email);
     }
 
     // 신규 유저 처리
