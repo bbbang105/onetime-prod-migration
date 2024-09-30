@@ -32,7 +32,9 @@ public class SecurityConfig {
                 "https://onetime-test.vercel.app",
                 "https://www.onetime-test.vercel.app",
                 "https://onetime-with-members.com",
-                "https://www.onetime-with-members.com"
+                "https://www.onetime-with-members.com",
+                "https://1-ti.me",
+                "https://www.1-ti.me"
         ));
         config.setAllowedMethods(Collections.singletonList("*"));
         config.setAllowedHeaders(Collections.singletonList("*"));
