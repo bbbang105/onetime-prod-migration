@@ -19,9 +19,16 @@ public class EventController {
     // 이벤트 생성 API
     @PostMapping
     public ResponseEntity<ApiResponse<EventDto.CreateEventResponse>> createEvent(
-            @RequestBody EventDto.CreateEventRequest createEventRequest) {
+            @RequestBody EventDto.CreateEventRequest createEventRequest,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
-        EventDto.CreateEventResponse createEventResponse = eventService.createEvent(createEventRequest);
+        EventDto.CreateEventResponse createEventResponse;
+        if (authorizationHeader != null) {
+            createEventResponse = eventService.createEventForAuthenticatedUser(createEventRequest, authorizationHeader);
+        } else {
+            createEventResponse = eventService.createEventForAnonymousUser(createEventRequest);
+        }
+
         return ApiResponse.onSuccess(SuccessStatus._CREATED_EVENT, createEventResponse);
     }
 
