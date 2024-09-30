@@ -24,6 +24,10 @@ public class Event extends BaseEntity {
     @Column(name = "events_uuid", columnDefinition = "BINARY(16)", unique = true)
     private UUID eventId;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "users_id", foreignKey = @ForeignKey(name = "events_fk_users_id"))
+    private User user;
+
     @Column(name = "title", nullable = false, length = 30)
     private String title;
 
@@ -40,12 +44,20 @@ public class Event extends BaseEntity {
     @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Member> members;
 
+    @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Schedule> schedules;
+
     @Builder
-    public Event(UUID eventId, String title, String startTime, String endTime, Category category) {
+    public Event(UUID eventId, User user, String title, String startTime, String endTime, Category category) {
         this.eventId = eventId;
+        this.user = user;
         this.title = title;
         this.startTime = startTime;
         this.endTime = endTime;
         this.category = category;
+    }
+
+    public void addUser(User user) {
+        this.user = user;
     }
 }

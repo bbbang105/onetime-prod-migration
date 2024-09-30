@@ -3,18 +3,15 @@ package side.onetime.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import side.onetime.domain.Event;
-import side.onetime.domain.Member;
-import side.onetime.domain.Schedule;
-import side.onetime.domain.Selection;
+import side.onetime.domain.*;
 import side.onetime.dto.ScheduleDto;
 import side.onetime.exception.*;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.MemberRepository;
 import side.onetime.repository.ScheduleRepository;
 import side.onetime.repository.SelectionRepository;
+import side.onetime.util.JwtUtil;
 
-import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -25,10 +22,11 @@ public class ScheduleService {
     private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
+    private final JwtUtil jwtUtil;
 
-    // 요일 스케줄 등록 메서드
+    // 요일 스케줄 등록 메서드 (비로그인)
     @Transactional
-    public void createDaySchedules(ScheduleDto.CreateDayScheduleRequest createDayScheduleRequest) {
+    public void createDaySchedulesForAnonymousUser(ScheduleDto.CreateDayScheduleRequest createDayScheduleRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.getEventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
         Member member = memberRepository.findByMemberId(UUID.fromString(createDayScheduleRequest.getMemberId()))
@@ -56,9 +54,41 @@ public class ScheduleService {
         selectionRepository.saveAll(selections);
     }
 
-    // 날짜 스케줄 등록 메서드
+    // 요일 스케줄 등록 메서드 (로그인)
     @Transactional
-    public void createDateSchedules(ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest) {
+    public void createDaySchedulesForAuthenticatedUser(ScheduleDto.CreateDayScheduleRequest createDayScheduleRequest, String authorizationHeader) {
+        Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.getEventId()))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        List<ScheduleDto.DaySchedule> daySchedules = createDayScheduleRequest.getDaySchedules();
+        List<Selection> newSelections = new ArrayList<>();
+        List<Schedule> allSchedules = new ArrayList<>();
+
+        for (ScheduleDto.DaySchedule daySchedule : daySchedules) {
+            String day = daySchedule.getDay();
+            List<String> times = daySchedule.getTimes();
+            List<Schedule> schedules = scheduleRepository.findAllByEventAndDay(event, day)
+                    .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DAY_SCHEDULES));
+
+            for (Schedule schedule : schedules) {
+                if (times.contains(schedule.getTime())) {
+                    newSelections.add(Selection.builder()
+                            .user(user)
+                            .schedule(schedule)
+                            .build());
+                }
+            }
+            allSchedules.addAll(schedules);
+        }
+        selectionRepository.deleteAllByUserAndScheduleIn(user, allSchedules);
+        selectionRepository.saveAll(newSelections);
+    }
+
+
+    // 날짜 스케줄 등록 메서드 (비로그인)
+    @Transactional
+    public void createDateSchedulesForAnonymousUser(ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.getEventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
         Member member = memberRepository.findByMemberId(UUID.fromString(createDateScheduleRequest.getMemberId()))
@@ -84,6 +114,40 @@ public class ScheduleService {
         selectionRepository.deleteAllByMember(member);
         selectionRepository.flush();
         selectionRepository.saveAll(selections);
+    }
+
+    // 날짜 스케줄 등록 메서드 (로그인)
+    @Transactional
+    public void createDateSchedulesForAuthenticatedUser(ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest, String authorizationHeader) {
+        Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.getEventId()))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        List<ScheduleDto.DateSchedule> dateSchedules = createDateScheduleRequest.getDateSchedules();
+        List<Selection> newSelections = new ArrayList<>();
+        List<Schedule> allSchedules = new ArrayList<>();
+
+        for (ScheduleDto.DateSchedule dateSchedule : dateSchedules) {
+            String date = dateSchedule.getDate();
+            List<String> times = dateSchedule.getTimes();
+
+            List<Schedule> schedules = scheduleRepository.findAllByEventAndDate(event, date)
+                    .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
+
+            for (Schedule schedule : schedules) {
+                if (times.contains(schedule.getTime())) {
+                    newSelections.add(Selection.builder()
+                            .user(user)
+                            .schedule(schedule)
+                            .build());
+                }
+            }
+
+            allSchedules.addAll(schedules);
+        }
+
+        selectionRepository.deleteAllByUserAndScheduleIn(user, allSchedules);
+        selectionRepository.saveAll(newSelections);
     }
 
     // 전체 요일 스케줄 반환 메서드

@@ -3,10 +3,7 @@ package side.onetime.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import side.onetime.domain.Event;
-import side.onetime.domain.Member;
-import side.onetime.domain.Schedule;
-import side.onetime.domain.Selection;
+import side.onetime.domain.*;
 import side.onetime.dto.EventDto;
 import side.onetime.exception.EventErrorResult;
 import side.onetime.exception.EventException;
@@ -17,6 +14,7 @@ import side.onetime.repository.EventRepository;
 import side.onetime.repository.ScheduleRepository;
 import side.onetime.repository.SelectionRepository;
 import side.onetime.util.DateUtil;
+import side.onetime.util.JwtUtil;
 
 import java.time.LocalTime;
 import java.util.*;
@@ -29,11 +27,35 @@ public class EventService {
     private final EventRepository eventRepository;
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
+    private final JwtUtil jwtUtil;
 
-    // 이벤트 생성 메서드
+    // 이벤트 생성 메서드 (비로그인)
     @Transactional
-    public EventDto.CreateEventResponse createEvent(EventDto.CreateEventRequest createEventRequest) {
+    public EventDto.CreateEventResponse createEventForAnonymousUser(EventDto.CreateEventRequest createEventRequest) {
         Event event = createEventRequest.to();
+        eventRepository.save(event);
+
+        if (createEventRequest.getCategory().equals(Category.DATE)) {
+            if (!isDateFormat(createEventRequest.getRanges().get(0))) {
+                throw new EventException(EventErrorResult._IS_NOT_DATE_FORMAT);
+            }
+            createAndSaveDateSchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
+        } else {
+            if (isDateFormat(createEventRequest.getRanges().get(0))) {
+                throw new EventException(EventErrorResult._IS_NOT_DAY_FORMAT);
+            }
+            createAndSaveDaySchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
+        }
+
+        return EventDto.CreateEventResponse.of(event);
+    }
+
+    // 이벤트 생성 메서드 (로그인)
+    @Transactional
+    public EventDto.CreateEventResponse createEventForAuthenticatedUser(EventDto.CreateEventRequest createEventRequest, String authorizationHeader) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        Event event = createEventRequest.to();
+        event.addUser(user);
         eventRepository.save(event);
 
         if (createEventRequest.getCategory().equals(Category.DATE)) {

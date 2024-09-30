@@ -19,18 +19,28 @@ public class ScheduleController {
     // 요일 스케줄 등록 API
     @PostMapping("/day")
     public ResponseEntity<ApiResponse<SuccessStatus>> createDaySchedules(
-            @RequestBody ScheduleDto.CreateDayScheduleRequest createDayScheduleRequest) {
+            @RequestBody ScheduleDto.CreateDayScheduleRequest createDayScheduleRequest,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
-        scheduleService.createDaySchedules(createDayScheduleRequest);
+        if (authorizationHeader != null) {
+            scheduleService.createDaySchedulesForAuthenticatedUser(createDayScheduleRequest, authorizationHeader);
+        } else {
+            scheduleService.createDaySchedulesForAnonymousUser(createDayScheduleRequest);
+        }
         return ApiResponse.onSuccess(SuccessStatus._CREATED_DAY_SCHEDULES);
     }
 
     // 날짜 스케줄 등록 API
     @PostMapping("/date")
     public ResponseEntity<ApiResponse<SuccessStatus>> createDateSchedules(
-            @RequestBody ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest) {
+            @RequestBody ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest,
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
-        scheduleService.createDateSchedules(createDateScheduleRequest);
+        if (authorizationHeader != null) {
+            scheduleService.createDateSchedulesForAuthenticatedUser(createDateScheduleRequest, authorizationHeader);
+        } else {
+            scheduleService.createDateSchedulesForAnonymousUser(createDateScheduleRequest);
+        }
         return ApiResponse.onSuccess(SuccessStatus._CREATED_DATE_SCHEDULES);
     }
 
