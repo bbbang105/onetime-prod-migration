@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import side.onetime.global.common.dao.BaseEntity;
 
+import java.util.List;
+
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
@@ -31,6 +33,12 @@ public class User extends BaseEntity {
 
     @Column(name = "provider_id", nullable = false, length = 50)
     private String providerId;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Event> events;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Selection> selections;
 
     @Builder
     public User(String name, String email, String nickname, String provider, String providerId) {

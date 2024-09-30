@@ -22,12 +22,17 @@ public class Selection extends BaseEntity {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "users_id", foreignKey = @ForeignKey(name = "selections_fk_users_id"))
+    private User user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "schedules_id", foreignKey = @ForeignKey(name = "selections_fk_schedules_id"))
     private Schedule schedule;
 
     @Builder
-    public Selection(Member member, Schedule schedule) {
+    public Selection(Member member, User user, Schedule schedule) {
         this.member = member;
+        this.user = user;
         this.schedule = schedule;
     }
 }
