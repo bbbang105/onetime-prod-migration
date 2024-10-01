@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.code.BaseErrorCode;
+import side.onetime.global.common.constant.ErrorStatus;
+import side.onetime.global.common.dto.ErrorReasonDto;
 
 @RestControllerAdvice
 @Slf4j
@@ -52,5 +54,28 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     public ResponseEntity<ApiResponse<BaseErrorCode>> handleTokenException(TokenException e) {
         TokenErrorResult errorResult = e.getTokenErrorResult();
         return ApiResponse.onFailure(errorResult);
+    }
+
+    // AccessDeniedException 등 보안 관련 에러 처리
+    @ExceptionHandler(SecurityException.class)
+    public ResponseEntity<ErrorReasonDto> handleSecurityException(SecurityException e) {
+        log.error("SecurityException: {}", e.getMessage());
+        return ResponseEntity.status(ErrorStatus._UNAUTHORIZED.getHttpStatus())
+                .body(ErrorStatus._UNAUTHORIZED.getReasonHttpStatus());
+    }
+
+    // 기타 Exception 처리
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorReasonDto> handleException(Exception e) {
+        log.error("Exception: {}", e.getMessage());
+
+        if (e instanceof IllegalArgumentException) {
+            return ResponseEntity.status(ErrorStatus._BAD_REQUEST.getHttpStatus())
+                    .body(ErrorStatus._BAD_REQUEST.getReasonHttpStatus());
+        }
+
+        // 그 외 내부 서버 오류로 처리
+        return ResponseEntity.status(ErrorStatus._INTERNAL_SERVER_ERROR.getHttpStatus())
+                .body(ErrorStatus._INTERNAL_SERVER_ERROR.getReasonHttpStatus());
     }
 }
