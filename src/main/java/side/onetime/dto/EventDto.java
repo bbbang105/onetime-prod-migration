@@ -10,9 +10,11 @@ import lombok.NoArgsConstructor;
 import side.onetime.domain.Event;
 import side.onetime.domain.Member;
 import side.onetime.domain.Schedule;
+import side.onetime.domain.User;
 import side.onetime.global.common.constant.Category;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -91,10 +93,18 @@ public class EventDto {
     public static class GetParticipantsResponse {
         private List<String> names;
 
-        public static GetParticipantsResponse of(List<Member> members) {
-            List<String> names = members.stream()
+        public static GetParticipantsResponse of(List<Member> members, List<User> users) {
+            List<String> names = new ArrayList<>();
+
+            // 멤버 이름 추가
+            names.addAll(members.stream()
                     .map(Member::getName)
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toList()));
+
+            // 유저 닉네임 추가
+            names.addAll(users.stream()
+                    .map(User::getNickname)
+                    .collect(Collectors.toList()));
 
             return GetParticipantsResponse.builder()
                     .names(names)
