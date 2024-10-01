@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.*;
+import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.ScheduleDto;
 import side.onetime.exception.*;
 import side.onetime.repository.*;
@@ -58,6 +59,15 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.getEventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        // 참여 정보가 없는 경우 참여자로 저장
+        eventParticipationRepository.findByUserAndEvent(user, event)
+                .orElseGet(() -> eventParticipationRepository.save(
+                        EventParticipation.builder()
+                                .user(user)
+                                .event(event)
+                                .eventStatus(EventStatus.PARTICIPANT)
+                                .build()
+                ));
 
         List<ScheduleDto.DaySchedule> daySchedules = createDayScheduleRequest.getDaySchedules();
         List<Selection> newSelections = new ArrayList<>();
@@ -82,7 +92,6 @@ public class ScheduleService {
         selectionRepository.deleteAllByUserAndScheduleIn(user, allSchedules);
         selectionRepository.saveAll(newSelections);
     }
-
 
     // 날짜 스케줄 등록 메서드 (비로그인)
     @Transactional
@@ -120,6 +129,15 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.getEventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        // 참여 정보가 없는 경우 참여자로 저장
+        eventParticipationRepository.findByUserAndEvent(user, event)
+                .orElseGet(() -> eventParticipationRepository.save(
+                        EventParticipation.builder()
+                                .user(user)
+                                .event(event)
+                                .eventStatus(EventStatus.PARTICIPANT)
+                                .build()
+                ));
 
         List<ScheduleDto.DateSchedule> dateSchedules = createDateScheduleRequest.getDateSchedules();
         List<Selection> newSelections = new ArrayList<>();
