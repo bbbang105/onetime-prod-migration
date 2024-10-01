@@ -7,11 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import side.onetime.domain.Event;
-import side.onetime.domain.Member;
-import side.onetime.domain.Schedule;
-import side.onetime.domain.User;
+import side.onetime.domain.*;
 import side.onetime.global.common.constant.Category;
+import side.onetime.util.DateUtil;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -151,6 +149,30 @@ public class EventDto {
         public void updateEndTime(String endTime) {
             endTime = String.valueOf(LocalTime.parse(endTime).plusMinutes(30));
             this.endTime = endTime;
+        }
+    }
+
+    @Builder
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    public static class GetUserParticipatedEventsResponse {
+        private UUID eventId;
+        private String title;
+        private String createdDate;
+        private int participantCount;
+        private String eventStatus;
+
+        public static GetUserParticipatedEventsResponse of(Event event, EventParticipation eventParticipation, int participantCount) {
+            return GetUserParticipatedEventsResponse.builder()
+                    .eventId(event.getEventId())
+                    .title(event.getTitle())
+                    .createdDate(DateUtil.formatDateToYearMonthDay(event.getCreatedDate()))
+                    .participantCount(participantCount)
+                    .eventStatus(String.valueOf(eventParticipation.getEventStatus()))
+                    .build();
         }
     }
 }

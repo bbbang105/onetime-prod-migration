@@ -58,4 +58,13 @@ public class EventController {
         List<EventDto.GetMostPossibleTime> getMostPossibleTimes = eventService.getMostPossibleTime(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_MOST_POSSIBLE_TIME, getMostPossibleTimes);
     }
+
+    // 유저 참여 이벤트 목록 조회 API
+    @GetMapping("/user/all")
+    public ResponseEntity<ApiResponse<List<EventDto.GetUserParticipatedEventsResponse>>> getUserParticipatedEvents(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        List<EventDto.GetUserParticipatedEventsResponse> getUserParticipatedEventsResponses = eventService.getUserParticipatedEvents(authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._GET_USER_PARTICIPATED_EVENTS, getUserParticipatedEventsResponses);
+    }
 }
