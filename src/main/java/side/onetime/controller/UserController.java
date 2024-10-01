@@ -41,4 +41,13 @@ public class UserController {
         userService.updateUserProfile(authorizationHeader, updateUserProfileRequest);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_PROFILE);
     }
+
+    // 유저 서비스 탈퇴 API
+    @PostMapping("/action-withdraw")
+    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawService(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        userService.withdrawService(authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_SERVICE);
+    }
 }

@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import side.onetime.domain.*;
 import side.onetime.global.common.constant.Category;
-import side.onetime.util.DateUtil;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -169,7 +168,7 @@ public class EventDto {
             return GetUserParticipatedEventsResponse.builder()
                     .eventId(event.getEventId())
                     .title(event.getTitle())
-                    .createdDate(DateUtil.formatDateToYearMonthDay(event.getCreatedDate()))
+                    .createdDate(String.valueOf(event.getCreatedDate()))
                     .participantCount(participantCount)
                     .eventStatus(String.valueOf(eventParticipation.getEventStatus()))
                     .build();

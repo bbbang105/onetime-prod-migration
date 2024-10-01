@@ -87,4 +87,11 @@ public class UserService {
         user.updateNickName(nickname);
         userRepository.save(user);
     }
+
+    // 유저 서비스 탈퇴 메서드
+    @Transactional
+    public void withdrawService(String authorizationHeader) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        userRepository.delete(user);
+    }
 }
