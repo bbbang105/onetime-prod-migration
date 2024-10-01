@@ -6,6 +6,7 @@ import side.onetime.dto.EventDto;
 import side.onetime.global.common.constant.Category;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -117,4 +118,19 @@ public class DateUtil {
                 .sorted(Comparator.comparingInt(mostPossibleTime -> sortedList.indexOf(mostPossibleTime.getTimePoint())))
                 .toList();
     }
+
+    // yyyy.MM.dd 형태로 변환하는 메서드
+    public static String formatDateToYearMonthDay(LocalDateTime dateTime) {
+        String dateTimeString = String.valueOf(dateTime);
+        DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        DateTimeFormatter targetFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+
+        try {
+            LocalDate parsedDate = LocalDate.parse(dateTimeString, originalFormatter);
+            return parsedDate.format(targetFormatter);
+        } catch (DateTimeParseException e) {
+            return dateTimeString;
+        }
+    }
+
 }

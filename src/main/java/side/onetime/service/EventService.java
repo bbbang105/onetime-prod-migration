@@ -11,10 +11,7 @@ import side.onetime.exception.EventException;
 import side.onetime.exception.ScheduleErrorResult;
 import side.onetime.exception.ScheduleException;
 import side.onetime.global.common.constant.Category;
-import side.onetime.repository.EventParticipationRepository;
-import side.onetime.repository.EventRepository;
-import side.onetime.repository.ScheduleRepository;
-import side.onetime.repository.SelectionRepository;
+import side.onetime.repository.*;
 import side.onetime.util.DateUtil;
 import side.onetime.util.JwtUtil;
 
@@ -28,6 +25,7 @@ public class EventService {
     private static final int MAX_MOST_POSSIBLE_TIMES_SIZE = 6;
     private final EventRepository eventRepository;
     private final EventParticipationRepository eventParticipationRepository;
+    private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
@@ -253,5 +251,23 @@ public class EventService {
     // 날짜 포맷인지 검증
     private boolean isDateFormat(String range) {
         return Character.isDigit(range.charAt(0));
+    }
+
+    // 유저 참여 이벤트 반환 메서드
+    @Transactional
+    public List<EventDto.GetUserParticipatedEventsResponse> getUserParticipatedEvents(String authorizationHeader) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        return eventParticipationRepository.findAllByUser(user).stream()
+                .sorted(Comparator.comparing(
+                                (EventParticipation eventParticipation) -> eventParticipation.getEvent().getCreatedDate())
+                        .reversed()) // 최신순으로 정렬
+                .map(eventParticipation -> {
+                    Event event = eventParticipation.getEvent();
+                    int memberCount = memberRepository.countByEvent(event);
+                    int participantCount = eventParticipationRepository.countByEvent(event);
+                    return EventDto.GetUserParticipatedEventsResponse.of(event, eventParticipation, memberCount + participantCount);
+                })
+                .collect(Collectors.toList());
     }
 }
