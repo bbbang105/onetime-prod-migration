@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import side.onetime.domain.*;
 import side.onetime.dto.ScheduleDto;
 import side.onetime.exception.*;
-import side.onetime.repository.EventRepository;
-import side.onetime.repository.MemberRepository;
-import side.onetime.repository.ScheduleRepository;
-import side.onetime.repository.SelectionRepository;
+import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
 
 import java.util.*;

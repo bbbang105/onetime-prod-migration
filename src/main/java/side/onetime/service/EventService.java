@@ -4,12 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.*;
+import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.EventDto;
 import side.onetime.exception.EventErrorResult;
 import side.onetime.exception.EventException;
 import side.onetime.exception.ScheduleErrorResult;
 import side.onetime.exception.ScheduleException;
 import side.onetime.global.common.constant.Category;
+import side.onetime.repository.EventParticipationRepository;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.ScheduleRepository;
 import side.onetime.repository.SelectionRepository;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 public class EventService {
     private static final int MAX_MOST_POSSIBLE_TIMES_SIZE = 6;
     private final EventRepository eventRepository;
+    private final EventParticipationRepository eventParticipationRepository;
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
@@ -55,8 +58,13 @@ public class EventService {
     public EventDto.CreateEventResponse createEventForAuthenticatedUser(EventDto.CreateEventRequest createEventRequest, String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Event event = createEventRequest.to();
-        event.addUser(user);
+        EventParticipation eventParticipation = EventParticipation.builder()
+                .user(user)
+                .event(event)
+                .eventStatus(EventStatus.CREATOR)
+                .build();
         eventRepository.save(event);
+        eventParticipationRepository.save(eventParticipation);
 
         if (createEventRequest.getCategory().equals(Category.DATE)) {
             if (!isDateFormat(createEventRequest.getRanges().get(0))) {
