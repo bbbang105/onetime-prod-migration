@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import side.onetime.domain.Member;
 import side.onetime.domain.Selection;
 
 import java.util.ArrayList;
@@ -98,9 +97,9 @@ public class ScheduleDto {
         @JsonProperty("schedules")
         private List<DaySchedule> daySchedules;
 
-        public static PerDaySchedulesResponse of(Member member, List<DaySchedule> daySchedules) {
+        public static PerDaySchedulesResponse of(String name, List<DaySchedule> daySchedules) {
             return PerDaySchedulesResponse.builder()
-                    .name(member.getName())
+                    .name(name)
                     .daySchedules(daySchedules)
                     .build();
         }
@@ -117,9 +116,9 @@ public class ScheduleDto {
         @JsonProperty("schedules")
         private List<DateSchedule> dateSchedules;
 
-        public static PerDateSchedulesResponse of(Member member, List<DateSchedule> dateSchedules) {
+        public static PerDateSchedulesResponse of(String name, List<DateSchedule> dateSchedules) {
             return PerDateSchedulesResponse.builder()
-                    .name(member.getName())
+                    .name(name)
                     .dateSchedules(dateSchedules)
                     .build();
         }
