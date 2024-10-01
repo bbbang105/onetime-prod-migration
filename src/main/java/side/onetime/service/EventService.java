@@ -131,9 +131,16 @@ public class EventService {
     public EventDto.GetParticipantsResponse getParticipants(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
-        List<Member> members = event.getMembers();
 
-        return EventDto.GetParticipantsResponse.of(members);
+        // 이벤트에 참여하는 모든 멤버
+        List<Member> members = event.getMembers();
+        // 이벤트에 참여하는 모든 유저
+        List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
+        List<User> users = eventParticipations.stream()
+                .map(EventParticipation::getUser)
+                .toList();
+
+        return EventDto.GetParticipantsResponse.of(members, users);
     }
 
     // 가장 많이 되는 시간 조회 메서드
@@ -142,31 +149,54 @@ public class EventService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
+        // 이벤트에 참여하는 모든 멤버
         List<Member> members = event.getMembers();
         List<String> allMembersName = members.stream()
                 .map(Member::getName)
                 .toList();
 
+        // 이벤트에 참여하는 모든 유저
+        List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
+        List<User> users = eventParticipations.stream()
+                .map(EventParticipation::getUser)
+                .toList();
+        List<String> allUserNicknames = users.stream()
+                .map(User::getNickname)
+                .toList();
+
         List<Selection> selections = selectionRepository.findAllSelectionsByEvent(event);
 
+        // 스케줄과 선택된 참여자 이름 매핑
         Map<Schedule, List<String>> scheduleToNamesMap = buildScheduleToNamesMap(selections);
+
         int mostPossibleCnt = scheduleToNamesMap.values().stream()
                 .mapToInt(List::size)
                 .max()
                 .orElse(0);
 
-        List<EventDto.GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allMembersName, event.getCategory());
+        // 멤버와 유저 전체 이름 합치기
+        List<String> allParticipants = new ArrayList<>(allMembersName);
+        allParticipants.addAll(allUserNicknames);
+
+        List<EventDto.GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
 
         return DateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
 
-    // 스케줄과 선택된 참여자 이름 매핑
+    // 스케줄과 선택된 참여자 이름 매핑 (멤버 이름 / 유저 닉네임)
     private Map<Schedule, List<String>> buildScheduleToNamesMap(List<Selection> selections) {
         return selections.stream()
                 .collect(Collectors.groupingBy(
                         Selection::getSchedule,
                         LinkedHashMap::new,
-                        Collectors.mapping(selection -> selection.getMember().getName(), Collectors.toList())
+                        Collectors.mapping(selection -> {
+                            if (selection.getMember() != null) {
+                                return selection.getMember().getName();
+                            } else if (selection.getUser() != null) {
+                                return selection.getUser().getNickname();
+                            }
+                            return null;
+                        }, Collectors.toList())
                 ));
     }
 
