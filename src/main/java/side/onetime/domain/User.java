@@ -35,9 +35,6 @@ public class User extends BaseEntity {
     private String providerId;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Event> events;
-
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
     @Builder
