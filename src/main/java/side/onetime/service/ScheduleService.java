@@ -198,7 +198,7 @@ public class ScheduleService {
         return perDaySchedulesResponses;
     }
 
-    // 개인 요일 스케줄 반환 메서드
+    // 개인 요일 스케줄 반환 메서드 (비로그인)
     @Transactional
     public ScheduleDto.PerDaySchedulesResponse getMemberDaySchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -219,6 +219,29 @@ public class ScheduleService {
                 .collect(Collectors.toList());
 
         return ScheduleDto.PerDaySchedulesResponse.of(member.getName(), daySchedules);
+    }
+
+    // 개인 요일 스케줄 반환 메서드 (로그인)
+    @Transactional
+    public ScheduleDto.PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Map<String, List<Selection>> groupedSelectionsByDay = user.getSelections().stream()
+                .filter(selection -> selection.getSchedule().getEvent().equals(event))
+                .collect(Collectors.groupingBy(
+                        selection -> selection.getSchedule().getDay(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+                .collect(Collectors.toList());
+
+        return ScheduleDto.PerDaySchedulesResponse.of(user.getNickname(), daySchedules);
     }
 
     // 전체 날짜 스케줄 반환 메서드
@@ -271,7 +294,7 @@ public class ScheduleService {
         return perDateSchedulesResponses;
     }
 
-    // 개인 날짜 스케줄 반환 메서드
+    // 개인 날짜 스케줄 반환 메서드 (비로그인)
     @Transactional
     public ScheduleDto.PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -292,6 +315,29 @@ public class ScheduleService {
                 .collect(Collectors.toList());
 
         return ScheduleDto.PerDateSchedulesResponse.of(member.getName(), dateSchedules);
+    }
+
+    // 개인 날짜 스케줄 반환 메서드 (로그인)
+    @Transactional
+    public ScheduleDto.PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        Map<String, List<Selection>> groupedSelectionsByDate = user.getSelections().stream()
+                .filter(selection -> selection.getSchedule().getEvent().equals(event))
+                .collect(Collectors.groupingBy(
+                        selection -> selection.getSchedule().getDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+                .collect(Collectors.toList());
+
+        return ScheduleDto.PerDateSchedulesResponse.of(user.getNickname(), dateSchedules);
     }
 
     // 멤버 필터링 요일 스케줄 반환 메서드

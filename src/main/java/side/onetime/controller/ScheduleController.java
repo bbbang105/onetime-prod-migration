@@ -53,7 +53,7 @@ public class ScheduleController {
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DAY_SCHEDULES, perDaySchedulesResponses);
     }
 
-    // 개인 요일 스케줄 조회 API
+    // 개인 요일 스케줄 조회 API (비로그인)
     @GetMapping("/day/{event_id}/{member_id}")
     public ResponseEntity<ApiResponse<ScheduleDto.PerDaySchedulesResponse>> getMemberDaySchedules(
             @PathVariable("event_id") String eventId,
@@ -61,6 +61,16 @@ public class ScheduleController {
 
         ScheduleDto.PerDaySchedulesResponse perDaySchedulesResponse = scheduleService.getMemberDaySchedules(eventId, memberId);
         return ApiResponse.onSuccess(SuccessStatus._GET_MEMBER_DAY_SCHEDULES, perDaySchedulesResponse);
+    }
+
+    // 개인 요일 스케줄 조회 API (로그인)
+    @GetMapping("/day/{event_id}/user")
+    public ResponseEntity<ApiResponse<ScheduleDto.PerDaySchedulesResponse>> getUserDaySchedules(
+            @PathVariable("event_id") String eventId,
+            @RequestHeader(value = "Authorization") String authorizationHeader) {
+
+        ScheduleDto.PerDaySchedulesResponse perDaySchedulesResponse = scheduleService.getUserDaySchedules(eventId, authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._GET_USER_DAY_SCHEDULES, perDaySchedulesResponse);
     }
 
     // 멤버 필터링 요일 스케줄 조회 API
@@ -81,7 +91,7 @@ public class ScheduleController {
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DATE_SCHEDULES, perDateSchedulesResponses);
     }
 
-    // 개인 날짜 스케줄 조회 API
+    // 개인 날짜 스케줄 조회 API (비로그인)
     @GetMapping("/date/{event_id}/{member_id}")
     public ResponseEntity<ApiResponse<ScheduleDto.PerDateSchedulesResponse>> getMemberDateSchedules(
             @PathVariable("event_id") String eventId,
@@ -89,6 +99,16 @@ public class ScheduleController {
 
         ScheduleDto.PerDateSchedulesResponse perDateSchedulesResponse = scheduleService.getMemberDateSchedules(eventId, memberId);
         return ApiResponse.onSuccess(SuccessStatus._GET_MEMBER_DATE_SCHEDULES, perDateSchedulesResponse);
+    }
+
+    // 개인 날짜 스케줄 조회 API (로그인)
+    @GetMapping("/date/{event_id}/user")
+    public ResponseEntity<ApiResponse<ScheduleDto.PerDateSchedulesResponse>> getUserDateSchedules(
+            @PathVariable("event_id") String eventId,
+            @RequestHeader(value = "Authorization") String authorizationHeader) {
+
+        ScheduleDto.PerDateSchedulesResponse perDateSchedulesResponse = scheduleService.getUserDateSchedules(eventId, authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._GET_USER_DATE_SCHEDULES, perDateSchedulesResponse);
     }
 
     // 멤버 필터링 날짜 스케줄 조회 API
