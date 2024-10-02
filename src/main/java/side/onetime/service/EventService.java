@@ -266,7 +266,8 @@ public class EventService {
                     Event event = eventParticipation.getEvent();
                     int memberCount = memberRepository.countByEvent(event);
                     int participantCount = eventParticipationRepository.countByEvent(event);
-                    return EventDto.GetUserParticipatedEventsResponse.of(event, eventParticipation, memberCount + participantCount);
+                    List<EventDto.GetMostPossibleTime> mostPossibleTimes = getMostPossibleTime(String.valueOf(event.getEventId()));
+                    return EventDto.GetUserParticipatedEventsResponse.of(event, eventParticipation, memberCount + participantCount, mostPossibleTimes);
                 })
                 .collect(Collectors.toList());
     }

@@ -163,14 +163,16 @@ public class EventDto {
         private String createdDate;
         private int participantCount;
         private String eventStatus;
+        private List<GetMostPossibleTime> mostPossibleTimes;
 
-        public static GetUserParticipatedEventsResponse of(Event event, EventParticipation eventParticipation, int participantCount) {
+        public static GetUserParticipatedEventsResponse of(Event event, EventParticipation eventParticipation, int participantCount, List<GetMostPossibleTime> mostPossibleTimes) {
             return GetUserParticipatedEventsResponse.builder()
                     .eventId(event.getEventId())
                     .title(event.getTitle())
                     .createdDate(String.valueOf(event.getCreatedDate()))
                     .participantCount(participantCount)
                     .eventStatus(String.valueOf(eventParticipation.getEventStatus()))
+                    .mostPossibleTimes(mostPossibleTimes)
                     .build();
         }
     }
