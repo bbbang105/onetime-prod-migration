@@ -25,7 +25,6 @@ public class EventService {
     private static final int MAX_MOST_POSSIBLE_TIMES_SIZE = 6;
     private final EventRepository eventRepository;
     private final EventParticipationRepository eventParticipationRepository;
-    private final MemberRepository memberRepository;
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
