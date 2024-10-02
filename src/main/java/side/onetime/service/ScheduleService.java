@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.EventStatus;
+import side.onetime.dto.EventDto;
 import side.onetime.dto.ScheduleDto;
 import side.onetime.exception.*;
 import side.onetime.repository.*;
@@ -22,6 +23,7 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
+    private final EventService eventService;
 
     // 요일 스케줄 등록 메서드 (비로그인)
     @Transactional
@@ -174,10 +176,16 @@ public class ScheduleService {
 
         // 이벤트에 참여하는 모든 멤버
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+
+        // 이벤트에 참여하는 모든 참여자 목록
+        EventDto.GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
+        List<String> participantNames = getParticipantsResponse.getNames();
+
         // 이벤트에 참여하는 모든 유저
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
         List<User> users = eventParticipations.stream()
                 .map(EventParticipation::getUser)
+                .filter(user -> participantNames.contains(user.getNickname())) // 유저가 참여자 목록에 있는지 확인
                 .toList();
 
         List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
@@ -270,10 +278,16 @@ public class ScheduleService {
 
         // 이벤트에 참여하는 모든 멤버
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+
+        // 이벤트에 참여하는 모든 참여자 목록
+        EventDto.GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
+        List<String> participantNames = getParticipantsResponse.getNames();
+
         // 이벤트에 참여하는 모든 유저
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
         List<User> users = eventParticipations.stream()
                 .map(EventParticipation::getUser)
+                .filter(user -> participantNames.contains(user.getNickname())) // 유저가 참여자 목록에 있는지 확인
                 .toList();
 
         List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();

@@ -159,6 +159,7 @@ public class EventDto {
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public static class GetUserParticipatedEventsResponse {
         private UUID eventId;
+        private Category category;
         private String title;
         private String createdDate;
         private int participantCount;
@@ -168,6 +169,7 @@ public class EventDto {
         public static GetUserParticipatedEventsResponse of(Event event, EventParticipation eventParticipation, int participantCount, List<GetMostPossibleTime> mostPossibleTimes) {
             return GetUserParticipatedEventsResponse.builder()
                     .eventId(event.getEventId())
+                    .category(event.getCategory())
                     .title(event.getTitle())
                     .createdDate(String.valueOf(event.getCreatedDate()))
                     .participantCount(participantCount)
