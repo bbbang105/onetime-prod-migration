@@ -12,4 +12,6 @@ public interface SelectionRepository extends JpaRepository<Selection, Long> {
     void deleteAllByUserAndScheduleIn(User user, List<Schedule> schedules);
     @Query("SELECT s FROM Selection s JOIN FETCH s.schedule sc WHERE sc.event = :event")
     List<Selection> findAllSelectionsByEvent(@Param("event") Event event);
+    @Query("SELECT COUNT(s) > 0 FROM Selection s WHERE s.user = :user AND s.schedule.event = :event")
+    boolean existsByUserAndEventSchedules(@Param("user") User user, @Param("event") Event event);
 }

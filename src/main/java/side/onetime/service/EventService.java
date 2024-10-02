@@ -135,6 +135,13 @@ public class EventService {
         // 이벤트에 참여하는 모든 유저
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
         List<User> users = eventParticipations.stream()
+                .filter(eventParticipation -> {
+                    // CREATOR일 경우, 스케줄 등록을 했는지 확인
+                    if (eventParticipation.getEventStatus() == EventStatus.CREATOR) {
+                        return selectionRepository.existsByUserAndEventSchedules(eventParticipation.getUser(), eventParticipation.getEvent());
+                    }
+                    return true;
+                })
                 .map(EventParticipation::getUser)
                 .toList();
 
@@ -155,11 +162,15 @@ public class EventService {
 
         // 이벤트에 참여하는 모든 유저
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
-        List<User> users = eventParticipations.stream()
+
+        EventDto.GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
+        List<String> participantNames = getParticipantsResponse.getNames();
+
+        // 유저 필터링: 참여자 목록에 있는 유저만 포함
+        List<String> allUserNicknames = eventParticipations.stream()
                 .map(EventParticipation::getUser)
-                .toList();
-        List<String> allUserNicknames = users.stream()
                 .map(User::getNickname)
+                .filter(participantNames::contains)
                 .toList();
 
         List<Selection> selections = selectionRepository.findAllSelectionsByEvent(event);
@@ -264,10 +275,11 @@ public class EventService {
                         .reversed()) // 최신순으로 정렬
                 .map(eventParticipation -> {
                     Event event = eventParticipation.getEvent();
-                    int memberCount = memberRepository.countByEvent(event);
-                    int participantCount = eventParticipationRepository.countByEvent(event);
-                    List<EventDto.GetMostPossibleTime> mostPossibleTimes = getMostPossibleTime(String.valueOf(event.getEventId()));
-                    return EventDto.GetUserParticipatedEventsResponse.of(event, eventParticipation, memberCount + participantCount, mostPossibleTimes);
+                    String eventId = String.valueOf(event.getEventId());
+                    EventDto.GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
+                    List<String> participantNames = getParticipantsResponse.getNames();
+                    List<EventDto.GetMostPossibleTime> mostPossibleTimes = getMostPossibleTime(eventId);
+                    return EventDto.GetUserParticipatedEventsResponse.of(event, eventParticipation, participantNames.size(), mostPossibleTimes);
                 })
                 .collect(Collectors.toList());
     }
