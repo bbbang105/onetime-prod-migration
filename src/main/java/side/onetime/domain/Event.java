@@ -5,7 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import side.onetime.global.common.constant.Category;
+import side.onetime.domain.enums.Category;
 import side.onetime.global.common.dao.BaseEntity;
 
 import java.util.List;

@@ -9,7 +9,7 @@ import side.onetime.domain.Schedule;
 import side.onetime.domain.Selection;
 import side.onetime.dto.MemberDto;
 import side.onetime.exception.*;
-import side.onetime.global.common.constant.Category;
+import side.onetime.domain.enums.Category;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.MemberRepository;
 import side.onetime.repository.ScheduleRepository;

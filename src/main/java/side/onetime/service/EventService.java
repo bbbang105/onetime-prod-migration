@@ -10,7 +10,7 @@ import side.onetime.exception.EventErrorResult;
 import side.onetime.exception.EventException;
 import side.onetime.exception.ScheduleErrorResult;
 import side.onetime.exception.ScheduleException;
-import side.onetime.global.common.constant.Category;
+import side.onetime.domain.enums.Category;
 import side.onetime.repository.*;
 import side.onetime.util.DateUtil;
 import side.onetime.util.JwtUtil;
