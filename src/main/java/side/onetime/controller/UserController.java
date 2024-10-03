@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.UserDto;
 import side.onetime.global.common.ApiResponse;
-import side.onetime.global.common.constant.SuccessStatus;
+import side.onetime.global.common.status.SuccessStatus;
 import side.onetime.service.UserService;
 
 @RestController
