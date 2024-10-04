@@ -41,6 +41,9 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     @Value("${jwt.refresh-token.expiration-time}")
     private long REFRESH_TOKEN_EXPIRATION_TIME;
 
+    @Value("${jwt.register-token.expiration-time}")
+    private long REGISTER_TOKEN_EXPIRATION_TIME;
+
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -96,7 +99,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     // 신규 유저 처리
     private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name, String email) throws IOException {
         log.info("신규 유저입니다.");
-        String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email, ACCESS_TOKEN_EXPIRATION_TIME);
+        String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email, REGISTER_TOKEN_EXPIRATION_TIME);
         String redirectUri = String.format(REGISTER_TOKEN_REDIRECT_URI, registerToken, URLEncoder.encode(name, StandardCharsets.UTF_8));
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
