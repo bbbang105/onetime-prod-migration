@@ -85,3 +85,5 @@ jwt:
     expiration-time: ${ACCESS_TOKEN_EXPIRATION_TIME}
   refresh-token:
     expiration-time: ${REFRESH_TOKEN_EXPIRATION_TIME}
+  register-token:
+    expiration-time: ${REGISTER_TOKEN_EXPIRATION_TIME}
