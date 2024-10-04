@@ -8,7 +8,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import side.onetime.domain.*;
-import side.onetime.global.common.constant.Category;
+import side.onetime.domain.enums.Category;
 
 import java.time.LocalTime;
 import java.util.ArrayList;

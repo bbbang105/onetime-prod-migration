@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.code.BaseErrorCode;
-import side.onetime.global.common.constant.ErrorStatus;
+import side.onetime.global.common.status.ErrorStatus;
 import side.onetime.global.common.dto.ErrorReasonDto;
 
 @RestControllerAdvice

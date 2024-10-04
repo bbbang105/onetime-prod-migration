@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import side.onetime.dto.TokenDto;
 import side.onetime.global.common.ApiResponse;
-import side.onetime.global.common.constant.SuccessStatus;
+import side.onetime.global.common.status.SuccessStatus;
 import side.onetime.service.TokenService;
 
 @RestController

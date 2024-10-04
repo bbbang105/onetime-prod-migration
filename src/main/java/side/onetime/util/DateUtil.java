@@ -3,7 +3,7 @@ package side.onetime.util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import side.onetime.dto.EventDto;
-import side.onetime.global.common.constant.Category;
+import side.onetime.domain.enums.Category;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

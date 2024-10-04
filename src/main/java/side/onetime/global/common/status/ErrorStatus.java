@@ -1,4 +1,4 @@
-package side.onetime.global.common.constant;
+package side.onetime.global.common.status;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
