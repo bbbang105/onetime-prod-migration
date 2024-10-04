@@ -34,6 +34,7 @@ public class UserService {
     public UserDto.OnboardUserResponse onboardUser(UserDto.OnboardUserRequest onboardUserRequest) {
         // 레지스터 토큰을 이용하여 사용자 정보 추출
         String registerToken = onboardUserRequest.getRegisterToken();
+        jwtUtil.validateTokenExpiration(registerToken);
         String provider = jwtUtil.getProviderFromToken(registerToken);
         String providerId = jwtUtil.getProviderIdFromToken(registerToken);
         String name = jwtUtil.getNameFromToken(registerToken);
