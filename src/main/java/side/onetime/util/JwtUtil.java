@@ -88,7 +88,7 @@ public class JwtUtil {
             return Long.parseLong(userId);
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
-            log.warn("토큰에서 userId를 반환하던 도중 에러가 발생했습니다.");
+            log.error("토큰에서 userId를 반환하던 도중 에러가 발생했습니다.");
             throw new TokenException(TokenErrorResult._INVALID_TOKEN);
         }
     }
@@ -114,7 +114,7 @@ public class JwtUtil {
             return userId;
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
-            log.warn("토큰에서 provider를 반환하는 도중 에러가 발생했습니다.");
+            log.error("토큰에서 provider를 반환하는 도중 에러가 발생했습니다.");
             throw new TokenException(TokenErrorResult._INVALID_TOKEN);
         }
     }
@@ -132,12 +132,12 @@ public class JwtUtil {
             return providerId;
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
-            log.warn("토큰에서 providerId를 반환하는 도중 에러가 발생했습니다.");
+            log.error("토큰에서 providerId를 반환하는 도중 에러가 발생했습니다.");
             throw new TokenException(TokenErrorResult._INVALID_TOKEN);
         }
     }
 
-    // 토큰에서 name을 반환하는 메서드
+    // 토큰에서 이름을 반환하는 메서드
     public String getNameFromToken(String token) {
         try {
             String name = Jwts.parser()
@@ -150,12 +150,12 @@ public class JwtUtil {
             return name;
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
-            log.warn("토큰에서 이름을 반환하는 도중 에러가 발생했습니다.");
+            log.error("토큰에서 이름을 반환하는 도중 에러가 발생했습니다.");
             throw new TokenException(TokenErrorResult._INVALID_TOKEN);
         }
     }
 
-    // 토큰에서 name을 반환하는 메서드
+    // 토큰에서 이메일을 반환하는 메서드
     public String getEmailFromToken(String token) {
         try {
             String email = Jwts.parser()
@@ -168,26 +168,25 @@ public class JwtUtil {
             return email;
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
-            log.warn("토큰에서 이메일을 반환하는 도중 에러가 발생했습니다.");
+            log.error("토큰에서 이메일을 반환하는 도중 에러가 발생했습니다.");
             throw new TokenException(TokenErrorResult._INVALID_TOKEN);
         }
     }
 
     // Jwt 토큰의 유효기간을 확인하는 메서드
-    public boolean isTokenExpired(String token) {
+    public void validateTokenExpiration(String token) {
         try {
+            log.info("토큰의 유효기간을 확인합니다.");
             Date expirationDate = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
                     .getExpiration();
-            log.info("토큰의 유효기간을 확인합니다.");
-            return expirationDate.before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
-            log.warn("유효기간 확인 도중 에러가 발생했습니다.");
-            throw new TokenException(TokenErrorResult._INVALID_TOKEN);
+            log.error("만료된 토큰입니다.");
+            throw new TokenException(TokenErrorResult._EXPIRED_TOKEN);
         }
     }
 }
