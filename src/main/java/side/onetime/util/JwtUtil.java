@@ -78,6 +78,7 @@ public class JwtUtil {
     // 토큰에서 유저 id를 반환하는 메서드
     public Long getUserIdFromToken(String token) {
         try {
+            validateTokenExpiration(token);
             String userId = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
@@ -96,6 +97,7 @@ public class JwtUtil {
     // 헤더에서 유저를 반환하는 메서드
     public User getUserFromHeader(String authorizationHeader) {
         String token = getTokenFromHeader(authorizationHeader);
+        validateTokenExpiration(token);
 
         return userRepository.findById(getUserIdFromToken(token))
                 .orElseThrow(() -> new UserException(UserErrorResult._NOT_FOUND_USER));
@@ -104,6 +106,7 @@ public class JwtUtil {
     // 토큰에서 provider를 반환하는 메서드
     public String getProviderFromToken(String token) {
         try {
+            validateTokenExpiration(token);
             String userId = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
@@ -122,6 +125,7 @@ public class JwtUtil {
     // 토큰에서 providerId를 반환하는 메서드
     public String getProviderIdFromToken(String token) {
         try {
+            validateTokenExpiration(token);
             String providerId = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
@@ -140,6 +144,7 @@ public class JwtUtil {
     // 토큰에서 이름을 반환하는 메서드
     public String getNameFromToken(String token) {
         try {
+            validateTokenExpiration(token);
             String name = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
@@ -158,6 +163,7 @@ public class JwtUtil {
     // 토큰에서 이메일을 반환하는 메서드
     public String getEmailFromToken(String token) {
         try {
+            validateTokenExpiration(token);
             String email = Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
