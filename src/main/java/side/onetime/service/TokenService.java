@@ -10,6 +10,8 @@ import side.onetime.exception.TokenException;
 import side.onetime.repository.RefreshTokenRepository;
 import side.onetime.util.JwtUtil;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class TokenService {
@@ -26,24 +28,26 @@ public class TokenService {
     // 액세스 & 리프레쉬 토큰 재발행 메서드
     public TokenDto.ReissueTokenResponse reissueToken(TokenDto.ReissueTokenRequest reissueTokenRequest) {
         String refreshToken = reissueTokenRequest.getRefreshToken();
-        jwtUtil.validateTokenExpiration(refreshToken);
-        Long userId = jwtUtil.getUserIdFromToken(refreshToken);
-        RefreshToken existRefreshToken = refreshTokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new TokenException(TokenErrorResult._NOT_FOUND_REFRESH_TOKEN));
-        String newAccessToken;
 
-        if (!existRefreshToken.getRefreshToken().equals(refreshToken)) {
-            // 리프레쉬 토큰이 다른 경우
-            throw new TokenException(TokenErrorResult._INVALID_REFRESH_TOKEN); // 401 에러를 던져 재로그인을 요청
-        } else {
-            // 액세스 토큰 재발급
-            newAccessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
+        // 토큰이 만료되거나 유효하지 않은 경우 예외 발생
+        jwtUtil.validateTokenExpiration(refreshToken);
+
+        Long userId = jwtUtil.getUserIdFromToken(refreshToken);
+        List<String> existRefreshTokens = refreshTokenRepository.findByUserId(userId)
+                .orElseThrow(() -> new TokenException(TokenErrorResult._NOT_FOUND_REFRESH_TOKEN));
+
+        if (!existRefreshTokens.contains(refreshToken)) {
+            // RefreshToken이 존재하지 않으면 예외 발생
+            throw new TokenException(TokenErrorResult._NOT_FOUND_REFRESH_TOKEN);
         }
 
-        // 새로운 리프레쉬 토큰 Redis 저장
-        RefreshToken newRefreshToken = new RefreshToken(userId, jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME));
-        refreshTokenRepository.save(newRefreshToken);
+        // 새로운 AccessToken 생성
+        String newAccessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
 
-        return TokenDto.ReissueTokenResponse.of(newAccessToken, newRefreshToken.getRefreshToken());
+        // 새로운 RefreshToken 생성 및 저장
+        String newRefreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
+        refreshTokenRepository.save(new RefreshToken(userId, newRefreshToken));
+
+        return TokenDto.ReissueTokenResponse.of(newAccessToken, newRefreshToken);
     }
 }
