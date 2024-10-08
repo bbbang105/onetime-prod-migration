@@ -31,9 +31,6 @@ public class TokenService {
     public TokenDto.ReissueTokenResponse reissueToken(TokenDto.ReissueTokenRequest reissueTokenRequest) {
         String refreshToken = reissueTokenRequest.getRefreshToken();
 
-        // 토큰이 만료되거나 유효하지 않은 경우 예외 발생
-        jwtUtil.validateTokenExpiration(refreshToken);
-
         Long userId = jwtUtil.getUserIdFromToken(refreshToken);
         List<String> existRefreshTokens = refreshTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new TokenException(TokenErrorResult._NOT_FOUND_REFRESH_TOKEN));
