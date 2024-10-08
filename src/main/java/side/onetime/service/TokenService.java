@@ -1,6 +1,7 @@
 package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.RefreshToken;
@@ -12,6 +13,7 @@ import side.onetime.util.JwtUtil;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TokenService {
@@ -48,6 +50,7 @@ public class TokenService {
         String newRefreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
         refreshTokenRepository.save(new RefreshToken(userId, newRefreshToken));
 
+        log.info("토큰 재발행에 성공하였습니다.");
         return TokenDto.ReissueTokenResponse.of(newAccessToken, newRefreshToken);
     }
 }
