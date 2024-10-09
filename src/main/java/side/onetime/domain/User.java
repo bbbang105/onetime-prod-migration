@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import side.onetime.global.common.dao.BaseEntity;
 
 import java.util.List;
@@ -35,9 +36,11 @@ public class User extends BaseEntity {
     private String providerId;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private List<Selection> selections;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private List<EventParticipation> eventParticipations;
 
     @Builder

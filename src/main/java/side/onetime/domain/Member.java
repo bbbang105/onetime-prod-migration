@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import side.onetime.global.common.dao.BaseEntity;
 
 import java.util.List;
@@ -33,7 +34,8 @@ public class Member extends BaseEntity {
     @Column(name = "pin", nullable = false)
     private String pin;
 
-    @OneToMany(mappedBy = "member",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private List<Selection> selections;
 
     @Builder

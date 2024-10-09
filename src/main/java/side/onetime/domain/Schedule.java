@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import side.onetime.global.common.dao.BaseEntity;
 
 import java.time.LocalTime;
@@ -34,6 +35,7 @@ public class Schedule extends BaseEntity {
     private String time;
 
     @OneToMany(mappedBy = "schedule",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private List<Selection> selections;
 
     @Builder
