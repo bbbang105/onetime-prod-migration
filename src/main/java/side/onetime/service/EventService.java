@@ -6,10 +6,7 @@ import org.springframework.stereotype.Service;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.EventDto;
-import side.onetime.exception.EventErrorResult;
-import side.onetime.exception.EventException;
-import side.onetime.exception.ScheduleErrorResult;
-import side.onetime.exception.ScheduleException;
+import side.onetime.exception.*;
 import side.onetime.domain.enums.Category;
 import side.onetime.repository.*;
 import side.onetime.util.DateUtil;
@@ -281,5 +278,22 @@ public class EventService {
                     return EventDto.GetUserParticipatedEventsResponse.of(event, eventParticipation, participantNames.size(), mostPossibleTimes);
                 })
                 .collect(Collectors.toList());
+    }
+
+    // 유저가 생성한 이벤트 삭제 메서드
+    @Transactional
+    public void removeUserCreatedEvent(String authorizationHeader, String eventId) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+
+        EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event)
+                .orElseThrow(() -> new EventParticipationException(EventParticipationErrorResult._NOT_FOUND_EVENT_PARTICIPATION));
+        if (!EventStatus.CREATOR.equals(eventParticipation.getEventStatus())) {
+            // 해당 이벤트의 생성자가 아닌 경우
+            throw new EventParticipationException(EventParticipationErrorResult._IS_NOT_USERS_CREATED_EVENT_PARTICIPATION);
+        }
+
+        eventRepository.delete(event);
     }
 }
