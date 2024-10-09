@@ -67,4 +67,14 @@ public class EventController {
         List<EventDto.GetUserParticipatedEventsResponse> getUserParticipatedEventsResponses = eventService.getUserParticipatedEvents(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_PARTICIPATED_EVENTS, getUserParticipatedEventsResponses);
     }
+
+    // 유저가 생성한 이벤트 삭제 API
+    @DeleteMapping("/{event_id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> removeUserCreatedEvent(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable("event_id") String eventId) {
+
+        eventService.removeUserCreatedEvent(authorizationHeader, eventId);
+        return ApiResponse.onSuccess(SuccessStatus._REMOVE_USER_CREATED_EVENT);
+    }
 }

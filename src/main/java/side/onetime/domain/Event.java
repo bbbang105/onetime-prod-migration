@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.BatchSize;
 import side.onetime.domain.enums.Category;
 import side.onetime.global.common.dao.BaseEntity;
 
@@ -38,10 +39,16 @@ public class Event extends BaseEntity {
     private Category category;
 
     @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private List<Member> members;
 
     @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
     private List<Schedule> schedules;
+
+    @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @BatchSize(size = 100)
+    private List<EventParticipation> eventParticipations;
 
     @Builder
     public Event(UUID eventId, String title, String startTime, String endTime, Category category) {

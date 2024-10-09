@@ -56,6 +56,13 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return ApiResponse.onFailure(errorResult);
     }
 
+    // EventParticipation
+    @ExceptionHandler(EventParticipationException.class)
+    public ResponseEntity<ApiResponse<BaseErrorCode>> handleEventParticipationException(EventParticipationException e) {
+        EventParticipationErrorResult errorResult = e.getEventParticipationErrorResult();
+        return ApiResponse.onFailure(errorResult);
+    }
+
     // AccessDeniedException 등 보안 관련 에러 처리
     @ExceptionHandler(SecurityException.class)
     public ResponseEntity<ErrorReasonDto> handleSecurityException(SecurityException e) {
