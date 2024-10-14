@@ -35,7 +35,6 @@ public class Member extends BaseEntity {
     private String pin;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @BatchSize(size = 100)
     private List<Selection> selections;
 
     @Builder

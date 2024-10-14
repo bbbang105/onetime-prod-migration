@@ -35,7 +35,6 @@ public class Schedule extends BaseEntity {
     private String time;
 
     @OneToMany(mappedBy = "schedule",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @BatchSize(size = 100)
     private List<Selection> selections;
 
     @Builder
