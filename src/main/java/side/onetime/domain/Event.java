@@ -39,15 +39,12 @@ public class Event extends BaseEntity {
     private Category category;
 
     @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @BatchSize(size = 100)
     private List<Member> members;
 
     @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @BatchSize(size = 100)
     private List<Schedule> schedules;
 
     @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @BatchSize(size = 100)
     private List<EventParticipation> eventParticipations;
 
     @Builder
