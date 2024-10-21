@@ -1,12 +1,12 @@
 package side.onetime.service;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.EventStatus;
-import side.onetime.dto.EventDto;
 import side.onetime.dto.ScheduleDto;
+import side.onetime.dto.event.response.GetParticipantsResponse;
 import side.onetime.exception.*;
 import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
@@ -178,8 +178,8 @@ public class ScheduleService {
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
 
         // 이벤트에 참여하는 모든 참여자 목록
-        EventDto.GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
-        List<String> participantNames = getParticipantsResponse.getNames();
+        GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
+        List<String> participantNames = getParticipantsResponse.names();
 
         // 이벤트에 참여하는 모든 유저
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
@@ -280,8 +280,8 @@ public class ScheduleService {
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
 
         // 이벤트에 참여하는 모든 참여자 목록
-        EventDto.GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
-        List<String> participantNames = getParticipantsResponse.getNames();
+        GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
+        List<String> participantNames = getParticipantsResponse.names();
 
         // 이벤트에 참여하는 모든 유저
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);

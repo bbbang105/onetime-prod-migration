@@ -1,14 +1,18 @@
 package side.onetime.service;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.*;
-import side.onetime.domain.enums.EventStatus;
-import side.onetime.dto.EventDto;
-import side.onetime.exception.*;
 import side.onetime.domain.enums.Category;
-import side.onetime.repository.*;
+import side.onetime.domain.enums.EventStatus;
+import side.onetime.dto.event.request.CreateEventRequest;
+import side.onetime.dto.event.response.*;
+import side.onetime.exception.*;
+import side.onetime.repository.EventParticipationRepository;
+import side.onetime.repository.EventRepository;
+import side.onetime.repository.ScheduleRepository;
+import side.onetime.repository.SelectionRepository;
 import side.onetime.util.DateUtil;
 import side.onetime.util.JwtUtil;
 
@@ -29,30 +33,30 @@ public class EventService {
 
     // 이벤트 생성 메서드 (비로그인)
     @Transactional
-    public EventDto.CreateEventResponse createEventForAnonymousUser(EventDto.CreateEventRequest createEventRequest) {
-        Event event = createEventRequest.to();
+    public CreateEventResponse createEventForAnonymousUser(CreateEventRequest createEventRequest) {
+        Event event = createEventRequest.toEntity();
         eventRepository.save(event);
 
-        if (createEventRequest.getCategory().equals(Category.DATE)) {
-            if (!isDateFormat(createEventRequest.getRanges().get(0))) {
+        if (createEventRequest.category().equals(Category.DATE)) {
+            if (!isDateFormat(createEventRequest.ranges().get(0))) {
                 throw new EventException(EventErrorResult._IS_NOT_DATE_FORMAT);
             }
-            createAndSaveDateSchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
+            createAndSaveDateSchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         } else {
-            if (isDateFormat(createEventRequest.getRanges().get(0))) {
+            if (isDateFormat(createEventRequest.ranges().get(0))) {
                 throw new EventException(EventErrorResult._IS_NOT_DAY_FORMAT);
             }
-            createAndSaveDaySchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
+            createAndSaveDaySchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         }
 
-        return EventDto.CreateEventResponse.of(event);
+        return CreateEventResponse.of(event);
     }
 
     // 이벤트 생성 메서드 (로그인)
     @Transactional
-    public EventDto.CreateEventResponse createEventForAuthenticatedUser(EventDto.CreateEventRequest createEventRequest, String authorizationHeader) {
+    public CreateEventResponse createEventForAuthenticatedUser(CreateEventRequest createEventRequest, String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        Event event = createEventRequest.to();
+        Event event = createEventRequest.toEntity();
         EventParticipation eventParticipation = EventParticipation.builder()
                 .user(user)
                 .event(event)
@@ -61,19 +65,19 @@ public class EventService {
         eventRepository.save(event);
         eventParticipationRepository.save(eventParticipation);
 
-        if (createEventRequest.getCategory().equals(Category.DATE)) {
-            if (!isDateFormat(createEventRequest.getRanges().get(0))) {
+        if (createEventRequest.category().equals(Category.DATE)) {
+            if (!isDateFormat(createEventRequest.ranges().get(0))) {
                 throw new EventException(EventErrorResult._IS_NOT_DATE_FORMAT);
             }
-            createAndSaveDateSchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
+            createAndSaveDateSchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         } else {
-            if (isDateFormat(createEventRequest.getRanges().get(0))) {
+            if (isDateFormat(createEventRequest.ranges().get(0))) {
                 throw new EventException(EventErrorResult._IS_NOT_DAY_FORMAT);
             }
-            createAndSaveDaySchedules(event, createEventRequest.getRanges(), createEventRequest.getStartTime(), createEventRequest.getEndTime());
+            createAndSaveDaySchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         }
 
-        return EventDto.CreateEventResponse.of(event);
+        return CreateEventResponse.of(event);
     }
 
     // 날짜 스케줄을 생성하고 저장하는 메서드
@@ -108,7 +112,7 @@ public class EventService {
 
     // 이벤트 조회 메서드
     @Transactional(readOnly = true)
-    public EventDto.GetEventResponse getEvent(String eventId) {
+    public GetEventResponse getEvent(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -119,12 +123,12 @@ public class EventService {
                 ? DateUtil.getSortedDateRanges(schedules.stream().map(Schedule::getDate).toList(), "yyyy.MM.dd")
                 : DateUtil.getSortedDayRanges(schedules.stream().map(Schedule::getDay).toList());
 
-        return EventDto.GetEventResponse.of(event, ranges);
+        return GetEventResponse.of(event, ranges);
     }
 
     // 참여자 조회 메서드
     @Transactional(readOnly = true)
-    public EventDto.GetParticipantsResponse getParticipants(String eventId) {
+    public GetParticipantsResponse getParticipants(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -143,12 +147,12 @@ public class EventService {
                 .map(EventParticipation::getUser)
                 .toList();
 
-        return EventDto.GetParticipantsResponse.of(members, users);
+        return GetParticipantsResponse.of(members, users);
     }
 
     // 가장 많이 되는 시간 조회 메서드
     @Transactional(readOnly = true)
-    public List<EventDto.GetMostPossibleTime> getMostPossibleTime(String eventId) {
+    public List<GetMostPossibleTime> getMostPossibleTime(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -161,8 +165,8 @@ public class EventService {
         // 이벤트에 참여하는 모든 유저
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
 
-        EventDto.GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
-        List<String> participantNames = getParticipantsResponse.getNames();
+        GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
+        List<String> participantNames = getParticipantsResponse.names();
 
         // 유저 필터링: 참여자 목록에 있는 유저만 포함
         List<String> allUserNicknames = eventParticipations.stream()
@@ -185,7 +189,7 @@ public class EventService {
         List<String> allParticipants = new ArrayList<>(allMembersName);
         allParticipants.addAll(allUserNicknames);
 
-        List<EventDto.GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
+        List<GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
 
         return DateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
@@ -208,9 +212,9 @@ public class EventService {
     }
 
     // 최적 시간대 리스트 생성
-    private List<EventDto.GetMostPossibleTime> buildMostPossibleTimes(Map<Schedule, List<String>> scheduleToNamesMap, int mostPossibleCnt, List<String> allMembersName, Category category) {
-        List<EventDto.GetMostPossibleTime> mostPossibleTimes = new ArrayList<>();
-        EventDto.GetMostPossibleTime previousTime = null;
+    private List<GetMostPossibleTime> buildMostPossibleTimes(Map<Schedule, List<String>> scheduleToNamesMap, int mostPossibleCnt, List<String> allMembersName, Category category) {
+        List<GetMostPossibleTime> mostPossibleTimes = new ArrayList<>();
+        GetMostPossibleTime previousTime = null;
 
         for (Map.Entry<Schedule, List<String>> entry : scheduleToNamesMap.entrySet()) {
             Schedule schedule = entry.getKey();
@@ -224,7 +228,7 @@ public class EventService {
                             .filter(name -> !curNames.contains(name))
                             .toList();
 
-                    EventDto.GetMostPossibleTime newTime = createMostPossibleTime(schedule, curNames, impossibleNames, category);
+                    GetMostPossibleTime newTime = createMostPossibleTime(schedule, curNames, impossibleNames, category);
                     mostPossibleTimes.add(newTime);
                     previousTime = newTime;
                 }
@@ -238,23 +242,23 @@ public class EventService {
     }
 
     // 이전 시간대와 병합이 가능한지 확인
-    private boolean canMergeWithPrevious(EventDto.GetMostPossibleTime previousTime, Schedule schedule, List<String> curNames, Category category) {
+    private boolean canMergeWithPrevious(GetMostPossibleTime previousTime, Schedule schedule, List<String> curNames, Category category) {
         if (previousTime == null) return false;
 
         boolean isSameTimePoint = category.equals(Category.DAY)
-                ? previousTime.getTimePoint().equals(schedule.getDay())
-                : previousTime.getTimePoint().equals(schedule.getDate());
+                ? previousTime.timePoint().equals(schedule.getDay())
+                : previousTime.timePoint().equals(schedule.getDate());
 
         return isSameTimePoint
-                && previousTime.getEndTime().equals(schedule.getTime())
-                && new HashSet<>(previousTime.getPossibleNames()).containsAll(curNames);
+                && previousTime.endTime().equals(schedule.getTime())
+                && new HashSet<>(previousTime.possibleNames()).containsAll(curNames);
     }
 
     // 새로운 시간대 객체 생성
-    private EventDto.GetMostPossibleTime createMostPossibleTime(Schedule schedule, List<String> curNames, List<String> impossibleNames, Category category) {
+    private GetMostPossibleTime createMostPossibleTime(Schedule schedule, List<String> curNames, List<String> impossibleNames, Category category) {
         return category.equals(Category.DAY)
-                ? EventDto.GetMostPossibleTime.dayOf(schedule, curNames, impossibleNames)
-                : EventDto.GetMostPossibleTime.dateOf(schedule, curNames, impossibleNames);
+                ? GetMostPossibleTime.dayOf(schedule, curNames, impossibleNames)
+                : GetMostPossibleTime.dateOf(schedule, curNames, impossibleNames);
     }
 
     // 날짜 포맷인지 검증
@@ -264,7 +268,7 @@ public class EventService {
 
     // 유저 참여 이벤트 반환 메서드
     @Transactional(readOnly = true)
-    public List<EventDto.GetUserParticipatedEventsResponse> getUserParticipatedEvents(String authorizationHeader) {
+    public List<GetUserParticipatedEventsResponse> getUserParticipatedEvents(String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         return eventParticipationRepository.findAllByUser(user).stream()
@@ -274,10 +278,10 @@ public class EventService {
                 .map(eventParticipation -> {
                     Event event = eventParticipation.getEvent();
                     String eventId = String.valueOf(event.getEventId());
-                    EventDto.GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
-                    List<String> participantNames = getParticipantsResponse.getNames();
-                    List<EventDto.GetMostPossibleTime> mostPossibleTimes = getMostPossibleTime(eventId);
-                    return EventDto.GetUserParticipatedEventsResponse.of(event, eventParticipation, participantNames.size(), mostPossibleTimes);
+                    GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
+                    List<String> participantNames = getParticipantsResponse.names();
+                    List<GetMostPossibleTime> mostPossibleTimes = getMostPossibleTime(eventId);
+                    return GetUserParticipatedEventsResponse.of(event, eventParticipation, participantNames.size(), mostPossibleTimes);
                 })
                 .collect(Collectors.toList());
     }

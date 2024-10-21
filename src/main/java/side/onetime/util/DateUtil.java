@@ -2,8 +2,8 @@ package side.onetime.util;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import side.onetime.dto.EventDto;
 import side.onetime.domain.enums.Category;
+import side.onetime.dto.event.response.GetMostPossibleTime;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -78,7 +78,7 @@ public class DateUtil {
     }
 
     // 최적 시간대 리스트를 날짜 또는 요일별로 정렬
-    public static List<EventDto.GetMostPossibleTime> sortMostPossibleTimes(List<EventDto.GetMostPossibleTime> mostPossibleTimes, Category category) {
+    public static List<GetMostPossibleTime> sortMostPossibleTimes(List<GetMostPossibleTime> mostPossibleTimes, Category category) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
         List<String> sortedList;
@@ -90,7 +90,7 @@ public class DateUtil {
                     .collect(Collectors.toMap(dayOrder::get, i -> i));
 
             sortedList = mostPossibleTimes.stream()
-                    .map(EventDto.GetMostPossibleTime::getTimePoint)
+                    .map(GetMostPossibleTime::timePoint)
                     .filter(dayOrderMap::containsKey)
                     .sorted(Comparator.comparingInt(dayOrderMap::get))
                     .distinct()
@@ -98,7 +98,7 @@ public class DateUtil {
         } else {
             // 날짜로 정렬
             sortedList = mostPossibleTimes.stream()
-                    .map(EventDto.GetMostPossibleTime::getTimePoint)
+                    .map(GetMostPossibleTime::timePoint)
                     .filter(timePoint -> {
                         try {
                             LocalDate.parse(timePoint, dateFormatter);
@@ -114,8 +114,8 @@ public class DateUtil {
 
         // 정렬된 리스트에 따라 `EventDto.GetMostPossibleTime` 객체 정렬
         return mostPossibleTimes.stream()
-                .filter(mostPossibleTime -> sortedList.contains(mostPossibleTime.getTimePoint()))
-                .sorted(Comparator.comparingInt(mostPossibleTime -> sortedList.indexOf(mostPossibleTime.getTimePoint())))
+                .filter(mostPossibleTime -> sortedList.contains(mostPossibleTime.timePoint()))
+                .sorted(Comparator.comparingInt(mostPossibleTime -> sortedList.indexOf(mostPossibleTime.timePoint())))
                 .toList();
     }
 
