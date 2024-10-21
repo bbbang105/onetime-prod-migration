@@ -1,5 +1,6 @@
 package side.onetime.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ public class UrlController {
     // 원본 -> 단축 URL API
     @PostMapping("/action-shorten")
     public ResponseEntity<ApiResponse<ConvertToShortenUrlResponse>> convertToShortenUrl(
-            @RequestBody ConvertToShortenUrlRequest covertToShortenUrlRequest) {
+            @Valid @RequestBody ConvertToShortenUrlRequest covertToShortenUrlRequest) {
 
         ConvertToShortenUrlResponse convertToShortenUrlResponse = urlService.convertToShortenUrl(covertToShortenUrlRequest);
         return ApiResponse.onSuccess(SuccessStatus._CONVERT_TO_SHORTEN_URL, convertToShortenUrlResponse);
@@ -32,7 +33,7 @@ public class UrlController {
     // 단축 -> 원본 URL API
     @PostMapping("/action-original")
     public ResponseEntity<ApiResponse<ConvertToOriginalUrlResponse>> convertToOriginalUrl(
-            @RequestBody ConvertToOriginalUrlRequest convertToOriginalUrlRequest) {
+            @Valid @RequestBody ConvertToOriginalUrlRequest convertToOriginalUrlRequest) {
 
         ConvertToOriginalUrlResponse convertToOriginalUrlResponse = urlService.convertToOriginalUrl(convertToOriginalUrlRequest);
         return ApiResponse.onSuccess(SuccessStatus._CONVERT_TO_ORIGINAL_URL, convertToOriginalUrlResponse);

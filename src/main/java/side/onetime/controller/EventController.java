@@ -1,5 +1,6 @@
 package side.onetime.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class EventController {
     // 이벤트 생성 API
     @PostMapping
     public ResponseEntity<ApiResponse<CreateEventResponse>> createEvent(
-            @RequestBody CreateEventRequest createEventRequest,
+            @Valid @RequestBody CreateEventRequest createEventRequest,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
         CreateEventResponse createEventResponse;

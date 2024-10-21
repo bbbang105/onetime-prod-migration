@@ -1,4 +1,4 @@
-package side.onetime.exception;
+package side.onetime.exception.status;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,9 +8,11 @@ import side.onetime.global.common.dto.ErrorReasonDto;
 
 @Getter
 @RequiredArgsConstructor
-public enum EventParticipationErrorResult implements BaseErrorCode {
-    _NOT_FOUND_EVENT_PARTICIPATION(HttpStatus.NOT_FOUND, "404", "이벤트 참여 여부를 찾을 수 없습니다."),
-    _IS_NOT_USERS_CREATED_EVENT_PARTICIPATION(HttpStatus.BAD_REQUEST, "400", "해당 이벤트의 생성자가 아닙니다."),
+public enum MemberErrorStatus implements BaseErrorCode {
+    _NOT_FOUND_MEMBER(HttpStatus.NOT_FOUND, "MEMBER-001", "멤버를 찾을 수 없습니다."),
+    _IS_EXISTED_NAME(HttpStatus.CONFLICT, "MEMBER-002", "이미 존재하는 이름입니다."),
+    _IS_ALREADY_REGISTERED(HttpStatus.CONFLICT, "MEMBER-003", "이미 등록된 멤버입니다."),
+    _NOT_FOUND_MEMBERS(HttpStatus.NOT_FOUND, "MEMBER-004", "멤버 전체 목록을 가져오는 데 실패했습니다.")
     ;
 
     private final HttpStatus httpStatus;

@@ -1,5 +1,6 @@
 package side.onetime.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,7 +22,7 @@ public class TokenController {
     // 액세스 토큰 재발행 API
     @PostMapping("/action-reissue")
     public ResponseEntity<ApiResponse<ReissueTokenResponse>> reissueToken(
-            @RequestBody ReissueTokenRequest reissueAccessTokenRequest) {
+            @Valid @RequestBody ReissueTokenRequest reissueAccessTokenRequest) {
 
         ReissueTokenResponse reissueTokenResponse = tokenService.reissueToken(reissueAccessTokenRequest);
         return ApiResponse.onSuccess(SuccessStatus._REISSUE_TOKENS, reissueTokenResponse);

@@ -1,5 +1,6 @@
 package side.onetime.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class UserController {
     // 유저 온보딩 API
     @PostMapping("/onboarding")
     public ResponseEntity<ApiResponse<OnboardUserResponse>> onboardUser(
-            @RequestBody OnboardUserRequest onboardUserRequest) {
+            @Valid @RequestBody OnboardUserRequest onboardUserRequest) {
 
         OnboardUserResponse onboardUserResponse = userService.onboardUser(onboardUserRequest);
         return ApiResponse.onSuccess(SuccessStatus._ONBOARD_USER, onboardUserResponse);
@@ -39,7 +40,7 @@ public class UserController {
     @PatchMapping("/profile/action-update")
     public ResponseEntity<ApiResponse<SuccessStatus>> updateUserProfile(
             @RequestHeader("Authorization") String authorizationHeader,
-            @RequestBody UpdateUserProfileRequest updateUserProfileRequest) {
+            @Valid @RequestBody UpdateUserProfileRequest updateUserProfileRequest) {
 
         userService.updateUserProfile(authorizationHeader, updateUserProfileRequest);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_PROFILE);

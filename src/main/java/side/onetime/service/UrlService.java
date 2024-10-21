@@ -6,8 +6,8 @@ import side.onetime.dto.url.request.ConvertToOriginalUrlRequest;
 import side.onetime.dto.url.request.ConvertToShortenUrlRequest;
 import side.onetime.dto.url.response.ConvertToOriginalUrlResponse;
 import side.onetime.dto.url.response.ConvertToShortenUrlResponse;
-import side.onetime.exception.EventErrorResult;
-import side.onetime.exception.EventException;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.EventErrorStatus;
 import side.onetime.repository.EventRepository;
 import side.onetime.util.Base62Util;
 
@@ -24,7 +24,7 @@ public class UrlService {
 
         UUID eventId = extractEventIdFromUrl(originalUrl);
         if (!eventRepository.existsByEventId(eventId)) {
-            throw new EventException(EventErrorResult._NOT_FOUND_EVENT);
+            throw new CustomException(EventErrorStatus._NOT_FOUND_EVENT);
         }
 
         return ConvertToShortenUrlResponse.of(Base62Util.convertToShortenUrl(originalUrl));
@@ -37,7 +37,7 @@ public class UrlService {
 
         UUID eventId = extractEventIdFromUrl(originalUrl);
         if (!eventRepository.existsByEventId(eventId)) {
-            throw new EventException(EventErrorResult._NOT_FOUND_EVENT);
+            throw new CustomException(EventErrorStatus._NOT_FOUND_EVENT);
         }
 
         return ConvertToOriginalUrlResponse.of(originalUrl);

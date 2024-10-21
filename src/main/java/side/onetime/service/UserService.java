@@ -1,17 +1,17 @@
 package side.onetime.service;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
-import side.onetime.exception.UserErrorResult;
-import side.onetime.exception.UserException;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.UserErrorStatus;
 import side.onetime.repository.RefreshTokenRepository;
 import side.onetime.repository.UserRepository;
 import side.onetime.util.JwtUtil;
@@ -44,7 +44,7 @@ public class UserService {
         String email = jwtUtil.getEmailFromToken(registerToken);
 
         if (onboardUserRequest.nickname().length() > NICKNAME_LENGTH_LIMIT) {
-            throw new UserException(UserErrorResult._NICKNAME_TOO_LONG);
+            throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
         }
 
         User user = User.builder()
@@ -84,7 +84,7 @@ public class UserService {
         String nickname = updateUserProfileRequest.nickname();
 
         if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
-            throw new UserException(UserErrorResult._NICKNAME_TOO_LONG);
+            throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
         }
         user.updateNickName(nickname);
         userRepository.save(user);
