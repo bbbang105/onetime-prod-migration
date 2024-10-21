@@ -13,7 +13,10 @@ import side.onetime.dto.schedule.response.DateSchedule;
 import side.onetime.dto.schedule.response.DaySchedule;
 import side.onetime.dto.schedule.response.PerDateSchedulesResponse;
 import side.onetime.dto.schedule.response.PerDaySchedulesResponse;
-import side.onetime.exception.*;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.EventErrorStatus;
+import side.onetime.exception.status.MemberErrorStatus;
+import side.onetime.exception.status.ScheduleErrorStatus;
 import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
 
@@ -35,9 +38,9 @@ public class ScheduleService {
     @Transactional
     public void createDaySchedulesForAnonymousUser(CreateDayScheduleRequest createDayScheduleRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         Member member = memberRepository.findByMemberId(UUID.fromString(createDayScheduleRequest.memberId()))
-                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         List<DaySchedule> daySchedules = createDayScheduleRequest.daySchedules();
         List<Selection> selections = new ArrayList<>();
@@ -45,7 +48,7 @@ public class ScheduleService {
             String day = daySchedule.day();
             List<String> times = daySchedule.times();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDay(event, day)
-                    .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DAY_SCHEDULES));
+                    .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_DAY_SCHEDULES));
 
             for (Schedule schedule : schedules) {
                 if (times.contains(schedule.getTime())) {
@@ -65,7 +68,7 @@ public class ScheduleService {
     @Transactional
     public void createDaySchedulesForAuthenticatedUser(CreateDayScheduleRequest createDayScheduleRequest, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         // 참여 정보가 없는 경우 참여자로 저장
         eventParticipationRepository.findByUserAndEvent(user, event)
@@ -85,7 +88,7 @@ public class ScheduleService {
             String day = daySchedule.day();
             List<String> times = daySchedule.times();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDay(event, day)
-                    .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DAY_SCHEDULES));
+                    .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_DAY_SCHEDULES));
 
             for (Schedule schedule : schedules) {
                 if (times.contains(schedule.getTime())) {
@@ -105,9 +108,9 @@ public class ScheduleService {
     @Transactional
     public void createDateSchedulesForAnonymousUser(CreateDateScheduleRequest createDateScheduleRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         Member member = memberRepository.findByMemberId(UUID.fromString(createDateScheduleRequest.memberId()))
-                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         List<DateSchedule> dateSchedules = createDateScheduleRequest.dateSchedules();
         List<Selection> selections = new ArrayList<>();
@@ -115,7 +118,7 @@ public class ScheduleService {
             String date = dateSchedule.date();
             List<String> times = dateSchedule.times();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDate(event, date)
-                    .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
+                    .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_DATE_SCHEDULES));
 
             for (Schedule schedule : schedules) {
                 if (times.contains(schedule.getTime())) {
@@ -135,7 +138,7 @@ public class ScheduleService {
     @Transactional
     public void createDateSchedulesForAuthenticatedUser(CreateDateScheduleRequest createDateScheduleRequest, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         // 참여 정보가 없는 경우 참여자로 저장
         eventParticipationRepository.findByUserAndEvent(user, event)
@@ -156,7 +159,7 @@ public class ScheduleService {
             List<String> times = dateSchedule.times();
 
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDate(event, date)
-                    .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
+                    .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_DATE_SCHEDULES));
 
             for (Schedule schedule : schedules) {
                 if (times.contains(schedule.getTime())) {
@@ -178,7 +181,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public List<PerDaySchedulesResponse> getAllDaySchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
@@ -234,10 +237,10 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public PerDaySchedulesResponse getMemberDaySchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
-                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
                 .collect(Collectors.groupingBy(
@@ -257,7 +260,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
@@ -280,7 +283,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public List<PerDateSchedulesResponse> getAllDateSchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
@@ -336,10 +339,10 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
-                .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
+                .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
                 .collect(Collectors.groupingBy(
@@ -359,7 +362,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
@@ -382,7 +385,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public List<PerDaySchedulesResponse> getFilteredDaySchedules(GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.eventId()))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.names());
 
@@ -408,7 +411,7 @@ public class ScheduleService {
     @Transactional(readOnly = true)
     public List<PerDateSchedulesResponse> getFilteredDateSchedules(GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.eventId()))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.names());
 

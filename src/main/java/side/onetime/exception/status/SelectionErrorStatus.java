@@ -1,4 +1,4 @@
-package side.onetime.exception;
+package side.onetime.exception.status;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -8,10 +8,8 @@ import side.onetime.global.common.dto.ErrorReasonDto;
 
 @Getter
 @RequiredArgsConstructor
-public enum UserErrorResult implements BaseErrorCode {
-    _NOT_FOUND_USER(HttpStatus.NOT_FOUND, "404", "유저를 찾을 수 없습니다."),
-    _NICKNAME_TOO_LONG(HttpStatus.BAD_REQUEST, "400", "닉네임 길이 제한을 초과했습니다."),
-    _NOT_FOUND_REQUEST_NICKNAME(HttpStatus.BAD_REQUEST, "400", "닉네임 요청 값을 찾을 수 없습니다.")
+public enum SelectionErrorStatus implements BaseErrorCode {
+    _NOT_FOUND_ALL_SELECTIONS(HttpStatus.NOT_FOUND, "SELECTION-001", "전체 선택 목록을 가져오는 데 실패했습니다."),
     ;
 
     private final HttpStatus httpStatus;

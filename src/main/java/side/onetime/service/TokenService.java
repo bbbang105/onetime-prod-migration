@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import side.onetime.domain.RefreshToken;
 import side.onetime.dto.token.request.ReissueTokenRequest;
 import side.onetime.dto.token.response.ReissueTokenResponse;
-import side.onetime.exception.TokenErrorResult;
-import side.onetime.exception.TokenException;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.TokenErrorStatus;
 import side.onetime.repository.RefreshTokenRepository;
 import side.onetime.util.JwtUtil;
 
@@ -34,11 +34,11 @@ public class TokenService {
 
         Long userId = jwtUtil.getUserIdFromToken(refreshToken);
         List<String> existRefreshTokens = refreshTokenRepository.findByUserId(userId)
-                .orElseThrow(() -> new TokenException(TokenErrorResult._NOT_FOUND_REFRESH_TOKEN));
+                .orElseThrow(() -> new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN));
 
         if (!existRefreshTokens.contains(refreshToken)) {
             // RefreshToken이 존재하지 않으면 예외 발생
-            throw new TokenException(TokenErrorResult._NOT_FOUND_REFRESH_TOKEN);
+            throw new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN);
         }
 
         // 새로운 AccessToken 생성

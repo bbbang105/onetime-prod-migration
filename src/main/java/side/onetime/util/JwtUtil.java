@@ -9,10 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import side.onetime.domain.User;
-import side.onetime.exception.TokenErrorResult;
-import side.onetime.exception.TokenException;
-import side.onetime.exception.UserErrorResult;
-import side.onetime.exception.UserException;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.TokenErrorStatus;
+import side.onetime.exception.status.UserErrorStatus;
 import side.onetime.repository.UserRepository;
 
 import javax.crypto.SecretKey;
@@ -90,7 +89,7 @@ public class JwtUtil {
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.error("토큰에서 userId를 반환하던 도중 에러가 발생했습니다.");
-            throw new TokenException(TokenErrorResult._INVALID_TOKEN);
+            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
         }
     }
 
@@ -100,7 +99,7 @@ public class JwtUtil {
         validateTokenExpiration(token);
 
         return userRepository.findById(getUserIdFromToken(token))
-                .orElseThrow(() -> new UserException(UserErrorResult._NOT_FOUND_USER));
+                .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
     }
 
     // 토큰에서 provider를 반환하는 메서드
@@ -118,7 +117,7 @@ public class JwtUtil {
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.error("토큰에서 provider를 반환하는 도중 에러가 발생했습니다.");
-            throw new TokenException(TokenErrorResult._INVALID_TOKEN);
+            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
         }
     }
 
@@ -137,7 +136,7 @@ public class JwtUtil {
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.error("토큰에서 providerId를 반환하는 도중 에러가 발생했습니다.");
-            throw new TokenException(TokenErrorResult._INVALID_TOKEN);
+            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
         }
     }
 
@@ -156,7 +155,7 @@ public class JwtUtil {
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.error("토큰에서 이름을 반환하는 도중 에러가 발생했습니다.");
-            throw new TokenException(TokenErrorResult._INVALID_TOKEN);
+            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
         }
     }
 
@@ -175,7 +174,7 @@ public class JwtUtil {
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.error("토큰에서 이메일을 반환하는 도중 에러가 발생했습니다.");
-            throw new TokenException(TokenErrorResult._INVALID_TOKEN);
+            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
         }
     }
 
@@ -192,7 +191,7 @@ public class JwtUtil {
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰이 유효하지 않은 경우
             log.error("만료된 토큰입니다.");
-            throw new TokenException(TokenErrorResult._EXPIRED_TOKEN);
+            throw new CustomException(TokenErrorStatus._EXPIRED_TOKEN);
         }
     }
 }

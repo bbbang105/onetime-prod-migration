@@ -8,7 +8,10 @@ import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.event.request.CreateEventRequest;
 import side.onetime.dto.event.response.*;
-import side.onetime.exception.*;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.EventErrorStatus;
+import side.onetime.exception.status.EventParticipationErrorStatus;
+import side.onetime.exception.status.ScheduleErrorStatus;
 import side.onetime.repository.EventParticipationRepository;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.ScheduleRepository;
@@ -39,12 +42,12 @@ public class EventService {
 
         if (createEventRequest.category().equals(Category.DATE)) {
             if (!isDateFormat(createEventRequest.ranges().get(0))) {
-                throw new EventException(EventErrorResult._IS_NOT_DATE_FORMAT);
+                throw new CustomException(EventErrorStatus._IS_NOT_DATE_FORMAT);
             }
             createAndSaveDateSchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         } else {
             if (isDateFormat(createEventRequest.ranges().get(0))) {
-                throw new EventException(EventErrorResult._IS_NOT_DAY_FORMAT);
+                throw new CustomException(EventErrorStatus._IS_NOT_DAY_FORMAT);
             }
             createAndSaveDaySchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         }
@@ -67,12 +70,12 @@ public class EventService {
 
         if (createEventRequest.category().equals(Category.DATE)) {
             if (!isDateFormat(createEventRequest.ranges().get(0))) {
-                throw new EventException(EventErrorResult._IS_NOT_DATE_FORMAT);
+                throw new CustomException(EventErrorStatus._IS_NOT_DATE_FORMAT);
             }
             createAndSaveDateSchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         } else {
             if (isDateFormat(createEventRequest.ranges().get(0))) {
-                throw new EventException(EventErrorResult._IS_NOT_DAY_FORMAT);
+                throw new CustomException(EventErrorStatus._IS_NOT_DAY_FORMAT);
             }
             createAndSaveDaySchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         }
@@ -114,10 +117,10 @@ public class EventService {
     @Transactional(readOnly = true)
     public GetEventResponse getEvent(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         List<Schedule> schedules = scheduleRepository.findAllByEvent(event)
-                .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_ALL_SCHEDULES));
+                .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_ALL_SCHEDULES));
 
         List<String> ranges = event.getCategory().equals(Category.DATE)
                 ? DateUtil.getSortedDateRanges(schedules.stream().map(Schedule::getDate).toList(), "yyyy.MM.dd")
@@ -130,7 +133,7 @@ public class EventService {
     @Transactional(readOnly = true)
     public GetParticipantsResponse getParticipants(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
         List<Member> members = event.getMembers();
@@ -154,7 +157,7 @@ public class EventService {
     @Transactional(readOnly = true)
     public List<GetMostPossibleTime> getMostPossibleTime(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
         List<Member> members = event.getMembers();
@@ -291,13 +294,13 @@ public class EventService {
     public void removeUserCreatedEvent(String authorizationHeader, String eventId) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
-                .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event)
-                .orElseThrow(() -> new EventParticipationException(EventParticipationErrorResult._NOT_FOUND_EVENT_PARTICIPATION));
+                .orElseThrow(() -> new CustomException(EventParticipationErrorStatus._NOT_FOUND_EVENT_PARTICIPATION));
         if (!EventStatus.CREATOR.equals(eventParticipation.getEventStatus())) {
             // 해당 이벤트의 생성자가 아닌 경우
-            throw new EventParticipationException(EventParticipationErrorResult._IS_NOT_USERS_CREATED_EVENT_PARTICIPATION);
+            throw new CustomException(EventParticipationErrorStatus._IS_NOT_USERS_CREATED_EVENT_PARTICIPATION);
         }
 
         eventRepository.deleteEvent(event);
