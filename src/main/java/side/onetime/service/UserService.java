@@ -1,6 +1,6 @@
 package side.onetime.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -67,6 +67,7 @@ public class UserService {
     }
 
     // 유저 정보 조회 메서드
+    @Transactional(readOnly = true)
     public UserDto.GetUserProfileResponse getUserProfile(String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
