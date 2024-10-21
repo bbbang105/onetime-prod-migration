@@ -1,6 +1,6 @@
 package side.onetime.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.*;
@@ -15,6 +15,7 @@ import side.onetime.util.JwtUtil;
 import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
+
 
 @Service
 @RequiredArgsConstructor
@@ -106,6 +107,7 @@ public class EventService {
     }
 
     // 이벤트 조회 메서드
+    @Transactional(readOnly = true)
     public EventDto.GetEventResponse getEvent(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -121,7 +123,7 @@ public class EventService {
     }
 
     // 참여자 조회 메서드
-    @Transactional
+    @Transactional(readOnly = true)
     public EventDto.GetParticipantsResponse getParticipants(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -145,7 +147,7 @@ public class EventService {
     }
 
     // 가장 많이 되는 시간 조회 메서드
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EventDto.GetMostPossibleTime> getMostPossibleTime(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -261,7 +263,7 @@ public class EventService {
     }
 
     // 유저 참여 이벤트 반환 메서드
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EventDto.GetUserParticipatedEventsResponse> getUserParticipatedEvents(String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 

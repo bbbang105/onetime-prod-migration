@@ -1,6 +1,6 @@
 package side.onetime.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.*;
@@ -169,7 +169,7 @@ public class ScheduleService {
     }
 
     // 전체 요일 스케줄 반환 메서드
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ScheduleDto.PerDaySchedulesResponse> getAllDaySchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -225,7 +225,7 @@ public class ScheduleService {
     }
 
     // 개인 요일 스케줄 반환 메서드 (비로그인)
-    @Transactional
+    @Transactional(readOnly = true)
     public ScheduleDto.PerDaySchedulesResponse getMemberDaySchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -248,7 +248,7 @@ public class ScheduleService {
     }
 
     // 개인 요일 스케줄 반환 메서드 (로그인)
-    @Transactional
+    @Transactional(readOnly = true)
     public ScheduleDto.PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -271,7 +271,7 @@ public class ScheduleService {
     }
 
     // 전체 날짜 스케줄 반환 메서드
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ScheduleDto.PerDateSchedulesResponse> getAllDateSchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -327,7 +327,7 @@ public class ScheduleService {
     }
 
     // 개인 날짜 스케줄 반환 메서드 (비로그인)
-    @Transactional
+    @Transactional(readOnly = true)
     public ScheduleDto.PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -350,7 +350,7 @@ public class ScheduleService {
     }
 
     // 개인 날짜 스케줄 반환 메서드 (로그인)
-    @Transactional
+    @Transactional(readOnly = true)
     public ScheduleDto.PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -373,7 +373,7 @@ public class ScheduleService {
     }
 
     // 멤버 필터링 요일 스케줄 반환 메서드
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ScheduleDto.PerDaySchedulesResponse> getFilteredDaySchedules(ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.getEventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
@@ -399,7 +399,7 @@ public class ScheduleService {
     }
 
     // 멤버 필터링 날짜 스케줄 반환 메서드
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ScheduleDto.PerDateSchedulesResponse> getFilteredDateSchedules(ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.getEventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));

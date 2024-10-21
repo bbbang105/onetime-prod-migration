@@ -1,6 +1,6 @@
 package side.onetime.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.Event;
@@ -52,6 +52,7 @@ public class MemberService {
         return MemberDto.RegisterMemberResponse.of(member, event);
     }
 
+    // 멤버 요일 선택 목록을 만드는 메서드
     private List<Selection> createMembersDaySelections(Event event, Member member, MemberDto.RegisterMemberRequest registerMemberRequest) {
         List<MemberDto.Schedule> schedules = registerMemberRequest.getSchedules();
         List<Selection> selections = new ArrayList<>();
@@ -73,6 +74,7 @@ public class MemberService {
         return selections;
     }
 
+    // 멤버 날짜 선택 목록을 만드는 메서드
     private List<Selection> createMembersDateSelections(Event event, Member member, MemberDto.RegisterMemberRequest registerMemberRequest) {
         List<MemberDto.Schedule> schedules = registerMemberRequest.getSchedules();
         List<Selection> selections = new ArrayList<>();
@@ -95,6 +97,7 @@ public class MemberService {
     }
 
     // 멤버 로그인 메서드
+    @Transactional(readOnly = true)
     public MemberDto.LoginMemberResponse loginMember(MemberDto.LoginMemberRequest loginMemberRequest) {
         UUID eventId = UUID.fromString(loginMemberRequest.getEventId());
         Event event = eventRepository.findByEventId(eventId)
@@ -107,6 +110,7 @@ public class MemberService {
     }
 
     // 멤버 이름 중복 체크 메서드
+    @Transactional(readOnly = true)
     public MemberDto.IsDuplicateResponse isDuplicate(MemberDto.IsDuplicateRequest isDuplicateRequest) {
         UUID eventId = UUID.fromString(isDuplicateRequest.getEventId());
         Event event = eventRepository.findByEventId(eventId)
