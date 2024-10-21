@@ -5,8 +5,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.EventStatus;
-import side.onetime.dto.ScheduleDto;
 import side.onetime.dto.event.response.GetParticipantsResponse;
+import side.onetime.dto.schedule.request.CreateDateScheduleRequest;
+import side.onetime.dto.schedule.request.CreateDayScheduleRequest;
+import side.onetime.dto.schedule.request.GetFilteredSchedulesRequest;
+import side.onetime.dto.schedule.response.DateSchedule;
+import side.onetime.dto.schedule.response.DaySchedule;
+import side.onetime.dto.schedule.response.PerDateSchedulesResponse;
+import side.onetime.dto.schedule.response.PerDaySchedulesResponse;
 import side.onetime.exception.*;
 import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
@@ -27,17 +33,17 @@ public class ScheduleService {
 
     // 요일 스케줄 등록 메서드 (비로그인)
     @Transactional
-    public void createDaySchedulesForAnonymousUser(ScheduleDto.CreateDayScheduleRequest createDayScheduleRequest) {
-        Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.getEventId()))
+    public void createDaySchedulesForAnonymousUser(CreateDayScheduleRequest createDayScheduleRequest) {
+        Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
-        Member member = memberRepository.findByMemberId(UUID.fromString(createDayScheduleRequest.getMemberId()))
+        Member member = memberRepository.findByMemberId(UUID.fromString(createDayScheduleRequest.memberId()))
                 .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
 
-        List<ScheduleDto.DaySchedule> daySchedules = createDayScheduleRequest.getDaySchedules();
+        List<DaySchedule> daySchedules = createDayScheduleRequest.daySchedules();
         List<Selection> selections = new ArrayList<>();
-        for (ScheduleDto.DaySchedule daySchedule : daySchedules) {
-            String day = daySchedule.getDay();
-            List<String> times = daySchedule.getTimes();
+        for (DaySchedule daySchedule : daySchedules) {
+            String day = daySchedule.day();
+            List<String> times = daySchedule.times();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDay(event, day)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DAY_SCHEDULES));
 
@@ -57,8 +63,8 @@ public class ScheduleService {
 
     // 요일 스케줄 등록 메서드 (로그인)
     @Transactional
-    public void createDaySchedulesForAuthenticatedUser(ScheduleDto.CreateDayScheduleRequest createDayScheduleRequest, String authorizationHeader) {
-        Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.getEventId()))
+    public void createDaySchedulesForAuthenticatedUser(CreateDayScheduleRequest createDayScheduleRequest, String authorizationHeader) {
+        Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         // 참여 정보가 없는 경우 참여자로 저장
@@ -71,13 +77,13 @@ public class ScheduleService {
                                 .build()
                 ));
 
-        List<ScheduleDto.DaySchedule> daySchedules = createDayScheduleRequest.getDaySchedules();
+        List<DaySchedule> daySchedules = createDayScheduleRequest.daySchedules();
         List<Selection> newSelections = new ArrayList<>();
         List<Schedule> allSchedules = new ArrayList<>();
 
-        for (ScheduleDto.DaySchedule daySchedule : daySchedules) {
-            String day = daySchedule.getDay();
-            List<String> times = daySchedule.getTimes();
+        for (DaySchedule daySchedule : daySchedules) {
+            String day = daySchedule.day();
+            List<String> times = daySchedule.times();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDay(event, day)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DAY_SCHEDULES));
 
@@ -97,17 +103,17 @@ public class ScheduleService {
 
     // 날짜 스케줄 등록 메서드 (비로그인)
     @Transactional
-    public void createDateSchedulesForAnonymousUser(ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest) {
-        Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.getEventId()))
+    public void createDateSchedulesForAnonymousUser(CreateDateScheduleRequest createDateScheduleRequest) {
+        Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
-        Member member = memberRepository.findByMemberId(UUID.fromString(createDateScheduleRequest.getMemberId()))
+        Member member = memberRepository.findByMemberId(UUID.fromString(createDateScheduleRequest.memberId()))
                 .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
 
-        List<ScheduleDto.DateSchedule> dateSchedules = createDateScheduleRequest.getDateSchedules();
+        List<DateSchedule> dateSchedules = createDateScheduleRequest.dateSchedules();
         List<Selection> selections = new ArrayList<>();
-        for (ScheduleDto.DateSchedule dateSchedule : dateSchedules) {
-            String date = dateSchedule.getDate();
-            List<String> times = dateSchedule.getTimes();
+        for (DateSchedule dateSchedule : dateSchedules) {
+            String date = dateSchedule.date();
+            List<String> times = dateSchedule.times();
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDate(event, date)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
 
@@ -127,8 +133,8 @@ public class ScheduleService {
 
     // 날짜 스케줄 등록 메서드 (로그인)
     @Transactional
-    public void createDateSchedulesForAuthenticatedUser(ScheduleDto.CreateDateScheduleRequest createDateScheduleRequest, String authorizationHeader) {
-        Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.getEventId()))
+    public void createDateSchedulesForAuthenticatedUser(CreateDateScheduleRequest createDateScheduleRequest, String authorizationHeader) {
+        Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         // 참여 정보가 없는 경우 참여자로 저장
@@ -141,13 +147,13 @@ public class ScheduleService {
                                 .build()
                 ));
 
-        List<ScheduleDto.DateSchedule> dateSchedules = createDateScheduleRequest.getDateSchedules();
+        List<DateSchedule> dateSchedules = createDateScheduleRequest.dateSchedules();
         List<Selection> newSelections = new ArrayList<>();
         List<Schedule> allSchedules = new ArrayList<>();
 
-        for (ScheduleDto.DateSchedule dateSchedule : dateSchedules) {
-            String date = dateSchedule.getDate();
-            List<String> times = dateSchedule.getTimes();
+        for (DateSchedule dateSchedule : dateSchedules) {
+            String date = dateSchedule.date();
+            List<String> times = dateSchedule.times();
 
             List<Schedule> schedules = scheduleRepository.findAllByEventAndDate(event, date)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
@@ -170,7 +176,7 @@ public class ScheduleService {
 
     // 전체 요일 스케줄 반환 메서드
     @Transactional(readOnly = true)
-    public List<ScheduleDto.PerDaySchedulesResponse> getAllDaySchedules(String eventId) {
+    public List<PerDaySchedulesResponse> getAllDaySchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -188,7 +194,7 @@ public class ScheduleService {
                 .filter(user -> participantNames.contains(user.getNickname())) // 유저가 참여자 목록에 있는지 확인
                 .toList();
 
-        List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
+        List<PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
 
         // 멤버 스케줄 추가
         for (Member member : members) {
@@ -199,10 +205,10 @@ public class ScheduleService {
                             Collectors.toList()
                     ));
 
-            List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                    .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+            List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                    .map(entry -> DaySchedule.from(entry.getValue()))
                     .collect(Collectors.toList());
-            perDaySchedulesResponses.add(ScheduleDto.PerDaySchedulesResponse.of(member.getName(), daySchedules));
+            perDaySchedulesResponses.add(PerDaySchedulesResponse.of(member.getName(), daySchedules));
         }
 
         // 유저 스케줄 추가
@@ -215,10 +221,10 @@ public class ScheduleService {
                             Collectors.toList()
                     ));
 
-            List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                    .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+            List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                    .map(entry -> DaySchedule.from(entry.getValue()))
                     .collect(Collectors.toList());
-            perDaySchedulesResponses.add(ScheduleDto.PerDaySchedulesResponse.of(user.getNickname(), daySchedules));
+            perDaySchedulesResponses.add(PerDaySchedulesResponse.of(user.getNickname(), daySchedules));
         }
 
         return perDaySchedulesResponses;
@@ -226,7 +232,7 @@ public class ScheduleService {
 
     // 개인 요일 스케줄 반환 메서드 (비로그인)
     @Transactional(readOnly = true)
-    public ScheduleDto.PerDaySchedulesResponse getMemberDaySchedules(String eventId, String memberId) {
+    public PerDaySchedulesResponse getMemberDaySchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -240,16 +246,16 @@ public class ScheduleService {
                         Collectors.toList()
                 ));
 
-        List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+        List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                .map(entry -> DaySchedule.from(entry.getValue()))
                 .collect(Collectors.toList());
 
-        return ScheduleDto.PerDaySchedulesResponse.of(member.getName(), daySchedules);
+        return PerDaySchedulesResponse.of(member.getName(), daySchedules);
     }
 
     // 개인 요일 스케줄 반환 메서드 (로그인)
     @Transactional(readOnly = true)
-    public ScheduleDto.PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
+    public PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -263,16 +269,16 @@ public class ScheduleService {
                         Collectors.toList()
                 ));
 
-        List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+        List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                .map(entry -> DaySchedule.from(entry.getValue()))
                 .collect(Collectors.toList());
 
-        return ScheduleDto.PerDaySchedulesResponse.of(user.getNickname(), daySchedules);
+        return PerDaySchedulesResponse.of(user.getNickname(), daySchedules);
     }
 
     // 전체 날짜 스케줄 반환 메서드
     @Transactional(readOnly = true)
-    public List<ScheduleDto.PerDateSchedulesResponse> getAllDateSchedules(String eventId) {
+    public List<PerDateSchedulesResponse> getAllDateSchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -290,7 +296,7 @@ public class ScheduleService {
                 .filter(user -> participantNames.contains(user.getNickname())) // 유저가 참여자 목록에 있는지 확인
                 .toList();
 
-        List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
+        List<PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
 
         // 멤버 스케줄 추가
         for (Member member : members) {
@@ -301,10 +307,10 @@ public class ScheduleService {
                             Collectors.toList()
                     ));
 
-            List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                    .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+            List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                    .map(entry -> DateSchedule.from(entry.getValue()))
                     .collect(Collectors.toList());
-            perDateSchedulesResponses.add(ScheduleDto.PerDateSchedulesResponse.of(member.getName(), dateSchedules));
+            perDateSchedulesResponses.add(PerDateSchedulesResponse.of(member.getName(), dateSchedules));
         }
 
         // 유저 스케줄 추가
@@ -317,10 +323,10 @@ public class ScheduleService {
                             Collectors.toList()
                     ));
 
-            List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                    .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+            List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                    .map(entry -> DateSchedule.from(entry.getValue()))
                     .collect(Collectors.toList());
-            perDateSchedulesResponses.add(ScheduleDto.PerDateSchedulesResponse.of(user.getNickname(), dateSchedules));
+            perDateSchedulesResponses.add(PerDateSchedulesResponse.of(user.getNickname(), dateSchedules));
         }
 
         return perDateSchedulesResponses;
@@ -328,7 +334,7 @@ public class ScheduleService {
 
     // 개인 날짜 스케줄 반환 메서드 (비로그인)
     @Transactional(readOnly = true)
-    public ScheduleDto.PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
+    public PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -342,16 +348,16 @@ public class ScheduleService {
                         Collectors.toList()
                 ));
 
-        List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+        List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                .map(entry -> DateSchedule.from(entry.getValue()))
                 .collect(Collectors.toList());
 
-        return ScheduleDto.PerDateSchedulesResponse.of(member.getName(), dateSchedules);
+        return PerDateSchedulesResponse.of(member.getName(), dateSchedules);
     }
 
     // 개인 날짜 스케줄 반환 메서드 (로그인)
     @Transactional(readOnly = true)
-    public ScheduleDto.PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
+    public PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
@@ -365,22 +371,22 @@ public class ScheduleService {
                         Collectors.toList()
                 ));
 
-        List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+        List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                .map(entry -> DateSchedule.from(entry.getValue()))
                 .collect(Collectors.toList());
 
-        return ScheduleDto.PerDateSchedulesResponse.of(user.getNickname(), dateSchedules);
+        return PerDateSchedulesResponse.of(user.getNickname(), dateSchedules);
     }
 
     // 멤버 필터링 요일 스케줄 반환 메서드
     @Transactional(readOnly = true)
-    public List<ScheduleDto.PerDaySchedulesResponse> getFilteredDaySchedules(ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
-        Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.getEventId()))
+    public List<PerDaySchedulesResponse> getFilteredDaySchedules(GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+        Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.eventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
-        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.getNames());
+        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.names());
 
-        List<ScheduleDto.PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
+        List<PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
 
         for (Member member : members) {
             Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
@@ -390,23 +396,23 @@ public class ScheduleService {
                             Collectors.toList()
                     ));
 
-            List<ScheduleDto.DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                    .map(entry -> ScheduleDto.DaySchedule.of(entry.getValue()))
+            List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
+                    .map(entry -> DaySchedule.from(entry.getValue()))
                     .collect(Collectors.toList());
-            perDaySchedulesResponses.add(ScheduleDto.PerDaySchedulesResponse.of(member.getName(), daySchedules));
+            perDaySchedulesResponses.add(PerDaySchedulesResponse.of(member.getName(), daySchedules));
         }
         return perDaySchedulesResponses;
     }
 
     // 멤버 필터링 날짜 스케줄 반환 메서드
     @Transactional(readOnly = true)
-    public List<ScheduleDto.PerDateSchedulesResponse> getFilteredDateSchedules(ScheduleDto.GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
-        Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.getEventId()))
+    public List<PerDateSchedulesResponse> getFilteredDateSchedules(GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+        Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.eventId()))
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
-        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.getNames());
+        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEventAndNames(event, getFilteredSchedulesRequest.names());
 
-        List<ScheduleDto.PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
+        List<PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
 
         for (Member member : members) {
             Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
@@ -416,10 +422,10 @@ public class ScheduleService {
                             Collectors.toList()
                     ));
 
-            List<ScheduleDto.DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                    .map(entry -> ScheduleDto.DateSchedule.of(entry.getValue()))
+            List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
+                    .map(entry -> DateSchedule.from(entry.getValue()))
                     .collect(Collectors.toList());
-            perDateSchedulesResponses.add(ScheduleDto.PerDateSchedulesResponse.of(member.getName(), dateSchedules));
+            perDateSchedulesResponses.add(PerDateSchedulesResponse.of(member.getName(), dateSchedules));
         }
         return perDateSchedulesResponses;
     }
