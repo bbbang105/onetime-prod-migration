@@ -17,7 +17,7 @@ public record CreateEventRequest(
         @NotBlank(message = "제목은 필수 값입니다.") String title,
         @NotBlank(message = "시작 시간은 필수 값입니다.") String startTime,
         @NotBlank(message = "종료 시간은 필수 값입니다.") String endTime,
-        @NotBlank(message = "카테고리는 필수 값입니다.") Category category,
+        @NotNull(message = "카테고리는 필수 값입니다.") Category category,
         @NotNull(message = "설문 범위는 필수 값입니다.") List<String> ranges
 ) {
     public Event toEntity() {
