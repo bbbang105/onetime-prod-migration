@@ -1,15 +1,21 @@
 package side.onetime.service;
 
-import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.Event;
 import side.onetime.domain.Member;
 import side.onetime.domain.Schedule;
 import side.onetime.domain.Selection;
-import side.onetime.dto.MemberDto;
-import side.onetime.exception.*;
 import side.onetime.domain.enums.Category;
+import side.onetime.dto.member.request.IsDuplicateRequest;
+import side.onetime.dto.member.request.LoginMemberRequest;
+import side.onetime.dto.member.request.RegisterMemberRequest;
+import side.onetime.dto.member.response.IsDuplicateResponse;
+import side.onetime.dto.member.response.LoginMemberResponse;
+import side.onetime.dto.member.response.RegisterMemberResponse;
+import side.onetime.dto.member.response.ScheduleResponse;
+import side.onetime.exception.*;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.MemberRepository;
 import side.onetime.repository.ScheduleRepository;
@@ -29,16 +35,16 @@ public class MemberService {
 
     // 멤버 등록 메서드
     @Transactional
-    public MemberDto.RegisterMemberResponse registerMember(MemberDto.RegisterMemberRequest registerMemberRequest) {
-        UUID eventId = UUID.fromString(registerMemberRequest.getEventId());
+    public RegisterMemberResponse registerMember(RegisterMemberRequest registerMemberRequest) {
+        UUID eventId = UUID.fromString(registerMemberRequest.eventId());
         Event event = eventRepository.findByEventId(eventId)
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
-        if (memberRepository.existsByEventAndName(event, registerMemberRequest.getName())) {
+        if (memberRepository.existsByEventAndName(event, registerMemberRequest.name())) {
             throw new MemberException(MemberErrorResult._IS_ALREADY_REGISTERED);
         }
 
-        Member member = registerMemberRequest.to(event);
+        Member member = registerMemberRequest.toEntity(event);
         memberRepository.save(member);
 
         List<Selection> selections;
@@ -49,16 +55,16 @@ public class MemberService {
         }
         selectionRepository.saveAll(selections);
 
-        return MemberDto.RegisterMemberResponse.of(member, event);
+        return RegisterMemberResponse.of(member, event);
     }
 
     // 멤버 요일 선택 목록을 만드는 메서드
-    private List<Selection> createMembersDaySelections(Event event, Member member, MemberDto.RegisterMemberRequest registerMemberRequest) {
-        List<MemberDto.Schedule> schedules = registerMemberRequest.getSchedules();
+    private List<Selection> createMembersDaySelections(Event event, Member member, RegisterMemberRequest registerMemberRequest) {
+        List<ScheduleResponse> schedules = registerMemberRequest.schedules();
         List<Selection> selections = new ArrayList<>();
-        for (MemberDto.Schedule schedule : schedules) {
-            String day = schedule.getTimePoint();
-            List<String> times = schedule.getTimes();
+        for (ScheduleResponse schedule : schedules) {
+            String day = schedule.timePoint();
+            List<String> times = schedule.times();
             List<Schedule> selectedSchedules = scheduleRepository.findAllByEventAndDay(event, day)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DAY_SCHEDULES));
 
@@ -75,12 +81,12 @@ public class MemberService {
     }
 
     // 멤버 날짜 선택 목록을 만드는 메서드
-    private List<Selection> createMembersDateSelections(Event event, Member member, MemberDto.RegisterMemberRequest registerMemberRequest) {
-        List<MemberDto.Schedule> schedules = registerMemberRequest.getSchedules();
+    private List<Selection> createMembersDateSelections(Event event, Member member, RegisterMemberRequest registerMemberRequest) {
+        List<ScheduleResponse> schedules = registerMemberRequest.schedules();
         List<Selection> selections = new ArrayList<>();
-        for (MemberDto.Schedule schedule : schedules) {
-            String date = schedule.getTimePoint();
-            List<String> times = schedule.getTimes();
+        for (ScheduleResponse schedule : schedules) {
+            String date = schedule.timePoint();
+            List<String> times = schedule.times();
             List<Schedule> selectedSchedules = scheduleRepository.findAllByEventAndDate(event, date)
                     .orElseThrow(() -> new ScheduleException(ScheduleErrorResult._NOT_FOUND_DATE_SCHEDULES));
 
@@ -98,23 +104,23 @@ public class MemberService {
 
     // 멤버 로그인 메서드
     @Transactional(readOnly = true)
-    public MemberDto.LoginMemberResponse loginMember(MemberDto.LoginMemberRequest loginMemberRequest) {
-        UUID eventId = UUID.fromString(loginMemberRequest.getEventId());
+    public LoginMemberResponse loginMember(LoginMemberRequest loginMemberRequest) {
+        UUID eventId = UUID.fromString(loginMemberRequest.eventId());
         Event event = eventRepository.findByEventId(eventId)
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
 
-        Member member = memberRepository.findByEventAndNameAndPin(event, loginMemberRequest.getName(), loginMemberRequest.getPin())
+        Member member = memberRepository.findByEventAndNameAndPin(event, loginMemberRequest.name(), loginMemberRequest.pin())
                 .orElseThrow(() -> new MemberException(MemberErrorResult._NOT_FOUND_MEMBER));
 
-        return MemberDto.LoginMemberResponse.of(member, event);
+        return LoginMemberResponse.of(member, event);
     }
 
     // 멤버 이름 중복 체크 메서드
     @Transactional(readOnly = true)
-    public MemberDto.IsDuplicateResponse isDuplicate(MemberDto.IsDuplicateRequest isDuplicateRequest) {
-        UUID eventId = UUID.fromString(isDuplicateRequest.getEventId());
+    public IsDuplicateResponse isDuplicate(IsDuplicateRequest isDuplicateRequest) {
+        UUID eventId = UUID.fromString(isDuplicateRequest.eventId());
         Event event = eventRepository.findByEventId(eventId)
                 .orElseThrow(() -> new EventException(EventErrorResult._NOT_FOUND_EVENT));
-        return MemberDto.IsDuplicateResponse.of(!memberRepository.existsByEventAndName(event, isDuplicateRequest.getName()));
+        return IsDuplicateResponse.of(!memberRepository.existsByEventAndName(event, isDuplicateRequest.name()));
     }
 }

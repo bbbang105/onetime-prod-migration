@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
-import side.onetime.dto.UserDto;
+import side.onetime.dto.user.request.OnboardUserRequest;
+import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.response.GetUserProfileResponse;
+import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.exception.UserErrorResult;
 import side.onetime.exception.UserException;
 import side.onetime.repository.RefreshTokenRepository;
@@ -31,23 +34,23 @@ public class UserService {
 
     // 유저 온보딩 메서드
     @Transactional
-    public UserDto.OnboardUserResponse onboardUser(UserDto.OnboardUserRequest onboardUserRequest) {
+    public OnboardUserResponse onboardUser(OnboardUserRequest onboardUserRequest) {
         // 레지스터 토큰을 이용하여 사용자 정보 추출
-        String registerToken = onboardUserRequest.getRegisterToken();
+        String registerToken = onboardUserRequest.registerToken();
         jwtUtil.validateTokenExpiration(registerToken);
         String provider = jwtUtil.getProviderFromToken(registerToken);
         String providerId = jwtUtil.getProviderIdFromToken(registerToken);
         String name = jwtUtil.getNameFromToken(registerToken);
         String email = jwtUtil.getEmailFromToken(registerToken);
 
-        if (onboardUserRequest.getNickname().length() > NICKNAME_LENGTH_LIMIT) {
+        if (onboardUserRequest.nickname().length() > NICKNAME_LENGTH_LIMIT) {
             throw new UserException(UserErrorResult._NICKNAME_TOO_LONG);
         }
 
         User user = User.builder()
                 .name(name)
                 .email(email)
-                .nickname(onboardUserRequest.getNickname())
+                .nickname(onboardUserRequest.nickname())
                 .provider(provider)
                 .providerId(providerId)
                 .build();
@@ -63,26 +66,23 @@ public class UserService {
         refreshTokenRepository.save(newRefreshToken);
 
         // 액세스 토큰 반환
-        return UserDto.OnboardUserResponse.of(accessToken, refreshToken);
+        return OnboardUserResponse.of(accessToken, refreshToken);
     }
 
     // 유저 정보 조회 메서드
     @Transactional(readOnly = true)
-    public UserDto.GetUserProfileResponse getUserProfile(String authorizationHeader) {
+    public GetUserProfileResponse getUserProfile(String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        return UserDto.GetUserProfileResponse.of(user);
+        return GetUserProfileResponse.of(user);
     }
 
     // 유저 정보 수정 메서드
     @Transactional
-    public void updateUserProfile(String authorizationHeader, UserDto.UpdateUserProfileRequest updateUserProfileRequest) {
+    public void updateUserProfile(String authorizationHeader, UpdateUserProfileRequest updateUserProfileRequest) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        String nickname = updateUserProfileRequest.getNickname();
+        String nickname = updateUserProfileRequest.nickname();
 
-        if (nickname == null) {
-            throw new UserException(UserErrorResult._NOT_FOUND_REQUEST_NICKNAME);
-        }
         if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
             throw new UserException(UserErrorResult._NICKNAME_TOO_LONG);
         }

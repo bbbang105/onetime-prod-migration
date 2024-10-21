@@ -6,7 +6,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import side.onetime.dto.UrlDto;
+import side.onetime.dto.url.request.ConvertToOriginalUrlRequest;
+import side.onetime.dto.url.request.ConvertToShortenUrlRequest;
+import side.onetime.dto.url.response.ConvertToOriginalUrlResponse;
+import side.onetime.dto.url.response.ConvertToShortenUrlResponse;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
 import side.onetime.service.UrlService;
@@ -19,19 +22,19 @@ public class UrlController {
 
     // 원본 -> 단축 URL API
     @PostMapping("/action-shorten")
-    public ResponseEntity<ApiResponse<UrlDto.ConvertToShortenUrlResponse>> convertToShortenUrl(
-            @RequestBody UrlDto.ConvertToShortenUrlRequest covertToShortenUrlRequest) {
+    public ResponseEntity<ApiResponse<ConvertToShortenUrlResponse>> convertToShortenUrl(
+            @RequestBody ConvertToShortenUrlRequest covertToShortenUrlRequest) {
 
-        UrlDto.ConvertToShortenUrlResponse convertToShortenUrlResponse = urlService.convertToShortenUrl(covertToShortenUrlRequest);
+        ConvertToShortenUrlResponse convertToShortenUrlResponse = urlService.convertToShortenUrl(covertToShortenUrlRequest);
         return ApiResponse.onSuccess(SuccessStatus._CONVERT_TO_SHORTEN_URL, convertToShortenUrlResponse);
     }
 
     // 단축 -> 원본 URL API
     @PostMapping("/action-original")
-    public ResponseEntity<ApiResponse<UrlDto.ConvertToOriginalUrlResponse>> convertToOriginalUrl(
-            @RequestBody UrlDto.ConvertToOriginalUrlRequest convertToOriginalUrlRequest) {
+    public ResponseEntity<ApiResponse<ConvertToOriginalUrlResponse>> convertToOriginalUrl(
+            @RequestBody ConvertToOriginalUrlRequest convertToOriginalUrlRequest) {
 
-        UrlDto.ConvertToOriginalUrlResponse convertToOriginalUrlResponse = urlService.convertToOriginalUrl(convertToOriginalUrlRequest);
+        ConvertToOriginalUrlResponse convertToOriginalUrlResponse = urlService.convertToOriginalUrl(convertToOriginalUrlRequest);
         return ApiResponse.onSuccess(SuccessStatus._CONVERT_TO_ORIGINAL_URL, convertToOriginalUrlResponse);
     }
 }

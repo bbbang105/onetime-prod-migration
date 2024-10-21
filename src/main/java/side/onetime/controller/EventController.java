@@ -3,7 +3,8 @@ package side.onetime.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import side.onetime.dto.EventDto;
+import side.onetime.dto.event.request.CreateEventRequest;
+import side.onetime.dto.event.response.*;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
 import side.onetime.service.EventService;
@@ -18,11 +19,11 @@ public class EventController {
 
     // 이벤트 생성 API
     @PostMapping
-    public ResponseEntity<ApiResponse<EventDto.CreateEventResponse>> createEvent(
-            @RequestBody EventDto.CreateEventRequest createEventRequest,
+    public ResponseEntity<ApiResponse<CreateEventResponse>> createEvent(
+            @RequestBody CreateEventRequest createEventRequest,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
-        EventDto.CreateEventResponse createEventResponse;
+        CreateEventResponse createEventResponse;
         if (authorizationHeader != null) {
             createEventResponse = eventService.createEventForAuthenticatedUser(createEventRequest, authorizationHeader);
         } else {
@@ -34,37 +35,37 @@ public class EventController {
 
     // 이벤트 조회 API
     @GetMapping("/{event_id}")
-    public ResponseEntity<ApiResponse<EventDto.GetEventResponse>> getEvent(
+    public ResponseEntity<ApiResponse<GetEventResponse>> getEvent(
             @PathVariable("event_id") String eventId) {
 
-        EventDto.GetEventResponse getEventResponse = eventService.getEvent(eventId);
+        GetEventResponse getEventResponse = eventService.getEvent(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_EVENT, getEventResponse);
     }
 
     // 참여자 조회 API
     @GetMapping("/{event_id}/participants")
-    public ResponseEntity<ApiResponse<EventDto.GetParticipantsResponse>> getParticipants(
+    public ResponseEntity<ApiResponse<GetParticipantsResponse>> getParticipants(
             @PathVariable("event_id") String eventId) {
 
-        EventDto.GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
+        GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_PARTICIPANTS, getParticipantsResponse);
     }
 
     // 가장 많이 되는 시간 조회 API
     @GetMapping("/{event_id}/most")
-    public ResponseEntity<ApiResponse<List<EventDto.GetMostPossibleTime>>> getMostPossibleTime(
+    public ResponseEntity<ApiResponse<List<GetMostPossibleTime>>> getMostPossibleTime(
             @PathVariable("event_id") String eventId) {
 
-        List<EventDto.GetMostPossibleTime> getMostPossibleTimes = eventService.getMostPossibleTime(eventId);
+        List<GetMostPossibleTime> getMostPossibleTimes = eventService.getMostPossibleTime(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_MOST_POSSIBLE_TIME, getMostPossibleTimes);
     }
 
     // 유저 참여 이벤트 목록 조회 API
     @GetMapping("/user/all")
-    public ResponseEntity<ApiResponse<List<EventDto.GetUserParticipatedEventsResponse>>> getUserParticipatedEvents(
+    public ResponseEntity<ApiResponse<List<GetUserParticipatedEventsResponse>>> getUserParticipatedEvents(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        List<EventDto.GetUserParticipatedEventsResponse> getUserParticipatedEventsResponses = eventService.getUserParticipatedEvents(authorizationHeader);
+        List<GetUserParticipatedEventsResponse> getUserParticipatedEventsResponses = eventService.getUserParticipatedEvents(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_PARTICIPATED_EVENTS, getUserParticipatedEventsResponses);
     }
 
