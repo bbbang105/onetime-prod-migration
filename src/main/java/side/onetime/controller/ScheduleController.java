@@ -1,5 +1,6 @@
 package side.onetime.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,7 +24,7 @@ public class ScheduleController {
     // 요일 스케줄 등록 API
     @PostMapping("/day")
     public ResponseEntity<ApiResponse<SuccessStatus>> createDaySchedules(
-            @RequestBody CreateDayScheduleRequest createDayScheduleRequest,
+            @Valid @RequestBody CreateDayScheduleRequest createDayScheduleRequest,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
         if (authorizationHeader != null) {
@@ -37,7 +38,7 @@ public class ScheduleController {
     // 날짜 스케줄 등록 API
     @PostMapping("/date")
     public ResponseEntity<ApiResponse<SuccessStatus>> createDateSchedules(
-            @RequestBody CreateDateScheduleRequest createDateScheduleRequest,
+            @Valid @RequestBody CreateDateScheduleRequest createDateScheduleRequest,
             @RequestHeader(value = "Authorization", required = false) String authorizationHeader) {
 
         if (authorizationHeader != null) {
@@ -80,7 +81,7 @@ public class ScheduleController {
     // 멤버 필터링 요일 스케줄 조회 API
     @GetMapping("/day/action-filtering")
     public ResponseEntity<ApiResponse<List<PerDaySchedulesResponse>>> getFilteredDaySchedules(
-            @RequestBody GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+            @Valid @RequestBody GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
 
         List<PerDaySchedulesResponse> perDaySchedulesResponses = scheduleService.getFilteredDaySchedules(getFilteredSchedulesRequest);
         return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_DAY_SCHEDULES, perDaySchedulesResponses);
@@ -118,7 +119,7 @@ public class ScheduleController {
     // 멤버 필터링 날짜 스케줄 조회 API
     @GetMapping("/date/action-filtering")
     public ResponseEntity<ApiResponse<List<PerDateSchedulesResponse>>> getFilteredDateSchedules(
-            @RequestBody GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+            @Valid @RequestBody GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
 
         List<PerDateSchedulesResponse> perDateSchedulesResponses = scheduleService.getFilteredDateSchedules(getFilteredSchedulesRequest);
         return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_DATE_SCHEDULES, perDateSchedulesResponses);
