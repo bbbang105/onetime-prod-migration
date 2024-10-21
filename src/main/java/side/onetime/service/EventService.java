@@ -294,6 +294,6 @@ public class EventService {
             throw new EventParticipationException(EventParticipationErrorResult._IS_NOT_USERS_CREATED_EVENT_PARTICIPATION);
         }
 
-        eventRepository.deleteUserEvent(event);
+        eventRepository.deleteEvent(event);
     }
 }

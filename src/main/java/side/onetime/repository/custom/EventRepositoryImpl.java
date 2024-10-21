@@ -16,7 +16,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
     private final JPAQueryFactory queryFactory;
 
     @Override
-    public void deleteUserEvent(Event e) {
+    public void deleteEvent(Event e) {
         queryFactory.delete(selection)
                 .where(selection.schedule.event.eq(e))
                 .execute();
