@@ -5,7 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.RefreshToken;
-import side.onetime.dto.TokenDto;
+import side.onetime.dto.token.request.ReissueTokenRequest;
+import side.onetime.dto.token.response.ReissueTokenResponse;
 import side.onetime.exception.TokenErrorResult;
 import side.onetime.exception.TokenException;
 import side.onetime.repository.RefreshTokenRepository;
@@ -28,8 +29,8 @@ public class TokenService {
     private final JwtUtil jwtUtil;
 
     // 액세스 & 리프레쉬 토큰 재발행 메서드
-    public TokenDto.ReissueTokenResponse reissueToken(TokenDto.ReissueTokenRequest reissueTokenRequest) {
-        String refreshToken = reissueTokenRequest.getRefreshToken();
+    public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
+        String refreshToken = reissueTokenRequest.refreshToken();
 
         Long userId = jwtUtil.getUserIdFromToken(refreshToken);
         List<String> existRefreshTokens = refreshTokenRepository.findByUserId(userId)
@@ -48,6 +49,6 @@ public class TokenService {
         refreshTokenRepository.save(new RefreshToken(userId, newRefreshToken));
 
         log.info("토큰 재발행에 성공하였습니다.");
-        return TokenDto.ReissueTokenResponse.of(newAccessToken, newRefreshToken);
+        return ReissueTokenResponse.of(newAccessToken, newRefreshToken);
     }
 }
