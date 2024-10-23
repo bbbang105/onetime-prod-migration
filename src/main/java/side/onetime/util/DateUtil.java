@@ -16,7 +16,7 @@ import java.util.stream.IntStream;
 
 @Component
 @RequiredArgsConstructor
-public class DateUtil {
+public class  DateUtil {
 
     // 30분 단위 타임 셋을 만드는 메서드
     public static List<LocalTime> createTimeSets(String start, String end) {
@@ -133,4 +133,11 @@ public class DateUtil {
         }
     }
 
+    // 30분 추가 메서드
+    public static String addThirtyMinutes(String time) {
+        LocalTime parsedTime = LocalTime.parse(time);
+        LocalTime updatedTime = parsedTime.plusMinutes(30);
+
+        return updatedTime.toString().equals("00:00") ? "24:00" : updatedTime.toString();
+    }
 }

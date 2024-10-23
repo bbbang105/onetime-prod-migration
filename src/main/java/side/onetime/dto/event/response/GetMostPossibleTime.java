@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import side.onetime.domain.Schedule;
 
-import java.time.LocalTime;
 import java.util.List;
+
+import static side.onetime.util.DateUtil.addThirtyMinutes;
 
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -22,7 +23,7 @@ public record GetMostPossibleTime(
         return new GetMostPossibleTime(
                 schedule.getDay(),
                 schedule.getTime(),
-                String.valueOf(LocalTime.parse(schedule.getTime()).plusMinutes(30)),
+                addThirtyMinutes(schedule.getTime()),
                 possibleNames.size(),
                 possibleNames,
                 impossibleNames
@@ -33,18 +34,18 @@ public record GetMostPossibleTime(
         return new GetMostPossibleTime(
                 schedule.getDate(),
                 schedule.getTime(),
-                String.valueOf(LocalTime.parse(schedule.getTime()).plusMinutes(30)),
+                addThirtyMinutes(schedule.getTime()),
                 possibleNames.size(),
                 possibleNames,
                 impossibleNames
         );
     }
 
-    public GetMostPossibleTime updateEndTime(String endTime) {
-        return new GetMostPossibleTime(
+    public void updateEndTime(String endTime) {
+        new GetMostPossibleTime(
                 this.timePoint,
                 this.startTime,
-                String.valueOf(LocalTime.parse(endTime).plusMinutes(30)),
+                addThirtyMinutes(endTime),
                 this.possibleCount,
                 this.possibleNames,
                 this.impossibleNames
