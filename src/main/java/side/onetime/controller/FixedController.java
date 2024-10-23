@@ -40,5 +40,4 @@ public class FixedController {
 
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_FIXED_SCHEDULES, fixedEventResponses);
     }
-
 }
