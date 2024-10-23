@@ -15,7 +15,7 @@ import side.onetime.service.FixedEventService;
 public class FixedEventController {
     private final FixedEventService fixedEventService;
 
-    // 고정 이벤트 생성 API
+    // 고정 이벤트 생성 및 고정 스케줄 등록 API
     @PostMapping
     public ResponseEntity<ApiResponse<Object>> createFixedEvent(
             @RequestHeader("Authorization") String authorizationHeader,
@@ -23,6 +23,6 @@ public class FixedEventController {
 
         fixedEventService.createFixedEvent(authorizationHeader, createFixedEventRequest);
 
-        return ApiResponse.onSuccess(SuccessStatus._CREATED_FIXED_EVENT);
+        return ApiResponse.onSuccess(SuccessStatus._CREATED_FIXED_SCHEDULE);
     }
 }
