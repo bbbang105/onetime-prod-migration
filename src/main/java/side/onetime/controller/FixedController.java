@@ -70,4 +70,15 @@ public class FixedController {
 
         return ApiResponse.onSuccess(SuccessStatus._MODIFY_FIXED_SCHEDULE);
     }
+
+    // 고정 이벤트 & 스케줄 삭제 API
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Object>> removeFixedEvent(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable("id") Long fixedEventId) {
+
+        fixedEventService.removeFixedEvent(authorizationHeader, fixedEventId);
+
+        return ApiResponse.onSuccess(SuccessStatus._REMOVE_FIXED_SCHEDULE);
+    }
 }

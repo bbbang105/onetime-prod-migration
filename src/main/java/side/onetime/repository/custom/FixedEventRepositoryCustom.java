@@ -8,4 +8,5 @@ import java.util.List;
 public interface FixedEventRepositoryCustom {
     List<FixedEvent> findAllByUser(User user);
     FixedEvent findByUserAndFixedEventIdCustom(User user, Long fixedEventId);
+    void deleteFixedEventAndSelections(User user, Long fixedEventId);
 }

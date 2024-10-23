@@ -7,6 +7,8 @@ import side.onetime.domain.FixedEvent;
 import side.onetime.domain.User;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
 import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.FixedErrorStatus;
 import side.onetime.repository.FixedEventRepository;
 import side.onetime.util.JwtUtil;
 
@@ -36,8 +38,18 @@ public class FixedEventService {
     @Transactional
     public void modifyFixedEvent(String authorizationHeader, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId);
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
+                .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
         fixedEvent.updateTitle(modifyFixedEventRequest.title());
         fixedEventRepository.save(fixedEvent);
+    }
+
+    // 고정 이벤트 & 스케줄 삭제 메서드
+    @Transactional
+    public void removeFixedEvent(String authorizationHeader, Long fixedEventId) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
+                .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
+        fixedEventRepository.deleteFixedEventAndSelections(user, fixedEventId);
     }
 }

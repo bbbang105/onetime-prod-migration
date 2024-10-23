@@ -5,6 +5,8 @@ import side.onetime.domain.FixedEvent;
 import side.onetime.domain.User;
 import side.onetime.repository.custom.FixedEventRepositoryCustom;
 
+import java.util.Optional;
+
 public interface FixedEventRepository extends JpaRepository<FixedEvent, Long>, FixedEventRepositoryCustom {
-    FixedEvent findByUserAndId(User user, Long id);
+    Optional<FixedEvent> findByUserAndId(User user, Long id);
 }
