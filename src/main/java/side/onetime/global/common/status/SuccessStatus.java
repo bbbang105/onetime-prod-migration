@@ -44,6 +44,8 @@ public enum SuccessStatus implements BaseCode {
     _GET_USER_PROFILE(HttpStatus.OK, "200", "유저 정보 조회에 성공했습니다."),
     _UPDATE_USER_PROFILE(HttpStatus.OK, "200", "유저 정보 수정에 성공했습니다."),
     _WITHDRAW_SERVICE(HttpStatus.OK, "200", "유저 서비스 탈퇴에 성공했습니다."),
+    // FixedEvent
+    _CREATED_FIXED_SCHEDULE(HttpStatus.CREATED, "201", "고정 스케줄 등록에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;
