@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
+import side.onetime.dto.fixed.response.FixedEventDetailResponse;
 import side.onetime.dto.fixed.response.FixedEventResponse;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
@@ -39,5 +40,16 @@ public class FixedController {
         List<FixedEventResponse> fixedEventResponses = fixedScheduleService.getAllFixedSchedules(authorizationHeader);
 
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_FIXED_SCHEDULES, fixedEventResponses);
+    }
+
+    // 특정 고정 스케줄 상세 조회 API
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<FixedEventDetailResponse>> getFixedScheduleDetail(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable("id") Long fixedScheduleId) {
+
+        FixedEventDetailResponse fixedEventDetailResponse = fixedScheduleService.getFixedScheduleDetail(authorizationHeader, fixedScheduleId);
+
+        return ApiResponse.onSuccess(SuccessStatus._GET_FIXED_SCHEDULE_DETAIL, fixedEventDetailResponse);
     }
 }

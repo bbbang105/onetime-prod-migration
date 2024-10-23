@@ -47,6 +47,7 @@ public enum SuccessStatus implements BaseCode {
     // Fixed
     _CREATED_FIXED_SCHEDULE(HttpStatus.CREATED, "201", "고정 스케줄 등록에 성공했습니다."),
     _GET_ALL_FIXED_SCHEDULES(HttpStatus.OK, "200", "전체 고정 스케줄 조회에 성공했습니다."),
+    _GET_FIXED_SCHEDULE_DETAIL(HttpStatus.OK, "200", "특정 고정 스케줄 상세 조회에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;

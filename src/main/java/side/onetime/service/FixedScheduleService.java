@@ -8,6 +8,7 @@ import side.onetime.domain.FixedSchedule;
 import side.onetime.domain.FixedSelection;
 import side.onetime.domain.User;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
+import side.onetime.dto.fixed.response.FixedEventDetailResponse;
 import side.onetime.dto.fixed.response.FixedEventResponse;
 import side.onetime.dto.fixed.response.FixedScheduleResponse;
 import side.onetime.exception.CustomException;
@@ -59,7 +60,6 @@ public class FixedScheduleService {
     public List<FixedEventResponse> getAllFixedSchedules(String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
-        // 유저의 고정 이벤트와 해당 이벤트에 대한 고정 선택 및 고정 스케줄을 QueryDSL로 조회
         List<FixedEvent> fixedEvents = fixedEventRepository.findAllByUser(user);
 
         if (fixedEvents.isEmpty()) {
@@ -86,5 +86,32 @@ public class FixedScheduleService {
         }
 
         return fixedEventResponses;
+    }
+
+    // 특정 고정 스케줄 상세 조회 메서드
+    @Transactional(readOnly = true)
+    public FixedEventDetailResponse getFixedScheduleDetail(String authorizationHeader, Long fixedScheduleId) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+
+        // 고정 이벤트 조회
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndFixedEventId(user, fixedScheduleId);
+        if (fixedEvent == null) {
+            throw new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT);
+        }
+
+        // 고정 선택을 요일별로 그룹화하여 시간 목록을 생성
+        Map<String, List<String>> groupedSchedules = fixedEvent.getFixedSelections().stream()
+                .collect(Collectors.groupingBy(
+                        selection -> selection.getFixedSchedule().getDay(),
+                        Collectors.mapping(selection -> selection.getFixedSchedule().getTime(), Collectors.toList())
+                ));
+
+        // 고정 스케줄 정보 생성
+        List<FixedScheduleResponse> scheduleResponses = groupedSchedules.entrySet().stream()
+                .map(entry -> FixedScheduleResponse.of(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+
+        // 고정 이벤트 상세 정보 반환
+        return FixedEventDetailResponse.of(fixedEvent.getTitle(), fixedEvent.getStartTime(), fixedEvent.getEndTime(), scheduleResponses);
     }
 }

@@ -8,15 +8,15 @@ import java.util.List;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record FixedEventResponse(
-        Long id,
+public record FixedEventDetailResponse(
+        String title,
         String startTime,
         String endTime,
         List<FixedScheduleResponse> schedules
 ) {
-    public static FixedEventResponse of(Long id, String startTime, String endTime, List<FixedScheduleResponse> schedules) {
-        return new FixedEventResponse(
-                id,
+    public static FixedEventDetailResponse of(String title, String startTime, String endTime, List<FixedScheduleResponse> schedules) {
+        return new FixedEventDetailResponse(
+                title,
                 startTime,
                 endTime,
                 schedules
