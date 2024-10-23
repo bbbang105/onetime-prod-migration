@@ -81,7 +81,7 @@ public class FixedScheduleService {
                     .collect(Collectors.toList());
 
             // 고정 이벤트 정보 생성
-            FixedEventResponse fixedEventResponse = FixedEventResponse.of(fixedEvent.getTitle(), fixedEvent.getStartTime(), fixedEvent.getEndTime(), scheduleResponses);
+            FixedEventResponse fixedEventResponse = FixedEventResponse.of(fixedEvent.getId(), fixedEvent.getTitle(), fixedEvent.getStartTime(), fixedEvent.getEndTime(), scheduleResponses);
             fixedEventResponses.add(fixedEventResponse);
         }
 
