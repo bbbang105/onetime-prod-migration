@@ -120,7 +120,8 @@ public class FixedScheduleService {
     @Transactional
     public void modifyFixedSchedule(String authorizationHeader, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId);
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
+                .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
 
         List<String> times = modifyFixedEventRequest.schedules().get(0).times();
         String startTime = times.get(0);
