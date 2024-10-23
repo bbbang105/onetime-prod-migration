@@ -42,4 +42,16 @@ public class FixedEvent extends BaseEntity {
         this.startTime = startTime;
         this.endTime = endTime;
     }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
+
+    public void updateStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public void updateEndTime(String endTime) {
+        this.endTime = endTime;
+    }
 }

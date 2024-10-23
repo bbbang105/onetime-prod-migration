@@ -7,7 +7,7 @@ import side.onetime.domain.FixedEvent;
 import side.onetime.domain.FixedSchedule;
 import side.onetime.domain.FixedSelection;
 import side.onetime.domain.User;
-import side.onetime.dto.fixed.request.CreateFixedEventRequest;
+import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
 import side.onetime.dto.fixed.response.FixedEventDetailResponse;
 import side.onetime.dto.fixed.response.FixedEventResponse;
 import side.onetime.dto.fixed.response.FixedScheduleResponse;
@@ -23,6 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static side.onetime.util.DateUtil.addThirtyMinutes;
+
 @Service
 @RequiredArgsConstructor
 public class FixedScheduleService {
@@ -33,8 +35,7 @@ public class FixedScheduleService {
 
     // 고정 스케줄 등록 메서드
     @Transactional
-    public void createFixedSchedules(CreateFixedEventRequest createFixedEventRequest, FixedEvent fixedEvent) {
-        List<FixedScheduleResponse> fixedScheduleResponses = createFixedEventRequest.schedules();
+    public void createFixedSchedules(List<FixedScheduleResponse> fixedScheduleResponses, FixedEvent fixedEvent) {
         List<FixedSelection> fixedSelections = new ArrayList<>();
 
         for (FixedScheduleResponse fixedScheduleResponse : fixedScheduleResponses) {
@@ -90,11 +91,11 @@ public class FixedScheduleService {
 
     // 특정 고정 스케줄 상세 조회 메서드
     @Transactional(readOnly = true)
-    public FixedEventDetailResponse getFixedScheduleDetail(String authorizationHeader, Long fixedScheduleId) {
+    public FixedEventDetailResponse getFixedScheduleDetail(String authorizationHeader, Long fixedEventId) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         // 고정 이벤트 조회
-        FixedEvent fixedEvent = fixedEventRepository.findByUserAndFixedEventId(user, fixedScheduleId);
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndFixedEventIdCustom(user, fixedEventId);
         if (fixedEvent == null) {
             throw new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT);
         }
@@ -113,5 +114,22 @@ public class FixedScheduleService {
 
         // 고정 이벤트 상세 정보 반환
         return FixedEventDetailResponse.of(fixedEvent.getTitle(), fixedEvent.getStartTime(), fixedEvent.getEndTime(), scheduleResponses);
+    }
+
+    // 고정 스케줄 수정 메서드
+    @Transactional
+    public void modifyFixedSchedule(String authorizationHeader, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId);
+
+        List<String> times = modifyFixedEventRequest.schedules().get(0).times();
+        String startTime = times.get(0);
+        String endTime = times.get(times.size() - 1);
+        fixedEvent.updateStartTime(startTime);
+        fixedEvent.updateEndTime(addThirtyMinutes(endTime));
+        fixedEventRepository.save(fixedEvent);
+
+        fixedSelectionRepository.deleteFixedSelectionsByEvent(fixedEvent);
+        createFixedSchedules(modifyFixedEventRequest.schedules(), fixedEvent);
     }
 }

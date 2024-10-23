@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
+import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
 import side.onetime.dto.fixed.response.FixedEventDetailResponse;
 import side.onetime.dto.fixed.response.FixedEventResponse;
 import side.onetime.global.common.ApiResponse;
@@ -46,10 +47,27 @@ public class FixedController {
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<FixedEventDetailResponse>> getFixedScheduleDetail(
             @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable("id") Long fixedScheduleId) {
+            @PathVariable("id") Long fixedEventId) {
 
-        FixedEventDetailResponse fixedEventDetailResponse = fixedScheduleService.getFixedScheduleDetail(authorizationHeader, fixedScheduleId);
+        FixedEventDetailResponse fixedEventDetailResponse = fixedScheduleService.getFixedScheduleDetail(authorizationHeader, fixedEventId);
 
         return ApiResponse.onSuccess(SuccessStatus._GET_FIXED_SCHEDULE_DETAIL, fixedEventDetailResponse);
+    }
+
+    // 고정 이벤트 또는 스케줄 수정 API
+    @PatchMapping("/{id}")
+    public ResponseEntity<ApiResponse<Object>> modifyFixedEvent(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable("id") Long fixedEventId,
+            @RequestBody ModifyFixedEventRequest modifyFixedEventRequest) {
+
+        if (modifyFixedEventRequest.title() != null) {
+            fixedEventService.modifyFixedEvent(authorizationHeader, fixedEventId, modifyFixedEventRequest);
+        }
+        if (modifyFixedEventRequest.schedules() != null) {
+            fixedScheduleService.modifyFixedSchedule(authorizationHeader, fixedEventId, modifyFixedEventRequest);
+        }
+
+        return ApiResponse.onSuccess(SuccessStatus._MODIFY_FIXED_SCHEDULE);
     }
 }
