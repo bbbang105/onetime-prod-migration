@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.FixedEvent;
 import side.onetime.domain.User;
-import side.onetime.dto.fixedEvent.request.CreateFixedEventRequest;
+import side.onetime.dto.fixed.request.CreateFixedEventRequest;
 import side.onetime.repository.FixedEventRepository;
 import side.onetime.util.JwtUtil;
 

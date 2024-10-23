@@ -1,4 +1,4 @@
-package side.onetime.dto.fixedEvent.request;
+package side.onetime.dto.fixed.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import side.onetime.domain.FixedEvent;
 import side.onetime.domain.User;
-import side.onetime.dto.fixedEvent.response.FixedScheduleResponse;
+import side.onetime.dto.fixed.response.FixedScheduleResponse;
 
 import java.util.List;
 

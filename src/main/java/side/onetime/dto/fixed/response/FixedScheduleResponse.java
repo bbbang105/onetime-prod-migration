@@ -1,4 +1,4 @@
-package side.onetime.dto.fixedEvent.response;
+package side.onetime.dto.fixed.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -11,4 +11,10 @@ import java.util.List;
 public record FixedScheduleResponse(
         String timePoint,
         List<String> times
-) {}
+) {
+    public static FixedScheduleResponse of(String timePoint, List<String> times) {
+        return new FixedScheduleResponse(
+                timePoint,
+                times);
+    }
+}
