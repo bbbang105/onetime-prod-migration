@@ -30,7 +30,7 @@ public class FixedEventRepositoryImpl implements FixedEventRepositoryCustom {
 
     // 특정 고정 스케줄 상세 조회
     @Override
-    public FixedEvent findByUserAndFixedEventId(User user, Long fixedEventId) {
+    public FixedEvent findByUserAndFixedEventIdCustom(User user, Long fixedEventId) {
         return queryFactory.selectFrom(fixedEvent)
                 .leftJoin(fixedEvent.fixedSelections, fixedSelection)
                 .fetchJoin()
