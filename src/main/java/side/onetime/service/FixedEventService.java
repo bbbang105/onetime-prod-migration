@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.FixedEvent;
 import side.onetime.domain.User;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
+import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
 import side.onetime.repository.FixedEventRepository;
 import side.onetime.util.JwtUtil;
 
@@ -28,6 +29,15 @@ public class FixedEventService {
         String endTime = times.get(times.size() - 1);
         FixedEvent fixedEvent = createFixedEventRequest.toEntity(user, startTime, endTime);
         fixedEventRepository.save(fixedEvent);
-        fixedScheduleService.createFixedSchedules(createFixedEventRequest, fixedEvent);
+        fixedScheduleService.createFixedSchedules(createFixedEventRequest.schedules(), fixedEvent);
+    }
+
+    // 고정 이벤트 수정 메서드
+    @Transactional
+    public void modifyFixedEvent(String authorizationHeader, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId);
+        fixedEvent.updateTitle(modifyFixedEventRequest.title());
+        fixedEventRepository.save(fixedEvent);
     }
 }
