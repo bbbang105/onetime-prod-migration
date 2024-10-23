@@ -27,4 +27,17 @@ public class FixedEventRepositoryImpl implements FixedEventRepositoryCustom {
                 .where(fixedEvent.user.eq(user))
                 .fetch();
     }
+
+    // 특정 고정 스케줄 상세 조회
+    @Override
+    public FixedEvent findByUserAndFixedEventId(User user, Long fixedEventId) {
+        return queryFactory.selectFrom(fixedEvent)
+                .leftJoin(fixedEvent.fixedSelections, fixedSelection)
+                .fetchJoin()
+                .leftJoin(fixedSelection.fixedSchedule, fixedSchedule)
+                .fetchJoin()
+                .where(fixedEvent.user.eq(user)
+                        .and(fixedEvent.id.eq(fixedEventId)))
+                .fetchOne();
+    }
 }

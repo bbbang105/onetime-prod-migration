@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface FixedEventRepositoryCustom {
     List<FixedEvent> findAllByUser(User user);
+    FixedEvent findByUserAndFixedEventId(User user, Long fixedEventId);
 }
