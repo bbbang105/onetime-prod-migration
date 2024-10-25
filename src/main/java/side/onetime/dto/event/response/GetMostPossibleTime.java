@@ -41,8 +41,8 @@ public record GetMostPossibleTime(
         );
     }
 
-    public void updateEndTime(String endTime) {
-        new GetMostPossibleTime(
+    public GetMostPossibleTime updateEndTime(String endTime) {
+        return new GetMostPossibleTime(
                 this.timePoint,
                 this.startTime,
                 addThirtyMinutes(endTime),
