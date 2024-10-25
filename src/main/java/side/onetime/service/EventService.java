@@ -224,13 +224,17 @@ public class EventService {
             List<String> curNames = entry.getValue();
 
             if (curNames.size() == mostPossibleCnt) {
+                // 이전 시간대와 병합 가능한 경우
                 if (canMergeWithPrevious(previousTime, schedule, curNames, category)) {
-                    previousTime.updateEndTime(schedule.getTime());
+                    // 종료 시간을 더해 업데이트
+                    previousTime = previousTime.updateEndTime(schedule.getTime());
+                    mostPossibleTimes.set(mostPossibleTimes.size() - 1, previousTime);
                 } else {
                     List<String> impossibleNames = allMembersName.stream()
                             .filter(name -> !curNames.contains(name))
                             .toList();
 
+                    // 새로운 시간대를 추가
                     GetMostPossibleTime newTime = createMostPossibleTime(schedule, curNames, impossibleNames, category);
                     mostPossibleTimes.add(newTime);
                     previousTime = newTime;
