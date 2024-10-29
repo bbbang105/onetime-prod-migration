@@ -7,6 +7,7 @@ import side.onetime.domain.FixedEvent;
 import side.onetime.domain.User;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
 import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
+import side.onetime.dto.fixed.response.FixedEventByDayResponse;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.FixedErrorStatus;
 import side.onetime.repository.FixedEventRepository;
@@ -51,5 +52,37 @@ public class FixedEventService {
         FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
                 .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
         fixedEventRepository.deleteFixedEventAndSelections(user, fixedEventId);
+    }
+
+    // 요일 별 고정 이벤트 조회 메서드
+    @Transactional(readOnly = true)
+    public List<FixedEventByDayResponse> getFixedEventByDay(String authorizationHeader, String day) {
+        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+        String koreanDay = convertDayToKorean(day);
+
+        List<FixedEvent> fixedEvents = fixedEventRepository.findFixedEventsByUserAndDay(user, koreanDay);
+
+        return fixedEvents.stream()
+                .map(fixedEvent -> FixedEventByDayResponse.of(
+                        fixedEvent.getId(),
+                        fixedEvent.getTitle(),
+                        fixedEvent.getStartTime(),
+                        fixedEvent.getEndTime()
+                ))
+                .toList();
+    }
+
+    // 영어 요일 -> 한글 요일 변환 메서드
+    private String convertDayToKorean(String day) {
+        return switch (day.toLowerCase()) {
+            case "mon" -> "월";
+            case "tue" -> "화";
+            case "wed" -> "수";
+            case "thu" -> "목";
+            case "fri" -> "금";
+            case "sat" -> "토";
+            case "sun" -> "일";
+            default -> throw new CustomException(FixedErrorStatus._IS_NOT_RIGHT_DAY);
+        };
     }
 }

@@ -13,6 +13,7 @@ public enum FixedErrorStatus implements BaseErrorCode {
     _NOT_FOUND_FIXED_EVENTS(HttpStatus.NOT_FOUND, "FIXED-002", "고정 이벤트 목록을 가져오는 데 실패했습니다."),
     _NOT_FOUND_FIXED_EVENT(HttpStatus.NOT_FOUND, "FIXED-003", "특정 고정 이벤트를 가져오는 데 실패했습니다."),
     _NOT_FOUND_FIXED_SELECTIONS(HttpStatus.NOT_FOUND, "FIXED-004", "고정 스케줄 선택 목록을 가져오는 데 실패했습니다."),
+    _IS_NOT_RIGHT_DAY(HttpStatus.BAD_REQUEST, "FIXED-005", "올바른 요일 형식이 아닙니다."),
     ;
 
     private final HttpStatus httpStatus;
