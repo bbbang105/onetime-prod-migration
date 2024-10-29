@@ -60,4 +60,19 @@ public class FixedEventRepositoryImpl implements FixedEventRepositoryCustom {
                         .and(fixedEvent.user.eq(user)))
                 .execute();
     }
+
+    // 요일 별 고정 이벤트 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<FixedEvent> findFixedEventsByUserAndDay(User user, String day) {
+        return queryFactory.selectFrom(fixedEvent)
+                .leftJoin(fixedEvent.fixedSelections, fixedSelection)
+                .fetchJoin()
+                .leftJoin(fixedSelection.fixedSchedule, fixedSchedule)
+                .fetchJoin()
+                .where(fixedEvent.user.eq(user)
+                        .and(fixedSchedule.day.eq(day)))
+                .fetch();
+    }
+
 }
