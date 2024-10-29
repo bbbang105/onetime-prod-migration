@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
 import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
+import side.onetime.dto.fixed.response.FixedEventByDayResponse;
 import side.onetime.dto.fixed.response.FixedEventDetailResponse;
 import side.onetime.dto.fixed.response.FixedEventResponse;
 import side.onetime.global.common.ApiResponse;
@@ -80,5 +81,16 @@ public class FixedController {
         fixedEventService.removeFixedEvent(authorizationHeader, fixedEventId);
 
         return ApiResponse.onSuccess(SuccessStatus._REMOVE_FIXED_SCHEDULE);
+    }
+
+    // 요일별 고정 이벤트 조회 API
+    @GetMapping("by-day/{day}")
+    public ResponseEntity<ApiResponse<List<FixedEventByDayResponse>>> getFixedEventByDay(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable("day") String day) {
+
+        List<FixedEventByDayResponse> response = fixedEventService.getFixedEventByDay(authorizationHeader, day);
+
+        return ApiResponse.onSuccess(SuccessStatus._GET_FIXED_EVENT_BY_DAY, response);
     }
 }
