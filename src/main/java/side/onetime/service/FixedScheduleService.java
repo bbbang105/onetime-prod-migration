@@ -63,10 +63,6 @@ public class FixedScheduleService {
 
         List<FixedEvent> fixedEvents = fixedEventRepository.findAllByUser(user);
 
-        if (fixedEvents.isEmpty()) {
-            throw new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENTS);
-        }
-
         List<FixedEventResponse> fixedEventResponses = new ArrayList<>();
         for (FixedEvent fixedEvent : fixedEvents) {
             // 각 이벤트에 대한 고정 선택을 그룹화하여 요일별 스케줄을 생성
