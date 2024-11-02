@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import side.onetime.domain.Event;
 import side.onetime.domain.enums.Category;
+import side.onetime.domain.enums.EventStatus;
 
 import java.util.List;
 
@@ -15,15 +16,17 @@ public record GetEventResponse(
         String startTime,
         String endTime,
         Category category,
-        List<String> ranges
+        List<String> ranges,
+        EventStatus eventStatus
 ) {
-    public static GetEventResponse of(Event event, List<String> ranges) {
+    public static GetEventResponse of(Event event, List<String> ranges, EventStatus eventStatus) {
         return new GetEventResponse(
                 event.getTitle(),
                 event.getStartTime(),
                 event.getEndTime(),
                 event.getCategory(),
-                ranges
+                ranges,
+                eventStatus
         );
     }
 }
