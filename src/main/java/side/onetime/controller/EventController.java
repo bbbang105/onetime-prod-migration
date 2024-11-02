@@ -37,9 +37,12 @@ public class EventController {
     // 이벤트 조회 API
     @GetMapping("/{event_id}")
     public ResponseEntity<ApiResponse<GetEventResponse>> getEvent(
+            @RequestHeader(value = "Authorization", required = false) String authorizationHeader,
             @PathVariable("event_id") String eventId) {
 
-        GetEventResponse getEventResponse = eventService.getEvent(eventId);
+        GetEventResponse getEventResponse = eventService.getEvent(eventId, authorizationHeader);
+
+
         return ApiResponse.onSuccess(SuccessStatus._GET_EVENT, getEventResponse);
     }
 

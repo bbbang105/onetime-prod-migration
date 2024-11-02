@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import side.onetime.domain.Event;
 import side.onetime.domain.EventParticipation;
 import side.onetime.domain.enums.Category;
+import side.onetime.domain.enums.EventStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,7 +19,7 @@ public record GetUserParticipatedEventsResponse(
         String title,
         String createdDate,
         int participantCount,
-        String eventStatus,
+        EventStatus eventStatus,
         List<GetMostPossibleTime> mostPossibleTimes
 ) {
     public static GetUserParticipatedEventsResponse of(Event event, EventParticipation eventParticipation, int participantCount, List<GetMostPossibleTime> mostPossibleTimes) {
@@ -28,7 +29,7 @@ public record GetUserParticipatedEventsResponse(
                 event.getTitle(),
                 String.valueOf(event.getCreatedDate()),
                 participantCount,
-                String.valueOf(eventParticipation.getEventStatus()),
+                eventParticipation.getEventStatus(),
                 mostPossibleTimes
         );
     }

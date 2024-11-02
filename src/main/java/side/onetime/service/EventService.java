@@ -115,7 +115,7 @@ public class EventService {
 
     // 이벤트 조회 메서드
     @Transactional(readOnly = true)
-    public GetEventResponse getEvent(String eventId) {
+    public GetEventResponse getEvent(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
@@ -126,7 +126,15 @@ public class EventService {
                 ? DateUtil.getSortedDateRanges(schedules.stream().map(Schedule::getDate).toList(), "yyyy.MM.dd")
                 : DateUtil.getSortedDayRanges(schedules.stream().map(Schedule::getDay).toList());
 
-        return GetEventResponse.of(event, ranges);
+        EventStatus eventStatus = null;
+        if (authorizationHeader != null) {
+            User user = jwtUtil.getUserFromHeader(authorizationHeader);
+            EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event)
+                    .orElseThrow(() -> new CustomException(EventParticipationErrorStatus._NOT_FOUND_EVENT_PARTICIPATION));
+            eventStatus = eventParticipation.getEventStatus();
+        }
+
+        return GetEventResponse.of(event, ranges, eventStatus);
     }
 
     // 참여자 조회 메서드
