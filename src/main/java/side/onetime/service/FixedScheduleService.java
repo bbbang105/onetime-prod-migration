@@ -19,6 +19,7 @@ import side.onetime.repository.FixedSelectionRepository;
 import side.onetime.util.JwtUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -65,11 +66,17 @@ public class FixedScheduleService {
 
         List<FixedEventResponse> fixedEventResponses = new ArrayList<>();
         for (FixedEvent fixedEvent : fixedEvents) {
-            // 각 이벤트에 대한 고정 선택을 그룹화하여 요일별 스케줄을 생성
+            // 각 이벤트에 대한 고정 선택을 그룹화하여 요일별 스케줄을 생성 (times를 오름차순 정렬)
             Map<String, List<String>> groupedSchedules = fixedEvent.getFixedSelections().stream()
                     .collect(Collectors.groupingBy(
                             selection -> selection.getFixedSchedule().getDay(),
-                            Collectors.mapping(selection -> selection.getFixedSchedule().getTime(), Collectors.toList())
+                            Collectors.collectingAndThen(
+                                    Collectors.mapping(selection -> selection.getFixedSchedule().getTime(), Collectors.toList()),
+                                    list -> {
+                                        list.sort(Comparator.naturalOrder());
+                                        return list;
+                                    }
+                            )
                     ));
 
             // 고정 스케줄 정보 생성
@@ -96,11 +103,17 @@ public class FixedScheduleService {
             throw new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT);
         }
 
-        // 고정 선택을 요일별로 그룹화하여 시간 목록을 생성
+        // 고정 선택을 요일별로 그룹화하여 시간 목록을 생성 (times를 오름차순 정렬)
         Map<String, List<String>> groupedSchedules = fixedEvent.getFixedSelections().stream()
                 .collect(Collectors.groupingBy(
                         selection -> selection.getFixedSchedule().getDay(),
-                        Collectors.mapping(selection -> selection.getFixedSchedule().getTime(), Collectors.toList())
+                        Collectors.collectingAndThen(
+                                Collectors.mapping(selection -> selection.getFixedSchedule().getTime(), Collectors.toList()),
+                                list -> {
+                                    list.sort(Comparator.naturalOrder());
+                                    return list;
+                                }
+                        )
                 ));
 
         // 고정 스케줄 정보 생성
