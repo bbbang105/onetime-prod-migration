@@ -129,9 +129,10 @@ public class EventService {
         EventStatus eventStatus = null;
         if (authorizationHeader != null) {
             User user = jwtUtil.getUserFromHeader(authorizationHeader);
-            EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event)
-                    .orElseThrow(() -> new CustomException(EventParticipationErrorStatus._NOT_FOUND_EVENT_PARTICIPATION));
-            eventStatus = eventParticipation.getEventStatus();
+            EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
+            if (eventParticipation != null) {
+                eventStatus = eventParticipation.getEventStatus();
+            }
         }
 
         return GetEventResponse.of(event, ranges, eventStatus);
@@ -308,8 +309,10 @@ public class EventService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event)
-                .orElseThrow(() -> new CustomException(EventParticipationErrorStatus._NOT_FOUND_EVENT_PARTICIPATION));
+        EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
+        if (eventParticipation == null) {
+            throw new CustomException(EventParticipationErrorStatus._NOT_FOUND_EVENT_PARTICIPATION);
+        }
         if (!EventStatus.CREATOR.equals(eventParticipation.getEventStatus())) {
             // 해당 이벤트의 생성자가 아닌 경우
             throw new CustomException(EventParticipationErrorStatus._IS_NOT_USERS_CREATED_EVENT_PARTICIPATION);

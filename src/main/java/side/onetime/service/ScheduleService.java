@@ -71,14 +71,16 @@ public class ScheduleService {
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         // 참여 정보가 없는 경우 참여자로 저장
-        eventParticipationRepository.findByUserAndEvent(user, event)
-                .orElseGet(() -> eventParticipationRepository.save(
-                        EventParticipation.builder()
-                                .user(user)
-                                .event(event)
-                                .eventStatus(EventStatus.PARTICIPANT)
-                                .build()
-                ));
+        EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
+        if (eventParticipation == null) {
+            eventParticipationRepository.save(
+                    EventParticipation.builder()
+                            .user(user)
+                            .event(event)
+                            .eventStatus(EventStatus.PARTICIPANT)
+                            .build()
+            );
+        }
 
         List<DaySchedule> daySchedules = createDayScheduleRequest.daySchedules();
         List<Selection> newSelections = new ArrayList<>();
@@ -141,14 +143,16 @@ public class ScheduleService {
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         // 참여 정보가 없는 경우 참여자로 저장
-        eventParticipationRepository.findByUserAndEvent(user, event)
-                .orElseGet(() -> eventParticipationRepository.save(
-                        EventParticipation.builder()
-                                .user(user)
-                                .event(event)
-                                .eventStatus(EventStatus.PARTICIPANT)
-                                .build()
-                ));
+        EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
+        if (eventParticipation == null) {
+            eventParticipationRepository.save(
+                    EventParticipation.builder()
+                            .user(user)
+                            .event(event)
+                            .eventStatus(EventStatus.PARTICIPANT)
+                            .build()
+            );
+        }
 
         List<DateSchedule> dateSchedules = createDateScheduleRequest.dateSchedules();
         List<Selection> newSelections = new ArrayList<>();
