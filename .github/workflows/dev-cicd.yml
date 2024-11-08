@@ -1,4 +1,4 @@
-name: Onetime CI/CD with Gradle
+name: Onetime DEV CI/CD with Gradle
 
 on:
   push:
