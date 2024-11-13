@@ -1,7 +1,6 @@
 package side.onetime.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
@@ -24,7 +23,10 @@ public class SwaggerConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         OpenAPI openAPI = new OpenAPI()
-                .info(new Info().title("OneTime API Documentation").version("0.0.1").description("Spring REST Docs with Swagger UI."))
+                .info(new Info()
+                        .title("OneTime API Documentation")
+                        .version("1.3.0")
+                        .description("Spring REST Docs with Swagger UI."))
                 .servers(List.of(
                         new Server().url("http://localhost:8090").description("로컬 서버"),
                         new Server().url("https://onetime-test.store").description("테스트 서버")
