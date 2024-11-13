@@ -7,6 +7,7 @@ import side.onetime.domain.*;
 import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.event.request.CreateEventRequest;
+import side.onetime.dto.event.request.ModifyUserCreatedEventTitleRequest;
 import side.onetime.dto.event.response.*;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.EventErrorStatus;
@@ -305,6 +306,19 @@ public class EventService {
     // 유저가 생성한 이벤트 삭제 메서드
     @Transactional
     public void removeUserCreatedEvent(String authorizationHeader, String eventId) {
+        EventParticipation eventParticipation = verifyUserIsEventCreator(authorizationHeader, eventId);
+        eventRepository.deleteEvent(eventParticipation.getEvent());
+    }
+
+    // 유저가 생성한 이벤트 제목 수정 메서드
+    @Transactional
+    public void modifyUserCreatedEventTitle(String authorizationHeader, String eventId, ModifyUserCreatedEventTitleRequest modifyUserCreatedEventTitleRequest) {
+        EventParticipation eventParticipation = verifyUserIsEventCreator(authorizationHeader, eventId);
+        eventParticipation.getEvent().updateTitle(modifyUserCreatedEventTitleRequest.title());
+    }
+
+    // 유저가 이벤트의 생성자인지 검증하는 메서드
+    private EventParticipation verifyUserIsEventCreator(String authorizationHeader, String eventId) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
@@ -314,10 +328,9 @@ public class EventService {
             throw new CustomException(EventParticipationErrorStatus._NOT_FOUND_EVENT_PARTICIPATION);
         }
         if (!EventStatus.CREATOR.equals(eventParticipation.getEventStatus())) {
-            // 해당 이벤트의 생성자가 아닌 경우
             throw new CustomException(EventParticipationErrorStatus._IS_NOT_USERS_CREATED_EVENT_PARTICIPATION);
         }
 
-        eventRepository.deleteEvent(event);
+        return eventParticipation;
     }
 }
