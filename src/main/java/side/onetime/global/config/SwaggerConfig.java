@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.Paths;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
@@ -26,7 +27,12 @@ public class SwaggerConfig {
                 .info(new Info()
                         .title("OneTime API Documentation")
                         .version("1.3.0")
-                        .description("Spring REST Docs with Swagger UI."))
+                        .description("Spring REST Docs with Swagger UI.")
+                        .contact(new Contact()
+                        .name("Sangho Han")
+                        .url("https://github.com/bbbang105")
+                        .email("hchsa77@gmail.com"))
+                )
                 .servers(List.of(
                         new Server().url("http://localhost:8090").description("로컬 서버"),
                         new Server().url("https://onetime-test.store").description("테스트 서버")
