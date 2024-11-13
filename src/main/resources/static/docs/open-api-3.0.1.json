@@ -1,0 +1,16 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "OneTime API Documentation",
+    "description" : "Spring REST Docs with Swagger UI.",
+    "version" : "0.0.1"
+  },
+  "servers" : [ {
+    "url" : "https://onetime-test.store"
+  } ],
+  "tags" : [ ],
+  "paths" : { },
+  "components" : {
+    "schemas" : { }
+  }
+}
