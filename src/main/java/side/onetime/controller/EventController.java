@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.event.request.CreateEventRequest;
+import side.onetime.dto.event.request.ModifyUserCreatedEventTitleRequest;
 import side.onetime.dto.event.response.*;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
@@ -127,5 +128,25 @@ public class EventController {
 
         eventService.removeUserCreatedEvent(authorizationHeader, eventId);
         return ApiResponse.onSuccess(SuccessStatus._REMOVE_USER_CREATED_EVENT);
+    }
+
+    /**
+     * 유저가 생성한 이벤트 제목 수정 API
+     *
+     * 이 API는 인증된 유저가 생성한 특정 이벤트의 제목을 수정합니다.
+     *
+     * @param authorizationHeader 인증된 유저의 토큰
+     * @param eventId 제목을 수정할 이벤트의 ID
+     * @param modifyUserCreatedEventTitleRequest 새로운 제목 정보가 담긴 요청 데이터
+     * @return 수정 성공 여부
+     */
+    @PutMapping("/{event_id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> modifyUserCreatedEventTitle(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable("event_id") String eventId,
+            @Valid @RequestBody ModifyUserCreatedEventTitleRequest modifyUserCreatedEventTitleRequest) {
+
+        eventService.modifyUserCreatedEventTitle(authorizationHeader, eventId, modifyUserCreatedEventTitleRequest);
+        return ApiResponse.onSuccess(SuccessStatus._MODIFY_USER_CREATED_EVENT_TITLE);
     }
 }
