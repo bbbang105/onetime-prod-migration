@@ -19,6 +19,7 @@ public enum SuccessStatus implements BaseCode {
     _GET_MOST_POSSIBLE_TIME(HttpStatus.OK, "200", "가장 많이 되는 시간 조회에 성공했습니다."),
     _GET_USER_PARTICIPATED_EVENTS(HttpStatus.OK, "200", "유저 참여 이벤트 목록 조회에 성공했습니다."),
     _REMOVE_USER_CREATED_EVENT(HttpStatus.OK, "200", "유저가 생성한 이벤트 삭제에 성공했습니다."),
+    _MODIFY_USER_CREATED_EVENT_TITLE(HttpStatus.OK, "200", "유저가 생성한 이벤트 제목 수정에 성공했습니다."),
     // Member
     _REGISTER_MEMBER(HttpStatus.CREATED, "201", "멤버 등록에 성공했습니다."),
     _LOGIN_MEMBER(HttpStatus.OK, "200", "멤버 로그인에 성공했습니다."),

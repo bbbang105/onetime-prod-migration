@@ -19,6 +19,7 @@ import side.onetime.controller.EventController;
 import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.event.request.CreateEventRequest;
+import side.onetime.dto.event.request.ModifyUserCreatedEventTitleRequest;
 import side.onetime.dto.event.response.*;
 import side.onetime.service.EventService;
 import side.onetime.util.JwtUtil;
@@ -381,6 +382,56 @@ public class EventControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
                                         .responseSchema(Schema.schema("RemoveUserCreatedEventResponseSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저가 생성한 이벤트 제목을 수정한다.")
+    public void modifyUserCreatedEventTitle() throws Exception {
+        // given
+        String eventId = UUID.randomUUID().toString();
+        ModifyUserCreatedEventTitleRequest request = new ModifyUserCreatedEventTitleRequest("수정할 이벤트 제목");
+
+        String requestContent = new ObjectMapper().writeValueAsString(request);
+
+        Mockito.doNothing().when(eventService).modifyUserCreatedEventTitle(anyString(), anyString(), any(ModifyUserCreatedEventTitleRequest.class));
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.put("/api/v1/events/{event_id}", eventId)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer sampleToken")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestContent)
+                .accept(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저가 생성한 이벤트 제목 수정에 성공했습니다."))
+
+                // docs
+                .andDo(MockMvcRestDocumentationWrapper.document("event/modify-user-created-event-title",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Event API")
+                                        .description("유저가 생성한 이벤트 제목을 수정한다.")
+                                        .pathParameters(
+                                                parameterWithName("event_id").description("수정할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]")
+                                        )
+                                        .requestFields(
+                                                fieldWithPath("title").type(JsonFieldType.STRING).description("새로운 이벤트 제목")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .responseSchema(Schema.schema("ModifyUserCreatedEventTitleResponseSchema"))
                                         .build()
                         )
                 ));

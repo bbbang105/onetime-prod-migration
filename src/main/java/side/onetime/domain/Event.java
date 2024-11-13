@@ -55,4 +55,8 @@ public class Event extends BaseEntity {
         this.endTime = endTime;
         this.category = category;
     }
+
+    public void updateTitle(String title) {
+        this.title = title;
+    }
 }
