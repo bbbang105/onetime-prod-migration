@@ -30,7 +30,7 @@ public enum SuccessStatus implements BaseCode {
     _GET_MEMBER_DAY_SCHEDULES(HttpStatus.OK, "200", "개인(비로그인) 요일 스케줄 조회에 성공했습니다."),
     _GET_USER_DAY_SCHEDULES(HttpStatus.OK, "200", "개인(로그인) 요일 스케줄 조회에 성공했습니다."),
     _GET_ALL_DATE_SCHEDULES(HttpStatus.OK, "200", "전체 날짜 스케줄 조회에 성공했습니다."),
-    _GET_MEMBER_DATE_SCHEDULES(HttpStatus.OK, "200", "개인(비로그인)날짜 스케줄 조회에 성공했습니다."),
+    _GET_MEMBER_DATE_SCHEDULES(HttpStatus.OK, "200", "개인(비로그인) 날짜 스케줄 조회에 성공했습니다."),
     _GET_USER_DATE_SCHEDULES(HttpStatus.OK, "200", "개인(로그인) 날짜 스케줄 조회에 성공했습니다."),
     _GET_FILTERED_DAY_SCHEDULES(HttpStatus.OK, "200", "멤버 필터링 요일 스케줄 조회에 성공했습니다."),
     _GET_FILTERED_DATE_SCHEDULES(HttpStatus.OK, "200", "멤버 필터링 날짜 스케줄 조회에 성공했습니다."),
