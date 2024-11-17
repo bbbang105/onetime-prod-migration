@@ -39,8 +39,8 @@ public class SecurityConfig {
             "https://www.1-ti.me",
             "https://noonsachin.com",
             "https://www.noonsachin.com",
-            "https://onetime-test.store.com",
-            "https://www.onetime-test.store.com",
+            "https://onetime-test.store",
+            "https://www.onetime-test.store",
     };
 
     @Bean
