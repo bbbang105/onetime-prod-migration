@@ -229,17 +229,22 @@ public class EventService {
         List<GetMostPossibleTime> mostPossibleTimes = new ArrayList<>();
         GetMostPossibleTime previousTime = null;
 
+        boolean stopFlag = false;
         for (Map.Entry<Schedule, List<String>> entry : scheduleToNamesMap.entrySet()) {
             Schedule schedule = entry.getKey();
             List<String> curNames = entry.getValue();
 
             if (curNames.size() == mostPossibleCnt) {
-                // 이전 시간대와 병합 가능한 경우
                 if (canMergeWithPrevious(previousTime, schedule, curNames, category)) {
-                    // 종료 시간을 더해 업데이트
+                    // 이전 시간대와 병합 가능한 경우
                     previousTime = previousTime.updateEndTime(schedule.getTime());
-                    mostPossibleTimes.set(mostPossibleTimes.size() - 1, previousTime);
+                    mostPossibleTimes.set(mostPossibleTimes.size() - 1, previousTime); // 종료 시간을 더해 업데이트
                 } else {
+                    // 새로운 시간대를 추가하는 경우
+                    if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
+                        // 6개를 찾았을 시 종료
+                        stopFlag = true;
+                    }
                     List<String> impossibleNames = allMembersName.stream()
                             .filter(name -> !curNames.contains(name))
                             .toList();
@@ -250,8 +255,7 @@ public class EventService {
                     previousTime = newTime;
                 }
             }
-
-            if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
+            if (stopFlag) {
                 break;
             }
         }
