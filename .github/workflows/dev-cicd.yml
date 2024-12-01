@@ -1,4 +1,4 @@
-name: Onetime CI/CD with Gradle
+name: Onetime DEV CI/CD with Gradle
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: ⏱️gradle build 중입니다.
-        run: ./gradlew build -x test
+        run: ./gradlew clean build openapi3 asciidoctor
 
       - name: ⏱️Docker Hub에 로그인합니다.
         uses: docker/login-action@v2

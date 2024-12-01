@@ -21,24 +21,37 @@ import java.util.Collections;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
+
+    private static final String[] SWAGGER_URLS = {
+            "/swagger-ui/**", "/v3/api-docs/**"
+    };
+
+    private static final String[] ALLOWED_ORIGINS = {
+            "http://localhost:5173",
+            "https://onetime-test.vercel.app",
+            "https://www.onetime-test.vercel.app",
+            "https://onetime-with-members.com",
+            "https://www.onetime-with-members.com",
+            "https://1-ti.me",
+            "https://www.1-ti.me",
+            "https://noonsachin.com",
+            "https://www.noonsachin.com",
+            "https://onetime-test.store",
+            "https://www.onetime-test.store",
+    };
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(Arrays.asList(
-                "http://localhost:5173",
-                "https://onetime-test.vercel.app",
-                "https://www.onetime-test.vercel.app",
-                "https://onetime-with-members.com",
-                "https://www.onetime-with-members.com",
-                "https://1-ti.me",
-                "https://www.1-ti.me"
-        ));
+        config.setAllowedOrigins(Arrays.asList(ALLOWED_ORIGINS));
         config.setAllowedMethods(Collections.singletonList("*"));
         config.setAllowedHeaders(Collections.singletonList("*"));
         config.setAllowCredentials(true);
+        config.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
+        config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -51,14 +64,14 @@ public class SecurityConfig {
                 .httpBasic(HttpBasicConfigurer::disable)
                 .cors(corsConfigurer -> corsConfigurer.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize ->
-                        authorize
-                                .requestMatchers("/**").permitAll()
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(SWAGGER_URLS).permitAll()
+                        .requestMatchers("/**").permitAll() // 추후 변경 필요
+                        .anyRequest().authenticated()
                 )
-                .oauth2Login(oauth -> // OAuth2 로그인 기능에 대한 여러 설정의 진입점
-                        oauth
-                                .successHandler(oAuthLoginSuccessHandler) // 로그인 성공 시 핸들러
-                                .failureHandler(oAuthLoginFailureHandler) // 로그인 실패 시 핸들러
+                .oauth2Login(oauth -> oauth
+                        .successHandler(oAuthLoginSuccessHandler) // OAuth 로그인 성공 핸들러
+                        .failureHandler(oAuthLoginFailureHandler) // OAuth 로그인 실패 핸들러
                 );
 
         return httpSecurity.build();
