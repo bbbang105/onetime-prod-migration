@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.BatchSize;
 import side.onetime.domain.enums.Category;
 import side.onetime.global.common.dao.BaseEntity;
 
@@ -38,6 +37,9 @@ public class Event extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private Category category;
 
+    @Column(name = "qr_file_name")
+    private String qrFileName;
+
     @OneToMany(mappedBy = "event",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Member> members;
 
@@ -58,5 +60,9 @@ public class Event extends BaseEntity {
 
     public void updateTitle(String title) {
         this.title = title;
+    }
+
+    public void addQrFileName(String qrFileName) {
+        this.qrFileName = qrFileName;
     }
 }
