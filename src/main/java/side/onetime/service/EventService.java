@@ -3,6 +3,7 @@ package side.onetime.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.EventStatus;
@@ -19,6 +20,8 @@ import side.onetime.repository.ScheduleRepository;
 import side.onetime.repository.SelectionRepository;
 import side.onetime.util.DateUtil;
 import side.onetime.util.JwtUtil;
+import side.onetime.util.QrUtil;
+import side.onetime.util.S3Util;
 
 import java.time.LocalTime;
 import java.util.*;
@@ -34,11 +37,17 @@ public class EventService {
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
+    private final S3Util s3Util;
+    private final QrUtil qrUtil;
 
     // 이벤트 생성 메서드 (비로그인)
     @Transactional
     public CreateEventResponse createEventForAnonymousUser(CreateEventRequest createEventRequest) {
         Event event = createEventRequest.toEntity();
+
+        // QR 코드 생성 및 업로드
+        String qrFileName = generateAndUploadQrCode(event.getEventId());
+        event.addQrFileName(qrFileName);
         eventRepository.save(event);
 
         if (createEventRequest.category().equals(Category.DATE)) {
@@ -61,12 +70,17 @@ public class EventService {
     public CreateEventResponse createEventForAuthenticatedUser(CreateEventRequest createEventRequest, String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Event event = createEventRequest.toEntity();
+
+        // QR 코드 생성 및 업로드
+        String qrFileName = generateAndUploadQrCode(event.getEventId());
+        event.addQrFileName(qrFileName);
+        eventRepository.save(event);
+        // 이벤트 참여 여부 저장
         EventParticipation eventParticipation = EventParticipation.builder()
                 .user(user)
                 .event(event)
                 .eventStatus(EventStatus.CREATOR)
                 .build();
-        eventRepository.save(event);
         eventParticipationRepository.save(eventParticipation);
 
         if (createEventRequest.category().equals(Category.DATE)) {
@@ -82,6 +96,16 @@ public class EventService {
         }
 
         return CreateEventResponse.of(event);
+    }
+
+    // QR 코드 생성 및 S3 업로드
+    private String generateAndUploadQrCode(UUID eventId) {
+        try {
+            MultipartFile qrCodeFile = qrUtil.getQrCodeFile(eventId);
+            return s3Util.uploadImage(qrCodeFile);
+        } catch (Exception e) {
+            throw new RuntimeException("QR 코드 생성 또는 업로드 실패", e);
+        }
     }
 
     // 날짜 스케줄을 생성하고 저장하는 메서드
