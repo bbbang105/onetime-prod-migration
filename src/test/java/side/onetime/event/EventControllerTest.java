@@ -436,4 +436,50 @@ public class EventControllerTest extends ControllerTestConfig {
                         )
                 ));
     }
+
+    @Test
+    @DisplayName("이벤트 QR 코드를 조회한다.")
+    public void getEventQrCode() throws Exception {
+        // given
+        String eventId = UUID.randomUUID().toString();
+        String qrCodeImgUrl = "https://example.com/qr-code-image.png";
+        GetEventQrCodeResponse response = GetEventQrCodeResponse.from(qrCodeImgUrl);
+
+        Mockito.when(eventService.getEventQrCode(anyString())).thenReturn(response);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/events/qr/{event_id}", eventId)
+                .accept(MediaType.APPLICATION_JSON));
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("이벤트 QR 코드 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.qr_code_img_url").value(qrCodeImgUrl))
+
+                // docs
+                .andDo(MockMvcRestDocumentationWrapper.document("event/get-event-qr-code",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Event API")
+                                        .description("이벤트 QR 코드를 조회한다.")
+                                        .pathParameters(
+                                                parameterWithName("event_id").description("조회할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                                fieldWithPath("payload.qr_code_img_url").type(JsonFieldType.STRING).description("QR 코드 이미지 URL")
+                                        )
+                                        .responseSchema(Schema.schema("GetEventQrCodeResponseSchema"))
+                                        .build()
+                        )
+                ));
+    }
 }

@@ -361,4 +361,15 @@ public class EventService {
 
         return eventParticipation;
     }
+
+    // 이벤트 QR Code 조회 메서드
+    @Transactional(readOnly = true)
+    public GetEventQrCodeResponse getEventQrCode(String eventId) {
+        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+                .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
+
+        String qrCodeImgUrl = s3Util.getPublicUrl(event.getQrFileName());
+
+        return GetEventQrCodeResponse.from(qrCodeImgUrl);
+    }
 }

@@ -149,4 +149,20 @@ public class EventController {
         eventService.modifyUserCreatedEventTitle(authorizationHeader, eventId, modifyUserCreatedEventTitleRequest);
         return ApiResponse.onSuccess(SuccessStatus._MODIFY_USER_CREATED_EVENT_TITLE);
     }
+
+    /**
+     * 이벤트 QR Code 조회 API
+     *
+     * 이 API는 이벤트로 이동할 수 있는 QR Code 이미지를 반환합니다.
+     *
+     * @param eventId QR Code를 조회할 이벤트의 ID
+     * @return QR Code 이미지 URL
+     */
+    @GetMapping("/qr/{event_id}")
+    public ResponseEntity<ApiResponse<GetEventQrCodeResponse>> getEventQrCode(
+            @PathVariable("event_id") String eventId) {
+
+        GetEventQrCodeResponse response = eventService.getEventQrCode(eventId);
+        return ApiResponse.onSuccess(SuccessStatus._GET_EVENT_QR_CODE, response);
+    }
 }
