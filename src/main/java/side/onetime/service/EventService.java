@@ -8,7 +8,7 @@ import side.onetime.domain.*;
 import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.event.request.CreateEventRequest;
-import side.onetime.dto.event.request.ModifyUserCreatedEventTitleRequest;
+import side.onetime.dto.event.request.ModifyUserCreatedEventRequest;
 import side.onetime.dto.event.response.*;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.EventErrorStatus;
@@ -23,7 +23,6 @@ import side.onetime.util.JwtUtil;
 import side.onetime.util.QrUtil;
 import side.onetime.util.S3Util;
 
-import java.time.LocalTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -142,13 +141,13 @@ public class EventService {
      */
     @Transactional
     protected void createAndSaveDateSchedules(Event event, List<String> ranges, String startTime, String endTime) {
-        List<LocalTime> timeSets = DateUtil.createTimeSets(startTime, endTime);
+        List<String> timeSets = DateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = ranges.stream()
                 .flatMap(range -> timeSets.stream()
                         .map(time -> Schedule.builder()
                                 .event(event)
                                 .date(range)
-                                .time(String.valueOf(time))
+                                .time(time)
                                 .build()))
                 .collect(Collectors.toList());
         scheduleRepository.saveAll(schedules);
@@ -165,13 +164,13 @@ public class EventService {
      */
     @Transactional
     protected void createAndSaveDaySchedules(Event event, List<String> ranges, String startTime, String endTime) {
-        List<LocalTime> timeSets = DateUtil.createTimeSets(startTime, endTime);
+        List<String> timeSets = DateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = ranges.stream()
                 .flatMap(range -> timeSets.stream()
                         .map(time -> Schedule.builder()
                                 .event(event)
                                 .day(range)
-                                .time(String.valueOf(time))
+                                .time(time)
                                 .build()))
                 .collect(Collectors.toList());
         scheduleRepository.saveAll(schedules);
@@ -451,17 +450,145 @@ public class EventService {
     }
 
     /**
-     * 유저가 생성한 이벤트 제목 수정 메서드.
-     * 인증된 유저가 생성한 특정 이벤트의 제목을 수정합니다.
+     * 유저가 생성한 이벤트 수정 메서드.
+     * 인증된 유저가 생성한 특정 이벤트를 수정합니다.
      *
      * @param authorizationHeader 인증된 유저의 토큰
      * @param eventId 수정할 이벤트의 ID
-     * @param modifyUserCreatedEventTitleRequest 새로운 제목 데이터
+     * @param modifyUserCreatedEventRequest 새로운 이벤트 데이터
      */
     @Transactional
-    public void modifyUserCreatedEventTitle(String authorizationHeader, String eventId, ModifyUserCreatedEventTitleRequest modifyUserCreatedEventTitleRequest) {
+    public void modifyUserCreatedEvent(String authorizationHeader, String eventId, ModifyUserCreatedEventRequest modifyUserCreatedEventRequest) {
         EventParticipation eventParticipation = verifyUserIsEventCreator(authorizationHeader, eventId);
-        eventParticipation.getEvent().updateTitle(modifyUserCreatedEventTitleRequest.title());
+        Event event = eventParticipation.getEvent();
+
+        updateEventTitle(event, modifyUserCreatedEventRequest.title());
+        updateEventRanges(event, event.getSchedules(), modifyUserCreatedEventRequest.ranges(), modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
+        updateEventTimes(event, event.getSchedules(), modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
+    }
+
+    /**
+     * 이벤트 제목 업데이트 메서드.
+     * 이벤트의 제목을 새로운 제목으로 업데이트합니다.
+     *
+     * @param event 이벤트 객체
+     * @param newTitle 새로운 제목
+     */
+    protected void updateEventTitle(Event event, String newTitle) {
+        if (newTitle != null) {
+            event.updateTitle(newTitle);
+        }
+    }
+
+    /**
+     * 이벤트 범위 업데이트 메서드.
+     * 기존의 범위를 새로운 범위로 업데이트하며, 삭제 및 생성 대상 범위를 처리합니다.
+     *
+     * @param event 이벤트 객체
+     * @param schedules 기존 스케줄 목록
+     * @param newRanges 새로운 범위 리스트
+     * @param newStartTime 새로 설정할 시작 시간
+     * @param newEndTime 새로 설정할 종료 시간
+     */
+    protected void updateEventRanges(Event event, List<Schedule> schedules, List<String> newRanges, String newStartTime, String newEndTime) {
+        Set<String> existRanges = event.getCategory() == Category.DATE
+                ? schedules.stream().map(Schedule::getDate).filter(Objects::nonNull).collect(Collectors.toSet())
+                : schedules.stream().map(Schedule::getDay).filter(Objects::nonNull).collect(Collectors.toSet());
+
+        // 삭제 대상 처리
+        existRanges.stream()
+                .filter(range -> !newRanges.contains(range))
+                .forEach(range -> eventRepository.deleteSchedulesByRange(event, range));
+
+        // 생성 대상 처리
+        List<String> rangesToCreate = newRanges.stream()
+                .filter(range -> !existRanges.contains(range))
+                .collect(Collectors.toList());
+
+        if (!rangesToCreate.isEmpty()) {
+            if (event.getCategory() == Category.DATE) {
+                createAndSaveDateSchedules(event, rangesToCreate, newStartTime, newEndTime);
+            } else if (event.getCategory() == Category.DAY) {
+                createAndSaveDaySchedules(event, rangesToCreate, newStartTime, newEndTime);
+            }
+        }
+    }
+
+    /**
+     * 이벤트 시간 업데이트 메서드.
+     * 기존의 시간대를 새로운 시간대로 업데이트하며, 삭제 및 생성 대상 시간대를 처리합니다.
+     *
+     * @param event 이벤트 객체
+     * @param schedules 기존 스케줄 목록
+     * @param newStartTime 새로 설정할 시작 시간
+     * @param newEndTime 새로 설정할 종료 시간
+     */
+    protected void updateEventTimes(Event event, List<Schedule> schedules, String newStartTime, String newEndTime) {
+        if (!event.getStartTime().equals(newStartTime) || !event.getEndTime().equals(newEndTime)) {
+            List<String> newTimeSets = DateUtil.createTimeSets(newStartTime, newEndTime);
+
+            Set<String> existTimes = schedules.stream()
+                    .map(Schedule::getTime)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+
+            // 삭제 대상 시간 처리
+            existTimes.stream()
+                    .filter(time -> !newTimeSets.contains(time))
+                    .forEach(time -> eventRepository.deleteSchedulesByTime(event, time));
+
+            // 생성 대상 시간 처리
+            List<String> timesToCreate = newTimeSets.stream()
+                    .filter(newTime -> !existTimes.contains(newTime))
+                    .toList();
+
+            if (!timesToCreate.isEmpty()) {
+                if (event.getCategory() == Category.DATE) {
+                    createSchedulesForTime(event, extractExistingRanges(schedules, event.getCategory()), timesToCreate, true);
+                } else if (event.getCategory() == Category.DAY) {
+                    createSchedulesForTime(event, extractExistingRanges(schedules, event.getCategory()), timesToCreate, false);
+                }
+            }
+
+            event.updateStartTime(newStartTime);
+            event.updateEndTime(newEndTime);
+        }
+    }
+
+    /**
+     * 기존 범위 추출 메서드.
+     * 스케줄 목록에서 현재 존재하는 날짜 또는 요일 범위를 추출합니다.
+     *
+     * @param schedules 스케줄 목록
+     * @param category 이벤트의 카테고리 (날짜 또는 요일)
+     * @return 현재 존재하는 범위 집합
+     */
+    private Set<String> extractExistingRanges(List<Schedule> schedules, Category category) {
+        return category == Category.DATE
+                ? schedules.stream().map(Schedule::getDate).filter(Objects::nonNull).collect(Collectors.toSet())
+                : schedules.stream().map(Schedule::getDay).filter(Objects::nonNull).collect(Collectors.toSet());
+    }
+
+    /**
+     * 시간 기반 스케줄 생성 메서드.
+     * 시간대를 기반으로 새로운 스케줄을 생성하고 저장합니다.
+     *
+     * @param event 이벤트 객체
+     * @param ranges 범위 리스트 (날짜 또는 요일)
+     * @param timesToCreate 새로 생성할 시간 리스트
+     * @param isDateBased 날짜 기반 여부
+     */
+    private void createSchedulesForTime(Event event, Set<String> ranges, List<String> timesToCreate, boolean isDateBased) {
+        List<Schedule> newSchedules = ranges.stream()
+                .flatMap(range -> timesToCreate.stream()
+                        .map(time -> Schedule.builder()
+                                .event(event)
+                                .date(isDateBased ? range : null)
+                                .day(!isDateBased ? range : null)
+                                .time(time)
+                                .build()))
+                .collect(Collectors.toList());
+        scheduleRepository.saveAll(newSchedules);
     }
 
     /**
