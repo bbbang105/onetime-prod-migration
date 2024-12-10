@@ -15,6 +15,7 @@ import side.onetime.repository.FixedEventRepository;
 import side.onetime.util.DateUtil;
 import side.onetime.util.JwtUtil;
 
+import java.util.Comparator;
 import java.util.List;
 
 
@@ -80,10 +81,11 @@ public class FixedEventService {
      * 요일별 고정 이벤트 조회 메서드.
      *
      * 특정 요일에 해당하는 고정 이벤트 목록을 조회합니다.
+     * startTime을 기준으로 오름차순 정렬하여 반환합니다.
      *
      * @param authorizationHeader 인증 토큰
      * @param day 조회할 요일 (예: "mon", "tue" 등)
-     * @return 고정 이벤트 목록
+     * @return 고정 이벤트 목록 (startTime 기준 오름차순 정렬)
      */
     @Transactional(readOnly = true)
     public List<FixedEventByDayResponse> getFixedEventByDay(String authorizationHeader, String day) {
@@ -102,6 +104,7 @@ public class FixedEventService {
                             DateUtil.addThirtyMinutes(endTime)
                     );
                 })
+                .sorted(Comparator.comparing(FixedEventByDayResponse::startTime))
                 .toList();
     }
 
