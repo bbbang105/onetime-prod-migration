@@ -74,5 +74,4 @@ public class FixedEventRepositoryImpl implements FixedEventRepositoryCustom {
                         .and(fixedSchedule.day.eq(day)))
                 .fetch();
     }
-
 }
