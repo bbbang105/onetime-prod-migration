@@ -28,8 +28,8 @@ public class  DateUtil {
      * @param end 종료 시간 (HH:mm 형식)
      * @return 30분 간격의 시간 리스트
      */
-    public static List<LocalTime> createTimeSets(String start, String end) {
-        List<LocalTime> timeSets = new ArrayList<>();
+    public static List<String> createTimeSets(String start, String end) {
+        List<String> timeSets = new ArrayList<>();
 
         boolean isEndTimeMidnight = end.equals("24:00");
         if (isEndTimeMidnight) {
@@ -41,12 +41,12 @@ public class  DateUtil {
         LocalTime currentTime = startTime;
 
         while (!currentTime.isAfter(endTime.minusMinutes(30))) {
-            timeSets.add(currentTime);
+            timeSets.add(String.valueOf(currentTime));
             currentTime = currentTime.plusMinutes(30);
         }
 
         if (isEndTimeMidnight) {
-            timeSets.add(LocalTime.of(23, 30));
+            timeSets.add("23:30");
         }
 
         return timeSets;
