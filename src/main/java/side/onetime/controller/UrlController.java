@@ -22,7 +22,7 @@ public class UrlController {
     private final UrlService urlService;
 
     /**
-     * 원본 URL을 단축 URL로 변환하는 API
+     * 원본 URL을 단축 URL로 변환하는 API.
      *
      * 이 API는 제공된 원본 URL을 단축 URL로 변환합니다.
      * 주어진 URL에서 이벤트 ID를 추출하고, 해당 이벤트가 존재할 경우에만 단축 URL을 생성하여 반환합니다.
@@ -39,7 +39,7 @@ public class UrlController {
     }
 
     /**
-     * 단축 URL을 원본 URL로 복원하는 API
+     * 단축 URL을 원본 URL로 복원하는 API.
      *
      * 이 API는 단축된 URL을 원래의 URL로 복원합니다.
      * 복원된 URL에서 이벤트 ID를 추출하여, 해당 이벤트가 존재하는지 확인 후 원본 URL을 반환합니다.

@@ -15,6 +15,15 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
+    /**
+     * 이벤트 삭제 메서드.
+     *
+     * 이벤트에 연결된 모든 관련 데이터를 삭제합니다.
+     * 삭제 순서는 외래 키 제약 조건을 고려하여,
+     * Selection → EventParticipation → Schedule → Member → Event 순으로 진행됩니다.
+     *
+     * @param e 삭제할 Event 객체
+     */
     @Override
     public void deleteEvent(Event e) {
         queryFactory.delete(selection)

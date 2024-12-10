@@ -31,12 +31,21 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+
     private final EventRepository eventRepository;
     private final MemberRepository memberRepository;
     private final SelectionRepository selectionRepository;
     private final ScheduleRepository scheduleRepository;
 
-    // 멤버 등록 메서드
+    /**
+     * 멤버 등록 메서드.
+     *
+     * 주어진 요청 데이터를 기반으로 멤버를 등록합니다.
+     * 등록된 멤버의 요일 또는 날짜 선택 데이터를 생성하여 저장합니다.
+     *
+     * @param registerMemberRequest 멤버 등록 요청 데이터
+     * @return 멤버 등록 응답 데이터
+     */
     @Transactional
     public RegisterMemberResponse registerMember(RegisterMemberRequest registerMemberRequest) {
         UUID eventId = UUID.fromString(registerMemberRequest.eventId());
@@ -61,7 +70,16 @@ public class MemberService {
         return RegisterMemberResponse.of(member, event);
     }
 
-    // 멤버 요일 선택 목록을 만드는 메서드
+    /**
+     * 멤버 요일 선택 목록 생성 메서드.
+     *
+     * 멤버가 선택한 요일과 시간을 기반으로 Selection 데이터를 생성합니다.
+     *
+     * @param event 이벤트 객체
+     * @param member 멤버 객체
+     * @param registerMemberRequest 멤버 등록 요청 데이터
+     * @return 생성된 Selection 리스트
+     */
     private List<Selection> createMembersDaySelections(Event event, Member member, RegisterMemberRequest registerMemberRequest) {
         List<ScheduleResponse> schedules = registerMemberRequest.schedules();
         List<Selection> selections = new ArrayList<>();
@@ -83,7 +101,16 @@ public class MemberService {
         return selections;
     }
 
-    // 멤버 날짜 선택 목록을 만드는 메서드
+    /**
+     * 멤버 날짜 선택 목록 생성 메서드.
+     *
+     * 멤버가 선택한 날짜와 시간을 기반으로 Selection 데이터를 생성합니다.
+     *
+     * @param event 이벤트 객체
+     * @param member 멤버 객체
+     * @param registerMemberRequest 멤버 등록 요청 데이터
+     * @return 생성된 Selection 리스트
+     */
     private List<Selection> createMembersDateSelections(Event event, Member member, RegisterMemberRequest registerMemberRequest) {
         List<ScheduleResponse> schedules = registerMemberRequest.schedules();
         List<Selection> selections = new ArrayList<>();
@@ -105,7 +132,14 @@ public class MemberService {
         return selections;
     }
 
-    // 멤버 로그인 메서드
+    /**
+     * 멤버 로그인 메서드.
+     *
+     * 주어진 요청 데이터를 기반으로 멤버를 조회하여 로그인 처리합니다.
+     *
+     * @param loginMemberRequest 멤버 로그인 요청 데이터
+     * @return 멤버 로그인 응답 데이터
+     */
     @Transactional(readOnly = true)
     public LoginMemberResponse loginMember(LoginMemberRequest loginMemberRequest) {
         UUID eventId = UUID.fromString(loginMemberRequest.eventId());
@@ -118,7 +152,14 @@ public class MemberService {
         return LoginMemberResponse.of(member, event);
     }
 
-    // 멤버 이름 중복 체크 메서드
+    /**
+     * 멤버 이름 중복 체크 메서드.
+     *
+     * 주어진 이벤트와 이름을 기반으로 멤버 이름이 중복되는지 확인합니다.
+     *
+     * @param isDuplicateRequest 중복 체크 요청 데이터
+     * @return 중복 여부를 나타내는 응답 데이터
+     */
     @Transactional(readOnly = true)
     public IsDuplicateResponse isDuplicate(IsDuplicateRequest isDuplicateRequest) {
         UUID eventId = UUID.fromString(isDuplicateRequest.eventId());

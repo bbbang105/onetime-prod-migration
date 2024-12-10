@@ -10,4 +10,5 @@ import jakarta.validation.constraints.NotBlank;
 public record OnboardUserRequest(
         @NotBlank(message = "Register Token은 필수 값입니다.") String registerToken,
         @NotBlank(message = "Nickname은 필수 값입니다.") String nickname
-) {}
+) {
+}

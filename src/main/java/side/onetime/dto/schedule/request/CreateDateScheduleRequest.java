@@ -16,4 +16,5 @@ public record CreateDateScheduleRequest(
         @NotBlank(message = "Event ID는 필수 값입니다.") String eventId,
         String memberId,
         @JsonProperty("schedules") @NotNull(message = "스케줄 목록은 필수 값입니다.") List<DateSchedule> dateSchedules
-) {}
+) {
+}
