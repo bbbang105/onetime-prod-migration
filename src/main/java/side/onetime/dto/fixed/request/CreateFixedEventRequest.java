@@ -11,20 +11,16 @@ import side.onetime.dto.fixed.response.FixedScheduleResponse;
 
 import java.util.List;
 
-import static side.onetime.util.DateUtil.addThirtyMinutes;
-
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record CreateFixedEventRequest(
         @NotBlank(message = "제목은 필수 값입니다.") String title,
         @NotNull(message = "스케줄 목록은 필수 값입니다.") List<FixedScheduleResponse> schedules
 ) {
-    public FixedEvent toEntity(User user, String startTime, String endTime) {
+    public FixedEvent toEntity(User user) {
         return FixedEvent.builder()
                 .user(user)
                 .title(title)
-                .startTime(startTime)
-                .endTime(addThirtyMinutes(endTime))
                 .build();
     }
 }

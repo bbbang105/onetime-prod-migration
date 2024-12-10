@@ -10,15 +10,11 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record FixedEventResponse(
         Long id,
-        String startTime,
-        String endTime,
         List<FixedScheduleResponse> schedules
 ) {
-    public static FixedEventResponse of(Long id, String startTime, String endTime, List<FixedScheduleResponse> schedules) {
+    public static FixedEventResponse of(Long id, List<FixedScheduleResponse> schedules) {
         return new FixedEventResponse(
                 id,
-                startTime,
-                endTime,
                 schedules
         );
     }

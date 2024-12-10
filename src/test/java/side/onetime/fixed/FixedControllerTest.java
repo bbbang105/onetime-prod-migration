@@ -94,8 +94,8 @@ public class FixedControllerTest extends ControllerTestConfig {
     public void getAllFixedSchedules() throws Exception {
         // given
         List<FixedEventResponse> responses = List.of(
-                new FixedEventResponse(1L, "09:00", "10:00", List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30")))),
-                new FixedEventResponse(2L, "09:00", "10:00", List.of(new FixedScheduleResponse("화", List.of("09:00", "09:30"))))
+                new FixedEventResponse(1L, List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30")))),
+                new FixedEventResponse(2L, List.of(new FixedScheduleResponse("화", List.of("09:00", "09:30"))))
         );
         Mockito.when(fixedScheduleService.getAllFixedSchedules(authorizationHeader)).thenReturn(responses);
 
@@ -123,8 +123,6 @@ public class FixedControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("HTTP 상태 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload[].id").type(JsonFieldType.NUMBER).description("고정 스케줄 ID"),
-                                                fieldWithPath("payload[].start_time").type(JsonFieldType.STRING).description("시작 시간"),
-                                                fieldWithPath("payload[].end_time").type(JsonFieldType.STRING).description("종료 시간"),
                                                 fieldWithPath("payload[].schedules[].time_point").type(JsonFieldType.STRING).description("요일"),
                                                 fieldWithPath("payload[].schedules[].times[]").type(JsonFieldType.ARRAY).description("시간 목록")
                                         )
@@ -138,7 +136,7 @@ public class FixedControllerTest extends ControllerTestConfig {
     public void getFixedScheduleDetail() throws Exception {
         // given
         Long fixedEventId = 1L;
-        FixedEventDetailResponse response = new FixedEventDetailResponse("고정 이벤트", "09:00", "10:00", List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30"))));
+        FixedEventDetailResponse response = new FixedEventDetailResponse("고정 이벤트", List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30"))));
         Mockito.when(fixedScheduleService.getFixedScheduleDetail(authorizationHeader, fixedEventId)).thenReturn(response);
 
         // when
@@ -168,8 +166,6 @@ public class FixedControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("HTTP 상태 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload.title").type(JsonFieldType.STRING).description("고정 스케줄 제목"),
-                                                fieldWithPath("payload.start_time").type(JsonFieldType.STRING).description("시작 시간"),
-                                                fieldWithPath("payload.end_time").type(JsonFieldType.STRING).description("종료 시간"),
                                                 fieldWithPath("payload.schedules[].time_point").type(JsonFieldType.STRING).description("요일"),
                                                 fieldWithPath("payload.schedules[].times[]").type(JsonFieldType.ARRAY).description("시간 목록")
                                         )
