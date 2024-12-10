@@ -1,9 +1,9 @@
 package side.onetime.dto.schedule.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import side.onetime.domain.Selection;
 
 import java.util.ArrayList;

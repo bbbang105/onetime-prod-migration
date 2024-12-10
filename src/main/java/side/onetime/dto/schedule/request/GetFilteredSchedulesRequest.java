@@ -13,4 +13,5 @@ import java.util.List;
 public record GetFilteredSchedulesRequest(
         @NotBlank(message = "Event ID는 필수 값입니다.") String eventId,
         @NotNull(message = "이름 목록은 필수 값입니다.") List<String> names
-) {}
+) {
+}

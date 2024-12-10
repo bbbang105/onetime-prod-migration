@@ -32,7 +32,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
-    // 유저 온보딩 메서드
+    /**
+     * 유저 온보딩 메서드.
+     *
+     * 회원가입 및 초기 설정을 진행합니다. 제공된 레지스터 토큰을 이용하여 유저 정보를 검증하고 저장합니다.
+     * 저장된 유저 정보를 기반으로 새로운 액세스 토큰과 리프레쉬 토큰을 생성하고 반환합니다.
+     *
+     * @param onboardUserRequest 온보딩 요청 데이터
+     * @return 액세스 토큰 및 리프레쉬 토큰 응답 데이터
+     */
     @Transactional
     public OnboardUserResponse onboardUser(OnboardUserRequest onboardUserRequest) {
         // 레지스터 토큰을 이용하여 사용자 정보 추출
@@ -69,7 +77,14 @@ public class UserService {
         return OnboardUserResponse.of(accessToken, refreshToken);
     }
 
-    // 유저 정보 조회 메서드
+    /**
+     * 유저 정보 조회 메서드.
+     *
+     * 인증된 유저의 프로필 정보를 반환합니다.
+     *
+     * @param authorizationHeader 인증 토큰
+     * @return 유저 프로필 응답 데이터
+     */
     @Transactional(readOnly = true)
     public GetUserProfileResponse getUserProfile(String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
@@ -77,7 +92,15 @@ public class UserService {
         return GetUserProfileResponse.of(user);
     }
 
-    // 유저 정보 수정 메서드
+    /**
+     * 유저 정보 수정 메서드.
+     *
+     * 인증된 유저의 닉네임을 수정합니다.
+     * 수정된 닉네임은 길이 제한을 검증하며 저장됩니다.
+     *
+     * @param authorizationHeader 인증 토큰
+     * @param updateUserProfileRequest 유저 정보 수정 요청 데이터
+     */
     @Transactional
     public void updateUserProfile(String authorizationHeader, UpdateUserProfileRequest updateUserProfileRequest) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
@@ -90,7 +113,13 @@ public class UserService {
         userRepository.save(user);
     }
 
-    // 유저 서비스 탈퇴 메서드
+    /**
+     * 유저 서비스 탈퇴 메서드.
+     *
+     * 인증된 유저의 계정을 삭제합니다.
+     *
+     * @param authorizationHeader 인증 토큰
+     */
     @Transactional
     public void withdrawService(String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);

@@ -24,7 +24,7 @@ public class MemberController {
     private final MemberService memberService;
 
     /**
-     * 멤버 등록 API
+     * 멤버 등록 API.
      *
      * 이 API는 새로운 멤버를 등록합니다. 멤버가 속한 이벤트 ID와 이름, PIN, 스케줄 목록을 받습니다.
      *
@@ -40,7 +40,7 @@ public class MemberController {
     }
 
     /**
-     * 멤버 로그인 API
+     * 멤버 로그인 API.
      *
      * 이 API는 멤버의 로그인 정보를 확인하고, 로그인에 성공한 경우 멤버의 정보를 반환합니다.
      *
@@ -56,7 +56,7 @@ public class MemberController {
     }
 
     /**
-     * 이름 중복 확인 API
+     * 이름 중복 확인 API.
      *
      * 이 API는 특정 이벤트에서 지정한 이름이 중복되는지 확인합니다.
      *

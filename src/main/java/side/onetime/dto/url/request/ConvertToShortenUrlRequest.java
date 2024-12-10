@@ -9,4 +9,5 @@ import jakarta.validation.constraints.NotBlank;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ConvertToShortenUrlRequest(
         @NotBlank(message = "Original URL은 필수 값입니다.") String originalUrl
-) {}
+) {
+}

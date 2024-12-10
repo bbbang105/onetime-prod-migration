@@ -19,7 +19,7 @@ public class UserController {
     private final UserService userService;
 
     /**
-     * 유저 온보딩 API
+     * 유저 온보딩 API.
      *
      * 회원가입 이후, 유저의 닉네임을 설정하고 온보딩을 완료하는 API입니다.
      * 주어진 레지스터 토큰을 통해 사용자 정보를 확인한 후, 액세스 토큰과 리프레쉬 토큰을 발급하여 반환합니다.
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     /**
-     * 유저 정보 조회 API
+     * 유저 정보 조회 API.
      *
      * 로그인한 유저의 닉네임과 이메일 정보를 조회합니다.
      *
@@ -52,7 +52,7 @@ public class UserController {
     }
 
     /**
-     * 유저 정보 수정 API
+     * 유저 정보 수정 API.
      *
      * 유저의 닉네임을 수정하는 API입니다. 수정된 닉네임은 최대 길이 제한을 받습니다.
      *
@@ -70,7 +70,7 @@ public class UserController {
     }
 
     /**
-     * 유저 서비스 탈퇴 API
+     * 유저 서비스 탈퇴 API.
      *
      * 유저의 계정을 삭제하여 서비스에서 탈퇴하는 API입니다.
      *

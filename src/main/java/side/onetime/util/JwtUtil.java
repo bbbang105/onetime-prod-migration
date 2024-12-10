@@ -25,12 +25,23 @@ public class JwtUtil {
     private String SECRET_KEY;
     private final UserRepository userRepository;
 
+    /**
+     * JWT 서명 키를 생성 및 반환.
+     *
+     * @return SecretKey 객체
+     */
     private SecretKey getSigningKey() {
         byte[] keyBytes = Decoders.BASE64.decode(this.SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // 액세스 토큰을 발급하는 메서드
+    /**
+     * 액세스 토큰 생성 메서드.
+     *
+     * @param userId 유저 ID
+     * @param expirationMillis 만료 시간(밀리초)
+     * @return 생성된 액세스 토큰
+     */
     public String generateAccessToken(Long userId, long expirationMillis) {
         log.info("액세스 토큰이 발행되었습니다.");
 
@@ -42,7 +53,16 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 레지스터 토큰을 발급하는 메서드
+    /**
+     * 레지스터 토큰 생성 메서드.
+     *
+     * @param provider 제공자
+     * @param providerId 제공자 ID
+     * @param name 사용자 이름
+     * @param email 사용자 이메일
+     * @param expirationMillis 만료 시간(밀리초)
+     * @return 생성된 레지스터 토큰
+     */
     public String generateRegisterToken(String provider, String providerId, String name, String email, long expirationMillis) {
         log.info("레지스터 토큰이 발행되었습니다.");
 
@@ -57,7 +77,13 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 리프레쉬 토큰을 발급하는 메서드
+    /**
+     * 리프레시 토큰 생성 메서드.
+     *
+     * @param userId 유저 ID
+     * @param expirationMillis 만료 시간(밀리초)
+     * @return 생성된 리프레시 토큰
+     */
     public String generateRefreshToken(Long userId, long expirationMillis) {
         log.info("리프레쉬 토큰이 발행되었습니다.");
 
@@ -69,12 +95,22 @@ public class JwtUtil {
                 .compact();
     }
 
-    // 응답 헤더에서 액세스 토큰을 반환하는 메서드
+    /**
+     * Authorization 헤더에서 Bearer 토큰 추출.
+     *
+     * @param authorizationHeader Authorization 헤더
+     * @return 토큰 문자열
+     */
     public String getTokenFromHeader(String authorizationHeader) {
         return authorizationHeader.substring(7);
     }
 
-    // 토큰에서 유저 id를 반환하는 메서드
+    /**
+     * 토큰에서 유저 ID 추출.
+     *
+     * @param token JWT 토큰
+     * @return 유저 ID
+     */
     public Long getUserIdFromToken(String token) {
         try {
             validateTokenExpiration(token);
@@ -93,7 +129,12 @@ public class JwtUtil {
         }
     }
 
-    // 헤더에서 유저를 반환하는 메서드
+    /**
+     * 헤더에서 유저 객체 반환.
+     *
+     * @param authorizationHeader Authorization 헤더
+     * @return 유저 객체
+     */
     public User getUserFromHeader(String authorizationHeader) {
         String token = getTokenFromHeader(authorizationHeader);
         validateTokenExpiration(token);
@@ -102,7 +143,12 @@ public class JwtUtil {
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
     }
 
-    // 토큰에서 provider를 반환하는 메서드
+    /**
+     * 토큰에서 provider 추출.
+     *
+     * @param token JWT 토큰
+     * @return 제공자 문자열
+     */
     public String getProviderFromToken(String token) {
         try {
             validateTokenExpiration(token);
@@ -121,7 +167,12 @@ public class JwtUtil {
         }
     }
 
-    // 토큰에서 providerId를 반환하는 메서드
+    /**
+     * 토큰에서 providerId 추출.
+     *
+     * @param token JWT 토큰
+     * @return 제공자 ID 문자열
+     */
     public String getProviderIdFromToken(String token) {
         try {
             validateTokenExpiration(token);
@@ -140,7 +191,12 @@ public class JwtUtil {
         }
     }
 
-    // 토큰에서 이름을 반환하는 메서드
+    /**
+     * 토큰에서 이름 추출.
+     *
+     * @param token JWT 토큰
+     * @return 사용자 이름
+     */
     public String getNameFromToken(String token) {
         try {
             validateTokenExpiration(token);
@@ -159,7 +215,12 @@ public class JwtUtil {
         }
     }
 
-    // 토큰에서 이메일을 반환하는 메서드
+    /**
+     * 토큰에서 이메일 추출.
+     *
+     * @param token JWT 토큰
+     * @return 사용자 이메일
+     */
     public String getEmailFromToken(String token) {
         try {
             validateTokenExpiration(token);
@@ -178,7 +239,11 @@ public class JwtUtil {
         }
     }
 
-    // Jwt 토큰의 유효기간을 확인하는 메서드
+    /**
+     * JWT 토큰 만료 기간 확인.
+     *
+     * @param token JWT 토큰
+     */
     public void validateTokenExpiration(String token) {
         try {
             log.info("토큰의 유효기간을 확인합니다.");

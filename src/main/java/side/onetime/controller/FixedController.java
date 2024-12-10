@@ -24,7 +24,7 @@ public class FixedController {
     private final FixedScheduleService fixedScheduleService;
 
     /**
-     * 고정 이벤트 생성 및 고정 스케줄 등록 API
+     * 고정 이벤트 생성 및 고정 스케줄 등록 API.
      *
      * 이 API는 새로운 고정 이벤트를 생성하고 관련된 고정 스케줄을 등록합니다.
      *
@@ -42,7 +42,7 @@ public class FixedController {
     }
 
     /**
-     * 전체 고정 스케줄 조회 API
+     * 전체 고정 스케줄 조회 API.
      *
      * 이 API는 유저가 등록한 모든 고정 스케줄을 조회합니다.
      *
@@ -58,7 +58,7 @@ public class FixedController {
     }
 
     /**
-     * 특정 고정 스케줄 상세 조회 API
+     * 특정 고정 스케줄 상세 조회 API.
      *
      * 이 API는 특정 ID에 해당하는 고정 스케줄의 상세 정보를 조회합니다.
      *
@@ -76,7 +76,7 @@ public class FixedController {
     }
 
     /**
-     * 고정 이벤트 또는 스케줄 수정 API
+     * 고정 이벤트 또는 스케줄 수정 API.
      *
      * 이 API는 특정 고정 이벤트의 제목과 스케줄을 수정할 수 있습니다.
      *
@@ -102,7 +102,7 @@ public class FixedController {
     }
 
     /**
-     * 고정 이벤트 & 스케줄 삭제 API
+     * 고정 이벤트 & 스케줄 삭제 API.
      *
      * 이 API는 특정 ID에 해당하는 고정 이벤트와 관련된 스케줄을 삭제합니다.
      *
@@ -120,7 +120,7 @@ public class FixedController {
     }
 
     /**
-     * 요일별 고정 이벤트 조회 API
+     * 요일별 고정 이벤트 조회 API.
      *
      * 이 API는 특정 요일에 해당하는 고정 이벤트 목록을 조회합니다.
      *

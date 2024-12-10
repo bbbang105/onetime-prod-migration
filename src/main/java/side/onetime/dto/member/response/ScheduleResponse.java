@@ -11,4 +11,5 @@ import java.util.List;
 public record ScheduleResponse(
         String timePoint,
         List<String> times
-) {}
+) {
+}

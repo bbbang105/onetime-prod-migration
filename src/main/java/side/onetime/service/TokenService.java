@@ -20,15 +20,23 @@ import java.util.List;
 public class TokenService {
 
     @Value("${jwt.access-token.expiration-time}")
-    private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
+    private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간.
 
     @Value("${jwt.refresh-token.expiration-time}")
-    private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간
+    private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간.
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
-    // 액세스 & 리프레쉬 토큰 재발행 메서드
+    /**
+     * 액세스 및 리프레쉬 토큰 재발행 메서드.
+     *
+     * 주어진 리프레쉬 토큰을 검증하고, 새로운 액세스 토큰과 리프레쉬 토큰을 생성 및 반환합니다.
+     * 새로운 리프레쉬 토큰은 저장소에 저장되며, 기존 리프레쉬 토큰은 삭제됩니다.
+     *
+     * @param reissueTokenRequest 토큰 재발행 요청 데이터
+     * @return 새로운 액세스 토큰 및 리프레쉬 토큰을 포함한 응답 데이터
+     */
     public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
         String refreshToken = reissueTokenRequest.refreshToken();
 
@@ -37,14 +45,14 @@ public class TokenService {
                 .orElseThrow(() -> new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN));
 
         if (!existRefreshTokens.contains(refreshToken)) {
-            // RefreshToken이 존재하지 않으면 예외 발생
+            // RefreshToken이 존재하지 않으면 예외 발생.
             throw new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN);
         }
 
-        // 새로운 AccessToken 생성
+        // 새로운 AccessToken 생성.
         String newAccessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
 
-        // 새로운 RefreshToken 생성 및 저장
+        // 새로운 RefreshToken 생성 및 저장.
         String newRefreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
         refreshTokenRepository.save(new RefreshToken(userId, newRefreshToken));
 
