@@ -52,9 +52,9 @@ jobs:
       - name: ⏱️Docker hub에서 pull 후 deploy합니다.
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.GCP_TEST_SERVER_HOST }}
-          username: ${{ secrets.GCP_TEST_SERVER_USERNAME }}
-          key: ${{ secrets.GCP_SSH_KEY }}
+          host: ${{ secrets.EC2_TEST_SERVER_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_KEY }}
           script: |
             sudo chmod 777 ./deploy.sh
             ./deploy.sh
