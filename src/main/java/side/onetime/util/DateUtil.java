@@ -18,9 +18,18 @@ import java.util.stream.IntStream;
 @RequiredArgsConstructor
 public class  DateUtil {
 
-    // 30분 단위 타임 셋을 만드는 메서드
-    public static List<LocalTime> createTimeSets(String start, String end) {
-        List<LocalTime> timeSets = new ArrayList<>();
+    /**
+     * 30분 단위 타임 셋 생성 메서드.
+     *
+     * 주어진 시작 시간과 종료 시간 사이의 모든 30분 간격의 시간을 리스트로 반환합니다.
+     * 종료 시간이 "24:00"인 경우 처리하여 23:30까지 포함합니다.
+     *
+     * @param start 시작 시간 (HH:mm 형식)
+     * @param end 종료 시간 (HH:mm 형식)
+     * @return 30분 간격의 시간 리스트
+     */
+    public static List<String> createTimeSets(String start, String end) {
+        List<String> timeSets = new ArrayList<>();
 
         boolean isEndTimeMidnight = end.equals("24:00");
         if (isEndTimeMidnight) {
@@ -32,18 +41,27 @@ public class  DateUtil {
         LocalTime currentTime = startTime;
 
         while (!currentTime.isAfter(endTime.minusMinutes(30))) {
-            timeSets.add(currentTime);
+            timeSets.add(String.valueOf(currentTime));
             currentTime = currentTime.plusMinutes(30);
         }
 
         if (isEndTimeMidnight) {
-            timeSets.add(LocalTime.of(23, 30));
+            timeSets.add("23:30");
         }
 
         return timeSets;
     }
 
-    // 날짜를 정렬된 문자열 리스트로 변환하는 메서드
+    /**
+     * 날짜 리스트 정렬 메서드.
+     *
+     * 주어진 날짜 문자열 리스트를 지정된 패턴에 따라 파싱 후 정렬하여 반환합니다.
+     * 중복된 날짜는 제거합니다.
+     *
+     * @param dateStrings 날짜 문자열 리스트
+     * @param pattern 날짜 형식 패턴 (예: yyyy.MM.dd)
+     * @return 정렬된 날짜 문자열 리스트
+     */
     public static List<String> getSortedDateRanges(List<String> dateStrings, String pattern) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
@@ -63,7 +81,15 @@ public class  DateUtil {
                 .toList();
     }
 
-    // 요일을 정렬된 문자열 리스트로 변환하는 메서드
+    /**
+     * 요일 리스트 정렬 메서드.
+     *
+     * 주어진 요일 문자열 리스트를 일요일부터 토요일까지의 순서대로 정렬하여 반환합니다.
+     * 중복된 요일은 제거합니다.
+     *
+     * @param dayStrings 요일 문자열 리스트
+     * @return 정렬된 요일 문자열 리스트
+     */
     public static List<String> getSortedDayRanges(List<String> dayStrings) {
         List<String> dayOrder = Arrays.asList("일", "월", "화", "수", "목", "금", "토");
         Map<String, Integer> dayOrderMap = IntStream.range(0, dayOrder.size())
@@ -77,7 +103,16 @@ public class  DateUtil {
                 .toList();
     }
 
-    // 최적 시간대 리스트를 날짜 또는 요일별로 정렬
+    /**
+     * 최적 시간대 정렬 메서드.
+     *
+     * 주어진 최적 시간대 리스트를 날짜 또는 요일 기준으로 정렬하여 반환합니다.
+     * 카테고리에 따라 날짜 또는 요일로 정렬 방식을 구분합니다.
+     *
+     * @param mostPossibleTimes 정렬할 최적 시간대 리스트
+     * @param category 정렬 기준 카테고리 (DAY 또는 DATE)
+     * @return 정렬된 최적 시간대 리스트
+     */
     public static List<GetMostPossibleTime> sortMostPossibleTimes(List<GetMostPossibleTime> mostPossibleTimes, Category category) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
@@ -119,7 +154,15 @@ public class  DateUtil {
                 .toList();
     }
 
-    // yyyy.MM.dd 형태로 변환하는 메서드
+    /**
+     * yyyy.MM.dd 형식으로 날짜 변환 메서드.
+     *
+     * 주어진 LocalDateTime 객체를 yyyy.MM.dd 형식의 문자열로 변환합니다.
+     * 변환 실패 시 원래 문자열을 반환합니다.
+     *
+     * @param dateTime 변환할 LocalDateTime 객체
+     * @return 변환된 날짜 문자열
+     */
     public static String formatDateToYearMonthDay(LocalDateTime dateTime) {
         String dateTimeString = String.valueOf(dateTime);
         DateTimeFormatter originalFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -133,7 +176,15 @@ public class  DateUtil {
         }
     }
 
-    // 30분 추가 메서드
+    /**
+     * 30분 추가 메서드.
+     *
+     * 주어진 시간에 30분을 추가한 결과를 반환합니다.
+     * 시간이 "00:00"이 될 경우 "24:00"으로 변환하여 반환합니다.
+     *
+     * @param time 추가할 시간 (HH:mm 형식)
+     * @return 30분이 추가된 시간 문자열
+     */
     public static String addThirtyMinutes(String time) {
         LocalTime parsedTime = LocalTime.parse(time);
         LocalTime updatedTime = parsedTime.plusMinutes(30);

@@ -9,4 +9,5 @@ import jakarta.validation.constraints.NotBlank;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UpdateUserProfileRequest(
         @NotBlank(message = "Nickname은 필수 값입니다.") String nickname
-) {}
+) {
+}

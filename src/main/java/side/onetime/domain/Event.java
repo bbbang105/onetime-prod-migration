@@ -62,6 +62,14 @@ public class Event extends BaseEntity {
         this.title = title;
     }
 
+    public void updateStartTime(String startTime) {
+        this.startTime = startTime;
+    }
+
+    public void updateEndTime(String endTime) {
+        this.endTime = endTime;
+    }
+
     public void addQrFileName(String qrFileName) {
         this.qrFileName = qrFileName;
     }

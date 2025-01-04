@@ -22,7 +22,7 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
 
     /**
-     * 요일 스케줄 등록 API
+     * 요일 스케줄 등록 API.
      *
      * 요일별 반복되는 스케줄을 등록하는 API입니다.
      * 인증된 사용자와 비인증 사용자에 따라 스케줄 생성 방식이 다릅니다.
@@ -45,7 +45,7 @@ public class ScheduleController {
     }
 
     /**
-     * 날짜 스케줄 등록 API
+     * 날짜 스케줄 등록 API.
      *
      * 특정 날짜에 대한 스케줄을 등록하는 API입니다.
      * 인증된 사용자와 비인증 사용자에 따라 스케줄 생성 방식이 다릅니다.
@@ -68,7 +68,7 @@ public class ScheduleController {
     }
 
     /**
-     * 전체 요일 스케줄 조회 API
+     * 전체 요일 스케줄 조회 API.
      *
      * 특정 이벤트에 등록된 모든 요일 스케줄을 조회합니다.
      *
@@ -84,7 +84,7 @@ public class ScheduleController {
     }
 
     /**
-     * 개인 요일 스케줄 조회 API (비로그인)
+     * 개인 요일 스케줄 조회 API (비로그인).
      *
      * 비로그인 사용자의 특정 이벤트에 대한 개인 요일 스케줄을 조회합니다.
      *
@@ -102,7 +102,7 @@ public class ScheduleController {
     }
 
     /**
-     * 개인 요일 스케줄 조회 API (로그인)
+     * 개인 요일 스케줄 조회 API (로그인).
      *
      * 인증된 사용자의 특정 이벤트에 대한 개인 요일 스케줄을 조회합니다.
      *
@@ -120,7 +120,7 @@ public class ScheduleController {
     }
 
     /**
-     * 멤버 필터링 요일 스케줄 조회 API
+     * 멤버 필터링 요일 스케줄 조회 API.
      *
      * 멤버 이름을 필터링하여 특정 이벤트의 요일 스케줄을 조회합니다.
      *
@@ -136,7 +136,7 @@ public class ScheduleController {
     }
 
     /**
-     * 전체 날짜 스케줄 조회 API
+     * 전체 날짜 스케줄 조회 API.
      *
      * 특정 이벤트에 등록된 모든 날짜 스케줄을 조회합니다.
      *
@@ -152,7 +152,7 @@ public class ScheduleController {
     }
 
     /**
-     * 개인 날짜 스케줄 조회 API (비로그인)
+     * 개인 날짜 스케줄 조회 API (비로그인).
      *
      * 비로그인 사용자의 특정 이벤트에 대한 개인 날짜 스케줄을 조회합니다.
      *
@@ -170,7 +170,7 @@ public class ScheduleController {
     }
 
     /**
-     * 개인 날짜 스케줄 조회 API (로그인)
+     * 개인 날짜 스케줄 조회 API (로그인).
      *
      * 인증된 사용자의 특정 이벤트에 대한 개인 날짜 스케줄을 조회합니다.
      *
@@ -188,7 +188,7 @@ public class ScheduleController {
     }
 
     /**
-     * 멤버 필터링 날짜 스케줄 조회 API
+     * 멤버 필터링 날짜 스케줄 조회 API.
      *
      * 멤버 이름을 필터링하여 특정 이벤트의 날짜 스케줄을 조회합니다.
      *

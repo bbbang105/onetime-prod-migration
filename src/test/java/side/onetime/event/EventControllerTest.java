@@ -19,7 +19,7 @@ import side.onetime.controller.EventController;
 import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.event.request.CreateEventRequest;
-import side.onetime.dto.event.request.ModifyUserCreatedEventTitleRequest;
+import side.onetime.dto.event.request.ModifyUserCreatedEventRequest;
 import side.onetime.dto.event.response.*;
 import side.onetime.service.EventService;
 import side.onetime.util.JwtUtil;
@@ -388,18 +388,24 @@ public class EventControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("유저가 생성한 이벤트 제목을 수정한다.")
+    @DisplayName("유저가 생성한 이벤트를 수정한다.")
     public void modifyUserCreatedEventTitle() throws Exception {
         // given
         String eventId = UUID.randomUUID().toString();
-        ModifyUserCreatedEventTitleRequest request = new ModifyUserCreatedEventTitleRequest("수정할 이벤트 제목");
+        ModifyUserCreatedEventRequest request = new ModifyUserCreatedEventRequest(
+                "수정된 이벤트 제목",
+                "09:00",
+                "18:00",
+                List.of("2024.12.10", "2024.12.11")
+        );
 
         String requestContent = new ObjectMapper().writeValueAsString(request);
 
-        Mockito.doNothing().when(eventService).modifyUserCreatedEventTitle(anyString(), anyString(), any(ModifyUserCreatedEventTitleRequest.class));
+        Mockito.doNothing().when(eventService)
+                .modifyUserCreatedEvent(anyString(), anyString(), any(ModifyUserCreatedEventRequest.class));
 
         // when
-        ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.put("/api/v1/events/{event_id}", eventId)
+        ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/events/{event_id}", eventId)
                 .header(HttpHeaders.AUTHORIZATION, "Bearer sampleToken")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(requestContent)
@@ -410,7 +416,7 @@ public class EventControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("유저가 생성한 이벤트 제목 수정에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("유저가 생성한 이벤트 수정에 성공했습니다."))
 
                 // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("event/modify-user-created-event-title",
@@ -419,12 +425,15 @@ public class EventControllerTest extends ControllerTestConfig {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Event API")
-                                        .description("유저가 생성한 이벤트 제목을 수정한다.")
+                                        .description("유저가 생성한 이벤트를 수정한다.")
                                         .pathParameters(
                                                 parameterWithName("event_id").description("수정할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]")
                                         )
                                         .requestFields(
-                                                fieldWithPath("title").type(JsonFieldType.STRING).description("새로운 이벤트 제목")
+                                                fieldWithPath("title").type(JsonFieldType.STRING).description("새로운 이벤트 제목"),
+                                                fieldWithPath("start_time").type(JsonFieldType.STRING).description("시작 시간 (HH:mm)"),
+                                                fieldWithPath("end_time").type(JsonFieldType.STRING).description("종료 시간 (HH:mm)"),
+                                                fieldWithPath("ranges").type(JsonFieldType.ARRAY).description("수정할 설문 범위 [예: 날짜 리스트]")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),

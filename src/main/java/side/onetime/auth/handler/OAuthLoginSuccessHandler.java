@@ -48,6 +48,17 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
 
+    /**
+     * OAuth2 인증 성공 처리 메서드.
+     *
+     * 인증 성공 시 OAuth2AuthenticationToken을 기반으로 제공자 정보를 추출하고,
+     * 인증 결과를 처리합니다.
+     *
+     * @param request  HttpServletRequest 객체
+     * @param response HttpServletResponse 객체
+     * @param authentication 인증 성공 정보를 담은 객체
+     * @throws IOException 인증 처리 중 발생할 수 있는 입출력 예외
+     */
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
@@ -57,7 +68,15 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         handleAuthentication(request, response, oAuth2UserInfo, provider);
     }
 
-    // OAuth2UserInfo 추출
+    /**
+     * OAuth2 사용자 정보 추출 메서드.
+     *
+     * 제공자(provider)에 따라 적합한 OAuth2UserInfo 객체를 생성합니다.
+     *
+     * @param token OAuth2AuthenticationToken 객체
+     * @param provider OAuth2 제공자 이름 (google, kakao, naver 등)
+     * @return OAuth2UserInfo 객체
+     */
     private OAuth2UserInfo extractOAuth2UserInfo(OAuth2AuthenticationToken token, String provider) {
         switch (provider) {
             case "google":
@@ -74,7 +93,17 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         }
     }
 
-    // 인증 처리
+    /**
+     * 인증 성공 처리 메서드.
+     *
+     * 인증된 사용자의 정보를 바탕으로 신규 또는 기존 사용자를 처리합니다.
+     *
+     * @param request  HttpServletRequest 객체
+     * @param response HttpServletResponse 객체
+     * @param oAuth2UserInfo OAuth2 사용자 정보 객체
+     * @param provider OAuth2 제공자 이름
+     * @throws IOException 인증 처리 중 발생할 수 있는 입출력 예외
+     */
     private void handleAuthentication(HttpServletRequest request, HttpServletResponse response, OAuth2UserInfo oAuth2UserInfo, String provider) throws IOException {
         String providerId = oAuth2UserInfo.getProviderId();
         String name = oAuth2UserInfo.getName();
@@ -83,10 +112,8 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         User existUser = userRepository.findByProviderId(providerId);
 
         if (existUser == null) {
-            // 신규 유저 처리
             handleNewUser(request, response, provider, providerId, name, email);
         } else {
-            // 기존 유저 처리
             handleExistingUser(request, response, existUser);
         }
 
@@ -96,7 +123,20 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         log.info("EMAIL : {}", email);
     }
 
-    // 신규 유저 처리
+    /**
+     * 신규 유저 처리 메서드.
+     *
+     * OAuth2 인증을 통해 새로 가입한 사용자를 처리하고,
+     * 회원가입 완료를 위한 리다이렉트를 수행합니다.
+     *
+     * @param request  HttpServletRequest 객체
+     * @param response HttpServletResponse 객체
+     * @param provider OAuth2 제공자 이름
+     * @param providerId 제공자 고유 ID
+     * @param name 사용자 이름
+     * @param email 사용자 이메일
+     * @throws IOException 인증 처리 중 발생할 수 있는 입출력 예외
+     */
     private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name, String email) throws IOException {
         log.info("신규 유저입니다.");
         String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email, REGISTER_TOKEN_EXPIRATION_TIME);
@@ -104,22 +144,37 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 
-    // 기존 유저 처리
+    /**
+     * 기존 유저 처리 메서드.
+     *
+     * OAuth2 인증을 통해 로그인한 기존 사용자를 처리하고,
+     * 액세스 및 리프레쉬 토큰을 발급하여 리다이렉트를 수행합니다.
+     *
+     * @param request  HttpServletRequest 객체
+     * @param response HttpServletResponse 객체
+     * @param user 기존 사용자 정보
+     * @throws IOException 인증 처리 중 발생할 수 있는 입출력 예외
+     */
     private void handleExistingUser(HttpServletRequest request, HttpServletResponse response, User user) throws IOException {
         log.info("기존 유저입니다.");
         Long userId = user.getId();
 
-        // 액세스 & 리프레쉬 토큰 발급 및 저장
         String accessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
         String refreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
         saveRefreshToken(userId, refreshToken);
 
-        // 리다이렉트 처리
         String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, accessToken, refreshToken);
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 
-    // Refresh Token 저장
+    /**
+     * Refresh Token 저장 메서드.
+     *
+     * 사용자의 리프레쉬 토큰을 데이터베이스에 저장합니다.
+     *
+     * @param userId 사용자 ID
+     * @param refreshToken 리프레쉬 토큰 값
+     */
     private void saveRefreshToken(Long userId, String refreshToken) {
         RefreshToken newRefreshToken = new RefreshToken(userId, refreshToken);
         refreshTokenRepository.save(newRefreshToken);

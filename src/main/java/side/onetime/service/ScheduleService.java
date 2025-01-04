@@ -34,7 +34,14 @@ public class ScheduleService {
     private final JwtUtil jwtUtil;
     private final EventService eventService;
 
-    // 요일 스케줄 등록 메서드 (비로그인)
+    /**
+     * 요일 스케줄 등록 메서드 (비로그인).
+     *
+     * 비로그인 사용자가 요일 스케줄을 등록합니다.
+     * 기존 Selection 데이터를 삭제하고 새 Selection 데이터를 저장합니다.
+     *
+     * @param createDayScheduleRequest 요일 스케줄 등록 요청 데이터
+     */
     @Transactional
     public void createDaySchedulesForAnonymousUser(CreateDayScheduleRequest createDayScheduleRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
@@ -64,7 +71,15 @@ public class ScheduleService {
         selectionRepository.saveAll(selections);
     }
 
-    // 요일 스케줄 등록 메서드 (로그인)
+    /**
+     * 요일 스케줄 등록 메서드 (로그인).
+     *
+     * 로그인 사용자가 요일 스케줄을 등록합니다.
+     * 기존 Selection 데이터를 삭제하고 새 Selection 데이터를 저장합니다.
+     *
+     * @param createDayScheduleRequest 요일 스케줄 등록 요청 데이터
+     * @param authorizationHeader 사용자 인증 토큰
+     */
     @Transactional
     public void createDaySchedulesForAuthenticatedUser(CreateDayScheduleRequest createDayScheduleRequest, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
@@ -106,7 +121,14 @@ public class ScheduleService {
         selectionRepository.saveAll(newSelections);
     }
 
-    // 날짜 스케줄 등록 메서드 (비로그인)
+    /**
+     * 날짜 스케줄 등록 메서드 (비로그인).
+     *
+     * 비로그인 사용자가 날짜 스케줄을 등록합니다.
+     * 기존 Selection 데이터를 삭제하고 새 Selection 데이터를 저장합니다.
+     *
+     * @param createDateScheduleRequest 날짜 스케줄 등록 요청 데이터
+     */
     @Transactional
     public void createDateSchedulesForAnonymousUser(CreateDateScheduleRequest createDateScheduleRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
@@ -136,7 +158,15 @@ public class ScheduleService {
         selectionRepository.saveAll(selections);
     }
 
-    // 날짜 스케줄 등록 메서드 (로그인)
+    /**
+     * 날짜 스케줄 등록 메서드 (로그인).
+     *
+     * 로그인 사용자가 날짜 스케줄을 등록합니다.
+     * 기존 Selection 데이터를 삭제하고 새 Selection 데이터를 저장합니다.
+     *
+     * @param createDateScheduleRequest 날짜 스케줄 등록 요청 데이터
+     * @param authorizationHeader 사용자 인증 토큰
+     */
     @Transactional
     public void createDateSchedulesForAuthenticatedUser(CreateDateScheduleRequest createDateScheduleRequest, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
@@ -181,7 +211,14 @@ public class ScheduleService {
         selectionRepository.saveAll(newSelections);
     }
 
-    // 전체 요일 스케줄 반환 메서드
+    /**
+     * 전체 요일 스케줄 반환 메서드.
+     *
+     * 이벤트에 참여하는 모든 사용자(멤버와 유저)의 요일 스케줄을 반환합니다.
+     *
+     * @param eventId 조회할 이벤트 ID
+     * @return 요일별 스케줄 응답 리스트
+     */
     @Transactional(readOnly = true)
     public List<PerDaySchedulesResponse> getAllDaySchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -237,7 +274,15 @@ public class ScheduleService {
         return perDaySchedulesResponses;
     }
 
-    // 개인 요일 스케줄 반환 메서드 (비로그인)
+    /**
+     * 개인 요일 스케줄 반환 메서드 (비로그인).
+     *
+     * 비로그인 사용자의 개인 요일 스케줄을 반환합니다.
+     *
+     * @param eventId 조회할 이벤트 ID
+     * @param memberId 조회할 멤버 ID
+     * @return 개인 요일 스케줄 응답
+     */
     @Transactional(readOnly = true)
     public PerDaySchedulesResponse getMemberDaySchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -260,7 +305,15 @@ public class ScheduleService {
         return PerDaySchedulesResponse.of(member.getName(), daySchedules);
     }
 
-    // 개인 요일 스케줄 반환 메서드 (로그인)
+    /**
+     * 개인 요일 스케줄 반환 메서드 (로그인).
+     *
+     * 로그인 사용자의 개인 요일 스케줄을 반환합니다.
+     *
+     * @param eventId 조회할 이벤트 ID
+     * @param authorizationHeader 사용자 인증 토큰
+     * @return 개인 요일 스케줄 응답
+     */
     @Transactional(readOnly = true)
     public PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -283,7 +336,14 @@ public class ScheduleService {
         return PerDaySchedulesResponse.of(user.getNickname(), daySchedules);
     }
 
-    // 전체 날짜 스케줄 반환 메서드
+    /**
+     * 전체 날짜 스케줄 반환 메서드.
+     *
+     * 이벤트에 참여하는 모든 사용자(멤버와 유저)의 날짜 스케줄을 반환합니다.
+     *
+     * @param eventId 조회할 이벤트 ID
+     * @return 날짜별 스케줄 응답 리스트
+     */
     @Transactional(readOnly = true)
     public List<PerDateSchedulesResponse> getAllDateSchedules(String eventId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -339,7 +399,15 @@ public class ScheduleService {
         return perDateSchedulesResponses;
     }
 
-    // 개인 날짜 스케줄 반환 메서드 (비로그인)
+    /**
+     * 개인 날짜 스케줄 반환 메서드 (비로그인).
+     *
+     * 비로그인 사용자의 개인 날짜 스케줄을 반환합니다.
+     *
+     * @param eventId 조회할 이벤트 ID
+     * @param memberId 조회할 멤버 ID
+     * @return 개인 날짜 스케줄 응답
+     */
     @Transactional(readOnly = true)
     public PerDateSchedulesResponse getMemberDateSchedules(String eventId, String memberId) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -362,7 +430,15 @@ public class ScheduleService {
         return PerDateSchedulesResponse.of(member.getName(), dateSchedules);
     }
 
-    // 개인 날짜 스케줄 반환 메서드 (로그인)
+    /**
+     * 개인 날짜 스케줄 반환 메서드 (로그인).
+     *
+     * 로그인 사용자의 개인 날짜 스케줄을 반환합니다.
+     *
+     * @param eventId 조회할 이벤트 ID
+     * @param authorizationHeader 사용자 인증 토큰
+     * @return 개인 날짜 스케줄 응답
+     */
     @Transactional(readOnly = true)
     public PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
@@ -385,7 +461,14 @@ public class ScheduleService {
         return PerDateSchedulesResponse.of(user.getNickname(), dateSchedules);
     }
 
-    // 멤버 필터링 요일 스케줄 반환 메서드
+    /**
+     * 멤버 필터링 요일 스케줄 반환 메서드.
+     *
+     * 주어진 이름 필터에 해당하는 멤버들의 요일 스케줄을 반환합니다.
+     *
+     * @param getFilteredSchedulesRequest 필터링 요청 데이터
+     * @return 필터링된 요일 스케줄 응답 리스트
+     */
     @Transactional(readOnly = true)
     public List<PerDaySchedulesResponse> getFilteredDaySchedules(GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.eventId()))
@@ -411,7 +494,14 @@ public class ScheduleService {
         return perDaySchedulesResponses;
     }
 
-    // 멤버 필터링 날짜 스케줄 반환 메서드
+    /**
+     * 멤버 필터링 날짜 스케줄 반환 메서드.
+     *
+     * 주어진 이름 필터에 해당하는 멤버들의 날짜 스케줄을 반환합니다.
+     *
+     * @param getFilteredSchedulesRequest 필터링 요청 데이터
+     * @return 필터링된 날짜 스케줄 응답 리스트
+     */
     @Transactional(readOnly = true)
     public List<PerDateSchedulesResponse> getFilteredDateSchedules(GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
         Event event = eventRepository.findByEventId(UUID.fromString(getFilteredSchedulesRequest.eventId()))
