@@ -2,9 +2,9 @@ name: 🚀 Build & Deploy workflow on test environment
 
 on:
   push:
-    branches: [develop, 'release/v**'] # develop 또는 release 브랜치 push 시 실행
+    branches: [develop, 'release/v**'] # develop 또는 release 브랜치에 push 시 실행
   pull_request:
-    branches: [develop, 'release/v**'] # develop 또는 release 브랜치에 PR 발생 시 실행
+    branches: [develop, 'release/v**'] # develop 또는 release 브랜치에 PR 생성 시 실행
 
 permissions:
   contents: read
@@ -14,65 +14,74 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       # 1. GitHub 리포지토리에서 코드 체크아웃
-      - name: ✅ Checkout branch
+      - name: ✅ 브랜치 체크아웃
         uses: actions/checkout@v3
 
       # 2. Gradle로 프로젝트 빌드
-      - name: 📦 Build Project
+      - name: 📦 프로젝트 빌드
         run: ./gradlew clean build
 
-      # 3. 빌드 결과 확인
-      - name: 🕵️ Verify Build Output
-        run: ls -l build/libs
+      # 3. 빌드 결과를 아티팩트로 저장
+      - name: 📦 빌드 결과 저장
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: build/libs/*.jar
 
   deploy:
     needs: build
-    environment: test # GitHub Actions의 test 환경 Secrets 사용
     runs-on: ubuntu-latest
     steps:
       # 1. GitHub 리포지토리에서 코드 체크아웃
-      - name: ✅ Checkout branch
+      - name: ✅ 브랜치 체크아웃
         uses: actions/checkout@v3
 
-      # 2. 현재 타임스탬프 생성
-      - name: 🕒 Generate timestamp
+      # 2. 빌드 결과 다운로드
+      - name: 📦 빌드 결과 다운로드
+        uses: actions/download-artifact@v3
+        with:
+          name: build-artifacts
+
+      # 3. 현재 타임스탬프 생성
+      - name: 🕒 타임스탬프 생성
         run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
 
-      # 3. Test 환경의 .env 파일 생성
-      - name: ⚙️ Restore .env file
+      # 4. Test 환경의 .env 파일 생성
+      - name: ⚙️ .env 파일 복원
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
 
-      # 4. Test 환경의 docker-compose.yaml 생성
-      - name: 🐋 Restore docker-compose.yaml
+      # 5. Test 환경의 docker-compose.yaml 생성
+      - name: 🐋 docker-compose.yaml 복원
         run: |
           echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yaml
 
-      # 5. Test 파일 압축 (기존 파일 + 빌드된 JAR 포함)
-      - name: 📦 Compress all files
+      # 6. 필요한 파일 압축 (JAR 포함)
+      - name: 📦 배포 패키지 압축
         run: |
           mkdir temp_deploy_package
           cp -r .env docker-compose.yaml appspec.yml deploy/ temp_deploy_package/
-          cp build/libs/*.jar temp_deploy_package/
-          cd temp_deploy_package && zip -r ../build-${{ github.sha }}.zip . && cd ..
+          cp *.jar temp_deploy_package/
+          cd temp_deploy_package && zip -r ../build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip . && cd ..
           rm -rf temp_deploy_package
 
-      # 6. AWS Credentials 설정
-      - name: 🌎 Configure AWS credentials
+      # 7. AWS Credentials 설정
+      - name: 🌎 AWS 자격 증명 설정
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
 
-      # 7. S3 버킷으로 파일 업로드
-      - name: 🚛 Upload to S3
-        run: aws s3 cp build-${{ github.sha }}.zip s3://${{ secrets.S3_BUCKET_NAME }}/test/build-${{ github.sha }}.zip
+      # 8. S3 버킷으로 파일 업로드
+      - name: 🚛 S3에 파일 업로드
+        run: aws s3 cp build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip s3://${{ secrets.S3_BUCKET_NAME }}/test/build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip
 
-      # 8. CodeDeploy를 통해 배포 수행
-      - name: 🚀 Deploy to EC2 with CodeDeploy
+      # 9. CodeDeploy를 통해 배포 수행
+      - name: 🚀 CodeDeploy로 EC2 배포
         run: |
           aws deploy create-deployment \
             --application-name ${{ secrets.CODEDEPLOY_APP_NAME }} \
             --deployment-group-name ${{ secrets.CODEDEPLOY_TEST_GROUP }} \
-            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},key=test/build-${{ github.sha }}.zip,bundleType=zip
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},key=test/build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip,bundleType=zip
+          
