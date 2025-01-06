@@ -37,12 +37,12 @@ jobs:
       # 3. Test 환경의 .env 파일 생성
       - name: ⚙️ Restore .env file
         run: |
-          echo "${{ secrets.ENV_FILE }}" > deploy/test/.env
+          echo "${{ secrets.ENV_FILE }}" > .env
 
       # 4. Test 환경의 docker-compose.yaml 생성
       - name: 🐋 Restore docker-compose.yaml
         run: |
-          echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > deploy/test/docker-compose.yaml
+          echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yaml
 
       # 5. Test 파일 압축 (타임스탬프 + 커밋 해시 포함)
       - name: 📦 Compress all files
