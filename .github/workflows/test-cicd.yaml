@@ -30,6 +30,7 @@ jobs:
 
   deploy:
     needs: build
+    environment: test # GitHub Actions의 test 환경 Secrets 사용
     runs-on: ubuntu-latest
     steps:
       # 1. GitHub 리포지토리에서 코드 체크아웃
