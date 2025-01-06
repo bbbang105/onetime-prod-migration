@@ -58,12 +58,11 @@ jobs:
         run: |
           echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yaml
 
-      # 6. 필요한 파일 압축 (JAR 포함)
+      # 6. 필요한 파일 압축
       - name: 📦 배포 패키지 압축
         run: |
           mkdir temp_deploy_package
-          cp -r .env docker-compose.yaml appspec.yml deploy/ temp_deploy_package/
-          cp *.jar temp_deploy_package/
+          cp -r *.jar .env Dockerfile docker-compose.yaml appspec.yml deploy/ temp_deploy_package/
           cd temp_deploy_package && zip -r ../build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip . && cd ..
           rm -rf temp_deploy_package
 
