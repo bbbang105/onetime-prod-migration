@@ -2,7 +2,16 @@
 
 # ✅ 현재 실행중인 App이 green인지 확인합니다.
 IS_GREEN=$(sudo docker ps --format '{{.Names}}' | grep -w green)
+
+# nginx 설정 파일 경로
+GREEN_NGINX_CONF="/etc/nginx/green-nginx.conf"
+BLUE_NGINX_CONF="/etc/nginx/blue-nginx.conf"
 DEFAULT_CONF="/etc/nginx/nginx.conf"
+
+# docker-compose.yaml 경로
+DOCKER_COMPOSE_FILE="/home/ubuntu/docker-compose.yaml"
+
+# discord webhook 관련 변수
 DISCORD_WEBHOOK_URL="https://discord.com/api/webhooks/1326042657880932434/ARfU0zZr8Gf1BLn1D1-qAr1pPber2FOjhKTn6fZGVxOemHL068tWt8nlQOQDhXkCFL03"
 MESSAGE_SUCCESS="🥳 배포가 성공적으로 수행되었습니다!"
 MESSAGE_FAILURE="🚨 배포 과정에서 오류가 발생했습니다. 빠른 확인바랍니다."
