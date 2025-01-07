@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# 작업 디렉토리 설정
+cd /home/ubuntu
+
 # ✅ 현재 실행중인 App이 green인지 확인합니다.
 IS_GREEN=$(sudo docker ps --format '{{.Names}}' | grep -w green)
 
@@ -28,7 +31,7 @@ if [ -z "$IS_GREEN" ]; then
   echo "### BLUE => GREEN ###"
 
   echo ">>> 1. green container를 up합니다."
-  sudo docker compose up -d green || {
+  sudo docker compose -f "$DOCKER_COMPOSE_FILE" up -d green || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
@@ -51,13 +54,13 @@ if [ -z "$IS_GREEN" ]; then
   done
 
   echo ">>> 3. nginx를 다시 실행합니다."
-  sudo cp /etc/nginx/green-nginx.conf /etc/nginx/nginx.conf && sudo nginx -s reload || {
+  sudo cp "$GREEN_NGINX_CONF" "$DEFAULT_CONF" && sudo nginx -s reload || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
 
   echo ">>> 4. blue container를 down합니다."
-  sudo docker compose stop blue || {
+  sudo docker compose -f "$DOCKER_COMPOSE_FILE" stop blue || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
@@ -69,7 +72,7 @@ else
   echo "### GREEN => BLUE ###"
 
   echo ">>> 1. blue container를 up합니다."
-  sudo docker compose up -d blue || {
+  sudo docker compose -f "$DOCKER_COMPOSE_FILE" up -d blue || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
@@ -92,13 +95,13 @@ else
   done
 
   echo ">>> 3. nginx를 다시 실행합니다."
-  sudo cp /etc/nginx/blue-nginx.conf /etc/nginx/nginx.conf && sudo nginx -s reload || {
+  sudo cp "$BLUE_NGINX_CONF" "$DEFAULT_CONF" && sudo nginx -s reload || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
 
   echo ">>> 4. green container를 down합니다."
-  sudo docker compose stop green || {
+  sudo docker compose -f "$DOCKER_COMPOSE_FILE" stop green || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
