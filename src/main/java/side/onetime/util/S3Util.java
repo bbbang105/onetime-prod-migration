@@ -23,12 +23,14 @@ public class S3Util {
      * S3에 이미지 업로드 메서드.
      * 주어진 MultipartFile 이미지를 S3에 업로드하고 고유한 파일 이름을 반환합니다.
      *
-     * @param image 업로드할 이미지 파일
+     * @param directoryName 업로드할 디렉토리명
+     * @param image          업로드할 이미지 파일
      * @return S3에 저장된 파일 이름
      * @throws IOException 파일 업로드 중 오류 발생 시
      */
-    public String uploadImage(MultipartFile image) throws IOException {
-        String fileName = UUID.randomUUID() + "_" + image.getOriginalFilename(); // 고유한 파일 이름 생성
+    public String uploadImage(String directoryName, MultipartFile image) throws IOException {
+        // 고유한 파일 이름 생성
+        String fileName = directoryName + "/" + UUID.randomUUID() + "_" + image.getOriginalFilename();
 
         // 메타데이터 설정
         ObjectMetadata metadata = new ObjectMetadata();
@@ -53,5 +55,16 @@ public class S3Util {
      */
     public String getPublicUrl(String fileName) {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, amazonS3.getRegionName(), fileName);
+    }
+
+    /**
+     * S3에서 파일 삭제 메서드.
+     * 주어진 파일 이름에 해당하는 S3 파일을 삭제합니다.
+     *
+     * @param fileName S3에 저장된 파일 이름
+     */
+    public void deleteFile(String fileName) {
+        // 파일 삭제
+        amazonS3.deleteObject(bucket, fileName);
     }
 }
