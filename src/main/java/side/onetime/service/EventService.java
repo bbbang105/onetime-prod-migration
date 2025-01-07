@@ -124,7 +124,7 @@ public class EventService {
     private String generateAndUploadQrCode(UUID eventId) {
         try {
             MultipartFile qrCodeFile = qrUtil.getQrCodeFile(eventId);
-            return s3Util.uploadImage(qrCodeFile);
+            return s3Util.uploadImage("qr", qrCodeFile);
         } catch (Exception e) {
             throw new CustomException(EventErrorStatus._FAILED_GENERATE_QR_CODE);
         }
@@ -447,6 +447,7 @@ public class EventService {
     public void removeUserCreatedEvent(String authorizationHeader, String eventId) {
         EventParticipation eventParticipation = verifyUserIsEventCreator(authorizationHeader, eventId);
         eventRepository.deleteEvent(eventParticipation.getEvent());
+        s3Util.deleteFile(eventParticipation.getEvent().getQrFileName()); // QR 이미지 삭제
     }
 
     /**
