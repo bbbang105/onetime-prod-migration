@@ -2,7 +2,7 @@
 
 ## 🌐 System Architecture
 
-<img width="925" alt="image" src="https://github.com/user-attachments/assets/12ebde7d-4623-4af8-9417-7d968c91c5fa">
+<img width="884" alt="원타임_아키텍처_AWS" src="https://github.com/user-attachments/assets/5ab6c7a7-b940-43b4-9e1e-a2a339b9f18a" />
 
 ## 🧱 ERD
 
@@ -17,12 +17,22 @@
 
 ### Branch
 
-- 생성한 이슈에 따라서 브랜치 생성 `Ex) feature/#4/login`
-- `main branch` : 개발 최종 완료 시 merge
-- `develop branch` : 배포 서버용
-- `test branch` : 테스트 서버용
-- `feature branch` : 각 새로운 기능 개발
-- `hotfix branch` : 배포 이후 긴급 수정
+- 이슈 기반 브랜치 생성 
+  - `ex) feature/#4/login`
+- `main branch`
+  - 현재 서비스 중인 브랜치 
+  - release 브랜치에서 검수가 완료된 소스 코드 병합 
+  - PR이 병합된 경우 prod-cicd.yml 스크립트 실행
+- `release branch`
+  - 검수 중인 브랜치로 Staging 환경 역할 
+  - `release/v*` 형식의 브랜치 이름 사용 
+  - 검수 완료 후 main 브랜치로 병합, 이후 브랜치 제거
+- `develop branch`
+  - 개발 중인 기능 병합 브랜치 
+  - 배포 단위 기능 모두 병합 시 release 브랜치로 분기 
+  - PR 병합 또는 코드 푸시 시 test-cicd.yml 스크립트 실행
+- `hotfix 브랜치`
+  - 배포 후 긴급 수정 시 사용
 
 ### **Commit Message**
 
