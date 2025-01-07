@@ -124,7 +124,7 @@ public class EventService {
     private String generateAndUploadQrCode(UUID eventId) {
         try {
             MultipartFile qrCodeFile = qrUtil.getQrCodeFile(eventId);
-            return s3Util.uploadImage(qrCodeFile);
+            return s3Util.uploadImage("qr", qrCodeFile);
         } catch (Exception e) {
             throw new CustomException(EventErrorStatus._FAILED_GENERATE_QR_CODE);
         }
