@@ -31,7 +31,7 @@ if [ -z "$IS_GREEN" ]; then
   echo "### BLUE => GREEN ###"
 
   echo ">>> 1. green container를 up합니다."
-  sudo docker compose -f "$DOCKER_COMPOSE_FILE" up -d green || {
+  sudo docker compose -f "$DOCKER_COMPOSE_FILE" up --build -d green || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
@@ -72,7 +72,7 @@ else
   echo "### GREEN => BLUE ###"
 
   echo ">>> 1. blue container를 up합니다."
-  sudo docker compose -f "$DOCKER_COMPOSE_FILE" up -d blue || {
+  sudo docker compose -f "$DOCKER_COMPOSE_FILE" up --build -d blue || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
