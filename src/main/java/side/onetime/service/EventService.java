@@ -447,6 +447,7 @@ public class EventService {
     public void removeUserCreatedEvent(String authorizationHeader, String eventId) {
         EventParticipation eventParticipation = verifyUserIsEventCreator(authorizationHeader, eventId);
         eventRepository.deleteEvent(eventParticipation.getEvent());
+        s3Util.deleteFile(eventParticipation.getEvent().getQrFileName()); // QR 이미지 삭제
     }
 
     /**
