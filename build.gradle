@@ -68,6 +68,8 @@ dependencies {
     // Zxing
     implementation 'com.google.zxing:core:3.5.1'
     implementation 'com.google.zxing:javase:3.5.1'
+    // Health-Check
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
 
 // QueryDSL 디렉토리
