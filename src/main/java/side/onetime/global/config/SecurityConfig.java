@@ -34,7 +34,8 @@ public class SecurityConfig {
             "/api/v1/members/**",
             "/api/v1/urls/**",
             "/api/v1/tokens/**",
-            "/api/v1/users/onboarding"
+            "/api/v1/users/onboarding",
+            "/actuator/health"
     };
 
     private static final String[] AUTHENTICATED_URLS = {

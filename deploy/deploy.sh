@@ -41,8 +41,8 @@ if [ -z "$IS_GREEN" ]; then
   while true; do
     echo ">>> 2. green health check 중..."
     sleep 3
-    REQUEST=$(curl -s http://127.0.0.1:8092) # green으로 request
-    if [ -n "$REQUEST" ]; then
+    REQUEST=$(curl -s http://127.0.0.1:8092/actuator/health)
+    if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
     fi
@@ -82,8 +82,8 @@ else
   while true; do
     echo ">>> 2. blue health check 중..."
     sleep 3
-    REQUEST=$(curl -s http://127.0.0.1:8091) # blue로 request
-    if [ -n "$REQUEST" ]; then
+    REQUEST=$(curl -s http://127.0.0.1:8091/actuator/health)
+    if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
     fi
