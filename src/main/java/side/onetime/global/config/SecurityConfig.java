@@ -15,7 +15,6 @@ import side.onetime.auth.handler.OAuthLoginFailureHandler;
 import side.onetime.auth.handler.OAuthLoginSuccessHandler;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @RequiredArgsConstructor
 @Configuration
@@ -29,6 +28,20 @@ public class SecurityConfig {
             "/swagger-ui/**", "/v3/api-docs/**"
     };
 
+    private static final String[] PUBLIC_URLS = {
+            "/api/v1/events/**",
+            "/api/v1/schedules/**",
+            "/api/v1/members/**",
+            "/api/v1/urls/**",
+            "/api/v1/tokens/**",
+            "/api/v1/users/onboarding"
+    };
+
+    private static final String[] AUTHENTICATED_URLS = {
+            "/api/v1/users/**",
+            "/api/v1/fixed-schedules/**",
+    };
+
     private static final String[] ALLOWED_ORIGINS = {
             "http://localhost:5173",
             "https://onetime-test.vercel.app",
@@ -36,19 +49,15 @@ public class SecurityConfig {
             "https://onetime-with-members.com",
             "https://www.onetime-with-members.com",
             "https://1-ti.me",
-            "https://www.1-ti.me",
-            "https://noonsachin.com",
-            "https://www.noonsachin.com",
             "https://onetime-test.store",
-            "https://www.onetime-test.store",
     };
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(Arrays.asList(ALLOWED_ORIGINS));
-        config.setAllowedMethods(Collections.singletonList("*"));
-        config.setAllowedHeaders(Collections.singletonList("*"));
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Set-Cookie"));
         config.setAllowCredentials(true);
         config.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
         config.setMaxAge(3600L);
@@ -66,12 +75,13 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(SWAGGER_URLS).permitAll()
-                        .requestMatchers("/**").permitAll() // 추후 변경 필요
+                        .requestMatchers(PUBLIC_URLS).permitAll()
+                        .requestMatchers(AUTHENTICATED_URLS).authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth -> oauth
-                        .successHandler(oAuthLoginSuccessHandler) // OAuth 로그인 성공 핸들러
-                        .failureHandler(oAuthLoginFailureHandler) // OAuth 로그인 실패 핸들러
+                        .successHandler(oAuthLoginSuccessHandler)
+                        .failureHandler(oAuthLoginFailureHandler)
                 );
 
         return httpSecurity.build();
