@@ -2,6 +2,8 @@ package side.onetime.fixed;
 
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -10,9 +12,14 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
+import side.onetime.auth.dto.CustomUserDetails;
+import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.FixedController;
+import side.onetime.domain.User;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
 import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
 import side.onetime.dto.fixed.response.FixedEventByDayResponse;
@@ -44,24 +51,37 @@ public class FixedControllerTest extends ControllerTestConfig {
     @MockBean
     private JwtUtil jwtUtil;
 
-    private final String authorizationHeader = "Bearer token";
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private CustomUserDetails customUserDetails;
+
+    @BeforeEach
+    public void setupSecurityContext() {
+        User mockUser = User.builder().name("User").email("user@example.com").build();
+        customUserDetails = new CustomUserDetails(mockUser);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities())
+        );
+    }
 
     @Test
     @DisplayName("고정 스케줄을 등록한다.")
     public void createFixedEvent() throws Exception {
-        // given
-        CreateFixedEventRequest request = new CreateFixedEventRequest("고정 이벤트", List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30"))));
+        CreateFixedEventRequest request = new CreateFixedEventRequest(
+                "고정 이벤트",
+                List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30")))
+        );
 
-        // when
         ResultActions result = mockMvc.perform(
                 RestDocumentationRequestBuilders.post("/api/v1/fixed-schedules")
-                        .header("Authorization", authorizationHeader)
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         );
 
-        // then
         result.andExpect(status().isCreated())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("201"))
@@ -92,21 +112,18 @@ public class FixedControllerTest extends ControllerTestConfig {
     @Test
     @DisplayName("전체 고정 스케줄을 조회한다.")
     public void getAllFixedSchedules() throws Exception {
-        // given
         List<FixedEventResponse> responses = List.of(
                 new FixedEventResponse(1L, List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30")))),
-                new FixedEventResponse(2L, List.of(new FixedScheduleResponse("화", List.of("09:00", "09:30"))))
+                new FixedEventResponse(2L, List.of(new FixedScheduleResponse("화", List.of("10:00", "10:30"))))
         );
-        Mockito.when(fixedScheduleService.getAllFixedSchedules(authorizationHeader)).thenReturn(responses);
 
-        // when
+        Mockito.when(fixedScheduleService.getAllFixedSchedules(customUserDetails.user())).thenReturn(responses);
+
         ResultActions result = mockMvc.perform(
                 RestDocumentationRequestBuilders.get("/api/v1/fixed-schedules")
-                        .header("Authorization", authorizationHeader)
                         .accept(MediaType.APPLICATION_JSON)
         );
 
-        // then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
@@ -132,21 +149,21 @@ public class FixedControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("특정 고정 스케줄을 상세 조회한다.")
+    @DisplayName("특정 고정 스케줄 상세 조회한다.")
     public void getFixedScheduleDetail() throws Exception {
-        // given
         Long fixedEventId = 1L;
-        FixedEventDetailResponse response = new FixedEventDetailResponse("고정 이벤트", List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30"))));
-        Mockito.when(fixedScheduleService.getFixedScheduleDetail(authorizationHeader, fixedEventId)).thenReturn(response);
+        FixedEventDetailResponse response = new FixedEventDetailResponse(
+                "고정 이벤트",
+                List.of(new FixedScheduleResponse("월", List.of("09:00", "09:30")))
+        );
 
-        // when
+        Mockito.when(fixedScheduleService.getFixedScheduleDetail(customUserDetails.user(), fixedEventId)).thenReturn(response);
+
         ResultActions result = mockMvc.perform(
                 RestDocumentationRequestBuilders.get("/api/v1/fixed-schedules/{id}", fixedEventId)
-                        .header("Authorization", authorizationHeader)
                         .accept(MediaType.APPLICATION_JSON)
         );
 
-        // then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
@@ -157,9 +174,9 @@ public class FixedControllerTest extends ControllerTestConfig {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Fixed API")
-                                        .description("특정 고정 스케줄을 상세 조회한다.")
+                                        .description("특정 고정 스케줄 상세 조회한다.")
                                         .pathParameters(
-                                                parameterWithName("id").description("고정 스케줄 ID [예시 : 1 (NUMBER Type)]")
+                                                parameterWithName("id").description("고정 스케줄 ID [예시 : 1]")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
@@ -177,20 +194,19 @@ public class FixedControllerTest extends ControllerTestConfig {
     @Test
     @DisplayName("특정 고정 스케줄을 수정한다.")
     public void modifyFixedEvent() throws Exception {
-        // given
         Long fixedEventId = 1L;
-        ModifyFixedEventRequest request = new ModifyFixedEventRequest("수정된 고정 스케줄", List.of(new FixedScheduleResponse("화", List.of("10:00", "11:00"))));
+        ModifyFixedEventRequest request = new ModifyFixedEventRequest(
+                "수정된 고정 스케줄",
+                List.of(new FixedScheduleResponse("화", List.of("10:00", "11:00")))
+        );
 
-        // when
         ResultActions result = mockMvc.perform(
                 RestDocumentationRequestBuilders.patch("/api/v1/fixed-schedules/{id}", fixedEventId)
-                        .header("Authorization", authorizationHeader)
                         .content(objectMapper.writeValueAsString(request))
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
         );
 
-        // then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
@@ -203,7 +219,7 @@ public class FixedControllerTest extends ControllerTestConfig {
                                         .tag("Fixed API")
                                         .description("특정 고정 스케줄을 수정한다.")
                                         .pathParameters(
-                                                parameterWithName("id").description("고정 스케줄 ID [예시 : 1 (NUMBER Type)]")
+                                                parameterWithName("id").description("고정 스케줄 ID [예시 : 1]")
                                         )
                                         .requestFields(
                                                 fieldWithPath("title").type(JsonFieldType.STRING).description("수정된 스케줄 이름"),
@@ -224,17 +240,13 @@ public class FixedControllerTest extends ControllerTestConfig {
     @Test
     @DisplayName("특정 고정 스케줄을 삭제한다.")
     public void removeFixedEvent() throws Exception {
-        // given
         Long fixedEventId = 1L;
 
-        // when
         ResultActions result = mockMvc.perform(
                 RestDocumentationRequestBuilders.delete("/api/v1/fixed-schedules/{id}", fixedEventId)
-                        .header("Authorization", authorizationHeader)
                         .accept(MediaType.APPLICATION_JSON)
         );
 
-        // then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
@@ -247,7 +259,7 @@ public class FixedControllerTest extends ControllerTestConfig {
                                         .tag("Fixed API")
                                         .description("특정 고정 스케줄을 삭제한다.")
                                         .pathParameters(
-                                                parameterWithName("id").description("고정 스케줄 ID [예시 : 1 (NUMBER Type)]")
+                                                parameterWithName("id").description("고정 스케줄 ID [예시 : 1]")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
@@ -262,19 +274,18 @@ public class FixedControllerTest extends ControllerTestConfig {
     @Test
     @DisplayName("요일별 고정 스케줄을 조회한다.")
     public void getFixedEventByDay() throws Exception {
-        // given
         String day = "mon";
-        List<FixedEventByDayResponse> responses = List.of(new FixedEventByDayResponse(1L, "고정 이벤트", "09:00", "10:00"));
-        Mockito.when(fixedEventService.getFixedEventByDay(authorizationHeader, day)).thenReturn(responses);
+        List<FixedEventByDayResponse> responses = List.of(
+                new FixedEventByDayResponse(1L, "고정 이벤트", "09:00", "10:00")
+        );
 
-        // when
+        Mockito.when(fixedEventService.getFixedEventByDay(customUserDetails.user(), day)).thenReturn(responses);
+
         ResultActions result = mockMvc.perform(
                 RestDocumentationRequestBuilders.get("/api/v1/fixed-schedules/by-day/{day}", day)
-                        .header("Authorization", authorizationHeader)
                         .accept(MediaType.APPLICATION_JSON)
         );
 
-        // then
         result.andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))

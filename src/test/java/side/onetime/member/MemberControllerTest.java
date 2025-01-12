@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.MemberController;
 import side.onetime.domain.enums.Category;
@@ -42,6 +43,9 @@ public class MemberControllerTest extends ControllerTestConfig {
 
     @MockBean
     private JwtUtil jwtUtil;
+
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
