@@ -16,7 +16,6 @@ import side.onetime.exception.status.FixedErrorStatus;
 import side.onetime.repository.FixedEventRepository;
 import side.onetime.repository.FixedScheduleRepository;
 import side.onetime.repository.FixedSelectionRepository;
-import side.onetime.util.JwtUtil;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -30,7 +29,6 @@ public class FixedScheduleService {
     private final FixedEventRepository fixedEventRepository;
     private final FixedScheduleRepository fixedScheduleRepository;
     private final FixedSelectionRepository fixedSelectionRepository;
-    private final JwtUtil jwtUtil;
 
     /**
      * 고정 스케줄 등록 메서드.
@@ -67,57 +65,48 @@ public class FixedScheduleService {
     /**
      * 전체 고정 스케줄 조회 메서드.
      *
-     * 현재 유저의 모든 고정 스케줄 데이터를 조회합니다.
+     * 인증된 사용자의 모든 고정 스케줄 데이터를 조회합니다.
      * FixedEventResponse 리스트로 반환합니다.
      *
-     * @param authorizationHeader 인증 토큰
+     * @param user 인증된 사용자 정보
      * @return 고정 스케줄 응답 데이터 리스트
      */
     @Transactional(readOnly = true)
-    public List<FixedEventResponse> getAllFixedSchedules(String authorizationHeader) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
-
+    public List<FixedEventResponse> getAllFixedSchedules(User user) {
         List<FixedEvent> fixedEvents = fixedEventRepository.findAllByUser(user);
 
-        List<FixedEventResponse> fixedEventResponses = new ArrayList<>();
-        for (FixedEvent fixedEvent : fixedEvents) {
-            Map<String, List<String>> groupedSchedules = fixedEvent.getFixedSelections().stream()
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getFixedSchedule().getDay(),
-                            Collectors.collectingAndThen(
-                                    Collectors.mapping(selection -> selection.getFixedSchedule().getTime(), Collectors.toList()),
-                                    list -> {
-                                        list.sort(Comparator.naturalOrder());
-                                        return list;
-                                    }
-                            )
-                    ));
+        return fixedEvents.stream()
+                .map(fixedEvent -> {
+                    Map<String, List<String>> groupedSchedules = fixedEvent.getFixedSelections().stream()
+                            .collect(Collectors.groupingBy(
+                                    selection -> selection.getFixedSchedule().getDay(),
+                                    Collectors.collectingAndThen(
+                                            Collectors.mapping(selection -> selection.getFixedSchedule().getTime(), Collectors.toList()),
+                                            list -> {
+                                                list.sort(Comparator.naturalOrder());
+                                                return list;
+                                            }
+                                    )
+                            ));
 
-            List<FixedScheduleResponse> scheduleResponses = groupedSchedules.entrySet().stream()
-                    .map(entry -> FixedScheduleResponse.of(entry.getKey(), entry.getValue()))
-                    .collect(Collectors.toList());
+                    List<FixedScheduleResponse> scheduleResponses = groupedSchedules.entrySet().stream()
+                            .map(entry -> FixedScheduleResponse.of(entry.getKey(), entry.getValue()))
+                            .toList();
 
-            FixedEventResponse fixedEventResponse = FixedEventResponse.of(fixedEvent.getId(), scheduleResponses);
-            fixedEventResponses.add(fixedEventResponse);
-        }
-
-        return fixedEventResponses;
+                    return FixedEventResponse.of(fixedEvent.getId(), scheduleResponses);
+                })
+                .toList();
     }
 
     /**
      * 특정 고정 스케줄 상세 조회 메서드.
      *
-     * 특정 고정 이벤트 ID를 기반으로 상세 데이터를 조회합니다.
-     * FixedEventDetailResponse 객체로 반환합니다.
-     *
-     * @param authorizationHeader 인증 토큰
+     * @param user 인증된 사용자 정보
      * @param fixedEventId 조회할 고정 이벤트 ID
      * @return 고정 이벤트 상세 데이터
      */
     @Transactional(readOnly = true)
-    public FixedEventDetailResponse getFixedScheduleDetail(String authorizationHeader, Long fixedEventId) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
-
+    public FixedEventDetailResponse getFixedScheduleDetail(User user, Long fixedEventId) {
         FixedEvent fixedEvent = fixedEventRepository.findByUserAndFixedEventIdCustom(user, fixedEventId);
         if (fixedEvent == null) {
             throw new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT);
@@ -137,7 +126,7 @@ public class FixedScheduleService {
 
         List<FixedScheduleResponse> scheduleResponses = groupedSchedules.entrySet().stream()
                 .map(entry -> FixedScheduleResponse.of(entry.getKey(), entry.getValue()))
-                .collect(Collectors.toList());
+                .toList();
 
         return FixedEventDetailResponse.of(fixedEvent.getTitle(), scheduleResponses);
     }
@@ -148,13 +137,12 @@ public class FixedScheduleService {
      * 기존 고정 이벤트의 스케줄 데이터를 삭제하고,
      * 새로운 스케줄 데이터를 기반으로 수정합니다.
      *
-     * @param authorizationHeader 인증 토큰
+     * @param user 인증된 사용자 정보
      * @param fixedEventId 수정할 고정 이벤트 ID
      * @param modifyFixedEventRequest 수정 요청 데이터
      */
     @Transactional
-    public void modifyFixedSchedule(String authorizationHeader, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+    public void modifyFixedSchedule(User user, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
         FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
                 .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
 
