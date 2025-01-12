@@ -116,7 +116,6 @@ public class JwtUtil {
      */
     public <T> T getClaimFromToken(String token, String key, Class<T> clazz) {
         try {
-            validateToken(token);
             return Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
