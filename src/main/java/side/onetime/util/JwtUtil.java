@@ -46,7 +46,7 @@ public class JwtUtil {
         log.info("액세스 토큰이 발행되었습니다.");
 
         return Jwts.builder()
-                .claim("userId", userId.toString()) // 클레임에 userId 추가
+                .claim("userId", userId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(this.getSigningKey())
@@ -88,7 +88,7 @@ public class JwtUtil {
         log.info("리프레쉬 토큰이 발행되었습니다.");
 
         return Jwts.builder()
-                .claim("userId", userId.toString()) // 클레임에 userId 추가
+                .claim("userId", userId)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(this.getSigningKey())
