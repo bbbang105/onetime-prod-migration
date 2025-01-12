@@ -8,6 +8,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HttpBasicConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -21,6 +22,7 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final JwtFilter jwtFilter;
     private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
     private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
 
@@ -54,6 +56,13 @@ public class SecurityConfig {
             "https://onetime-test.store",
     };
 
+    /**
+     * CORS 설정을 구성하는 메서드.
+     *
+     * 허용된 Origin, Method, Header 등을 설정하고, 인증 관련 헤더를 노출합니다.
+     *
+     * @return CORS 설정 객체
+     */
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -69,6 +78,20 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * Spring Security의 필터 체인을 구성하는 메서드.
+     *
+     * - HTTP 기본 인증 비활성화
+     * - CSRF 비활성화
+     * - CORS 설정 적용
+     * - 요청 경로별 인증 정책 설정
+     * - OAuth2 로그인 성공/실패 핸들러 설정
+     * - JwtFilter를 Security Filter Chain에 추가
+     *
+     * @param httpSecurity HttpSecurity 객체
+     * @return SecurityFilterChain 객체
+     * @throws Exception 필터 체인 구성 실패 시 예외 발생
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -84,7 +107,8 @@ public class SecurityConfig {
                 .oauth2Login(oauth -> oauth
                         .successHandler(oAuthLoginSuccessHandler)
                         .failureHandler(oAuthLoginFailureHandler)
-                );
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // 빈 주입된 JwtFilter 추가
 
         return httpSecurity.build();
     }
