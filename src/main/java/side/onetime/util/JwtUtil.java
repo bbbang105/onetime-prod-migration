@@ -1,9 +1,9 @@
 package side.onetime.util;
 
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -106,26 +106,26 @@ public class JwtUtil {
     }
 
     /**
-     * 토큰에서 유저 ID 추출.
+     * 토큰에서 특정 클레임 값 추출.
      *
      * @param token JWT 토큰
-     * @return 유저 ID
+     * @param key   클레임 키
+     * @param clazz 반환할 값의 클래스 타입
+     * @param <T>   반환할 값의 타입
+     * @return 클레임 값
      */
-    public Long getUserIdFromToken(String token) {
+    public <T> T getClaimFromToken(String token, String key, Class<T> clazz) {
         try {
-            validateTokenExpiration(token);
-            String userId = Jwts.parser()
+            validateToken(token);
+            return Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload()
-                    .get("userId", String.class);
-            log.info("유저 id를 반환합니다.");
-            return Long.parseLong(userId);
+                    .get(key, clazz);
         } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.error("토큰에서 userId를 반환하던 도중 에러가 발생했습니다.");
-            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
+            log.error("토큰에서 '{}' claim 값을 추출하는 도중 에러가 발생했습니다: {}", key, e.getMessage());
+            throw new CustomException(TokenErrorStatus._TOKEN_CLAIM_EXTRACTION_ERROR);
         }
     }
 
@@ -137,126 +137,36 @@ public class JwtUtil {
      */
     public User getUserFromHeader(String authorizationHeader) {
         String token = getTokenFromHeader(authorizationHeader);
-        validateTokenExpiration(token);
+        validateToken(token);
 
-        return userRepository.findById(getUserIdFromToken(token))
+        return userRepository.findById(getClaimFromToken(token, "userId", Long.class))
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
     }
 
     /**
-     * 토큰에서 provider 추출.
-     *
-     * @param token JWT 토큰
-     * @return 제공자 문자열
-     */
-    public String getProviderFromToken(String token) {
-        try {
-            validateTokenExpiration(token);
-            String userId = Jwts.parser()
-                    .verifyWith(this.getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .get("provider", String.class);
-            log.info("provider를 반환합니다.");
-            return userId;
-        } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.error("토큰에서 provider를 반환하는 도중 에러가 발생했습니다.");
-            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
-        }
-    }
-
-    /**
-     * 토큰에서 providerId 추출.
-     *
-     * @param token JWT 토큰
-     * @return 제공자 ID 문자열
-     */
-    public String getProviderIdFromToken(String token) {
-        try {
-            validateTokenExpiration(token);
-            String providerId = Jwts.parser()
-                    .verifyWith(this.getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .get("providerId", String.class);
-            log.info("providerId를 반환합니다.");
-            return providerId;
-        } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.error("토큰에서 providerId를 반환하는 도중 에러가 발생했습니다.");
-            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
-        }
-    }
-
-    /**
-     * 토큰에서 이름 추출.
-     *
-     * @param token JWT 토큰
-     * @return 사용자 이름
-     */
-    public String getNameFromToken(String token) {
-        try {
-            validateTokenExpiration(token);
-            String name = Jwts.parser()
-                    .verifyWith(this.getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .get("name", String.class);
-            log.info("name을 반환합니다.");
-            return name;
-        } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.error("토큰에서 이름을 반환하는 도중 에러가 발생했습니다.");
-            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
-        }
-    }
-
-    /**
-     * 토큰에서 이메일 추출.
-     *
-     * @param token JWT 토큰
-     * @return 사용자 이메일
-     */
-    public String getEmailFromToken(String token) {
-        try {
-            validateTokenExpiration(token);
-            String email = Jwts.parser()
-                    .verifyWith(this.getSigningKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .get("email", String.class);
-            log.info("email을 반환합니다.");
-            return email;
-        } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.error("토큰에서 이메일을 반환하는 도중 에러가 발생했습니다.");
-            throw new CustomException(TokenErrorStatus._INVALID_TOKEN);
-        }
-    }
-
-    /**
-     * JWT 토큰 만료 기간 확인.
+     * JWT 토큰 검증.
      *
      * @param token JWT 토큰
      */
-    public void validateTokenExpiration(String token) {
+    public void validateToken(String token) {
         try {
-            log.info("토큰의 유효기간을 확인합니다.");
-            Date expirationDate = Jwts.parser()
+            log.info("JWT를 검증합니다.");
+            Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getExpiration();
-        } catch (JwtException | IllegalArgumentException e) {
-            // 토큰이 유효하지 않은 경우
-            log.error("만료된 토큰입니다.");
-            throw new CustomException(TokenErrorStatus._EXPIRED_TOKEN);
+                    .parseSignedClaims(token);
+        } catch (SecurityException | MalformedJwtException | SignatureException e) {
+            log.error("Invalid JWT signature, 유효하지 않은 JWT 서명 입니다.");
+            throw new CustomException(TokenErrorStatus._TOKEN_SIGNATURE_INVALID);
+        } catch (ExpiredJwtException e) {
+            log.error("Expired JWT token, 만료된 JWT token 입니다.");
+            throw new CustomException(TokenErrorStatus._TOKEN_EXPIRED);
+        } catch (UnsupportedJwtException e) {
+            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
+            throw new CustomException(TokenErrorStatus._TOKEN_UNSUPPORTED);
+        } catch (IllegalArgumentException e) {
+            log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
+            throw new CustomException(TokenErrorStatus._TOKEN_MALFORMED);
         }
     }
 }
