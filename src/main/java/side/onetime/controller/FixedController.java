@@ -3,7 +3,9 @@ package side.onetime.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import side.onetime.auth.dto.CustomUserDetails;
 import side.onetime.dto.fixed.request.CreateFixedEventRequest;
 import side.onetime.dto.fixed.request.ModifyFixedEventRequest;
 import side.onetime.dto.fixed.response.FixedEventByDayResponse;
@@ -20,6 +22,7 @@ import java.util.List;
 @RequestMapping("/api/v1/fixed-schedules")
 @RequiredArgsConstructor
 public class FixedController {
+
     private final FixedEventService fixedEventService;
     private final FixedScheduleService fixedScheduleService;
 
@@ -28,16 +31,16 @@ public class FixedController {
      *
      * 이 API는 새로운 고정 이벤트를 생성하고 관련된 고정 스케줄을 등록합니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
      * @param createFixedEventRequest 생성할 고정 이벤트에 대한 요청 데이터 (제목, 스케줄 목록 등)
+     * @param customUserDetails 인증된 사용자 정보
      * @return 생성 성공 여부를 나타내는 메시지
      */
     @PostMapping
     public ResponseEntity<ApiResponse<Object>> createFixedEvent(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @Valid @RequestBody CreateFixedEventRequest createFixedEventRequest) {
+            @Valid @RequestBody CreateFixedEventRequest createFixedEventRequest,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        fixedEventService.createFixedEvent(authorizationHeader, createFixedEventRequest);
+        fixedEventService.createFixedEvent(customUserDetails.user(), createFixedEventRequest);
         return ApiResponse.onSuccess(SuccessStatus._CREATED_FIXED_SCHEDULE);
     }
 
@@ -46,14 +49,14 @@ public class FixedController {
      *
      * 이 API는 유저가 등록한 모든 고정 스케줄을 조회합니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
+     * @param customUserDetails 인증된 사용자 정보
      * @return 유저가 등록한 모든 고정 스케줄 목록
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<FixedEventResponse>>> getAllFixedSchedules(
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        List<FixedEventResponse> fixedEventResponses = fixedScheduleService.getAllFixedSchedules(authorizationHeader);
+        List<FixedEventResponse> fixedEventResponses = fixedScheduleService.getAllFixedSchedules(customUserDetails.user());
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_FIXED_SCHEDULES, fixedEventResponses);
     }
 
@@ -62,16 +65,16 @@ public class FixedController {
      *
      * 이 API는 특정 ID에 해당하는 고정 스케줄의 상세 정보를 조회합니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
      * @param fixedEventId 조회할 고정 스케줄의 ID
+     * @param customUserDetails 인증된 사용자 정보
      * @return 조회된 고정 스케줄의 세부 정보
      */
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<FixedEventDetailResponse>> getFixedScheduleDetail(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable("id") Long fixedEventId) {
+            @PathVariable("id") Long fixedEventId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        FixedEventDetailResponse fixedEventDetailResponse = fixedScheduleService.getFixedScheduleDetail(authorizationHeader, fixedEventId);
+        FixedEventDetailResponse fixedEventDetailResponse = fixedScheduleService.getFixedScheduleDetail(customUserDetails.user(), fixedEventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_FIXED_SCHEDULE_DETAIL, fixedEventDetailResponse);
     }
 
@@ -80,22 +83,22 @@ public class FixedController {
      *
      * 이 API는 특정 고정 이벤트의 제목과 스케줄을 수정할 수 있습니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
      * @param fixedEventId 수정할 고정 이벤트의 ID
      * @param modifyFixedEventRequest 수정할 고정 이벤트의 제목 및 스케줄
+     * @param customUserDetails 인증된 사용자 정보
      * @return 수정 성공 여부를 나타내는 메시지
      */
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> modifyFixedEvent(
-            @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable("id") Long fixedEventId,
-            @RequestBody ModifyFixedEventRequest modifyFixedEventRequest) {
+            @RequestBody ModifyFixedEventRequest modifyFixedEventRequest,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
         if (modifyFixedEventRequest.title() != null) {
-            fixedEventService.modifyFixedEvent(authorizationHeader, fixedEventId, modifyFixedEventRequest);
+            fixedEventService.modifyFixedEvent(customUserDetails.user(), fixedEventId, modifyFixedEventRequest);
         }
         if (modifyFixedEventRequest.schedules() != null) {
-            fixedScheduleService.modifyFixedSchedule(authorizationHeader, fixedEventId, modifyFixedEventRequest);
+            fixedScheduleService.modifyFixedSchedule(customUserDetails.user(), fixedEventId, modifyFixedEventRequest);
         }
 
         return ApiResponse.onSuccess(SuccessStatus._MODIFY_FIXED_SCHEDULE);
@@ -106,16 +109,16 @@ public class FixedController {
      *
      * 이 API는 특정 ID에 해당하는 고정 이벤트와 관련된 스케줄을 삭제합니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
      * @param fixedEventId 삭제할 고정 이벤트의 ID
+     * @param customUserDetails 인증된 사용자 정보
      * @return 삭제 성공 여부를 나타내는 메시지
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Object>> removeFixedEvent(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable("id") Long fixedEventId) {
+            @PathVariable("id") Long fixedEventId,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        fixedEventService.removeFixedEvent(authorizationHeader, fixedEventId);
+        fixedEventService.removeFixedEvent(customUserDetails.user(), fixedEventId);
         return ApiResponse.onSuccess(SuccessStatus._REMOVE_FIXED_SCHEDULE);
     }
 
@@ -124,16 +127,16 @@ public class FixedController {
      *
      * 이 API는 특정 요일에 해당하는 고정 이벤트 목록을 조회합니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
      * @param day 조회할 요일 (예: 월, 화 등)
+     * @param customUserDetails 인증된 사용자 정보
      * @return 조회된 요일의 고정 이벤트 목록
      */
     @GetMapping("by-day/{day}")
     public ResponseEntity<ApiResponse<List<FixedEventByDayResponse>>> getFixedEventByDay(
-            @RequestHeader("Authorization") String authorizationHeader,
-            @PathVariable("day") String day) {
+            @PathVariable("day") String day,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        List<FixedEventByDayResponse> response = fixedEventService.getFixedEventByDay(authorizationHeader, day);
+        List<FixedEventByDayResponse> response = fixedEventService.getFixedEventByDay(customUserDetails.user(), day);
         return ApiResponse.onSuccess(SuccessStatus._GET_FIXED_EVENT_BY_DAY, response);
     }
 }

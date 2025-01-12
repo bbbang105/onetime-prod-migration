@@ -4,18 +4,23 @@ import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
+import side.onetime.auth.dto.CustomUserDetails;
+import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.UserController;
+import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
 import side.onetime.dto.user.response.GetUserProfileResponse;
@@ -25,7 +30,6 @@ import side.onetime.util.JwtUtil;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -33,11 +37,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(UserController.class)
 public class UserControllerTest extends ControllerTestConfig {
+
     @MockBean
     private UserService userService;
 
     @MockBean
     private JwtUtil jwtUtil;
+
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private CustomUserDetails customUserDetails;
+
+    @BeforeEach
+    public void setupSecurityContext() {
+        User mockUser = User.builder().nickname("testUser").email("test@example.com").build();
+        customUserDetails = new CustomUserDetails(mockUser);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities())
+        );
+    }
 
     @Test
     @DisplayName("유저 온보딩을 진행한다.")
@@ -47,8 +68,7 @@ public class UserControllerTest extends ControllerTestConfig {
         Mockito.when(userService.onboardUser(any(OnboardUserRequest.class))).thenReturn(response);
 
         OnboardUserRequest request = new OnboardUserRequest("sampleRegisterToken", "UserNickname");
-
-        String requestContent = new ObjectMapper().writeValueAsString(request);
+        String requestContent = objectMapper.writeValueAsString(request);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/users/onboarding")
@@ -64,8 +84,6 @@ public class UserControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.message").value("유저 온보딩에 성공했습니다."))
                 .andExpect(jsonPath("$.payload.access_token").value("sampleAccessToken"))
                 .andExpect(jsonPath("$.payload.refresh_token").value("sampleRefreshToken"))
-
-                // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("user/onboard",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -100,11 +118,10 @@ public class UserControllerTest extends ControllerTestConfig {
         String email = "user@example.com";
         GetUserProfileResponse response = new GetUserProfileResponse(nickname, email);
 
-        Mockito.when(userService.getUserProfile(anyString())).thenReturn(response);
+        Mockito.when(userService.getUserProfile(any(User.class))).thenReturn(response);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/profile")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer sampleToken")
                 .accept(MediaType.APPLICATION_JSON));
 
         // then
@@ -115,8 +132,6 @@ public class UserControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.message").value("유저 정보 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.payload.nickname").value(nickname))
                 .andExpect(jsonPath("$.payload.email").value(email))
-
-                // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("user/get-profile",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -143,16 +158,13 @@ public class UserControllerTest extends ControllerTestConfig {
     public void updateUserProfile() throws Exception {
         // given
         UpdateUserProfileRequest request = new UpdateUserProfileRequest("NewNickname");
-
-        Mockito.doNothing().when(userService).updateUserProfile(anyString(), any(UpdateUserProfileRequest.class));
-
-        String requestContent = new ObjectMapper().writeValueAsString(request);
+        Mockito.doNothing().when(userService).updateUserProfile(any(User.class), any(UpdateUserProfileRequest.class));
+        String requestContent = objectMapper.writeValueAsString(request);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/users/profile/action-update")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer sampleToken")
-                .contentType(MediaType.APPLICATION_JSON)
                 .content(requestContent)
+                .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
 
         // then
@@ -161,8 +173,6 @@ public class UserControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("유저 정보 수정에 성공했습니다."))
-
-                // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("user/update-profile",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -187,11 +197,10 @@ public class UserControllerTest extends ControllerTestConfig {
     @DisplayName("유저가 서비스를 탈퇴한다.")
     public void withdrawService() throws Exception {
         // given
-        Mockito.doNothing().when(userService).withdrawService(anyString());
+        Mockito.doNothing().when(userService).withdrawService(any(User.class));
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/users/action-withdraw")
-                .header(HttpHeaders.AUTHORIZATION, "Bearer sampleToken")
                 .accept(MediaType.APPLICATION_JSON));
 
         // then
@@ -200,8 +209,6 @@ public class UserControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("유저 서비스 탈퇴에 성공했습니다."))
-
-                // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("user/withdraw-service",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),

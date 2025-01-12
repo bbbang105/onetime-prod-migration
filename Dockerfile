@@ -6,10 +6,6 @@ WORKDIR /app
 # JAR 파일만 복사
 COPY ./onetime-0.0.1-SNAPSHOT.jar app.jar
 
-# HEALTHCHECK 추가
-HEALTHCHECK --interval=5s --timeout=3s --start-period=30s --retries=3 \
-  CMD curl --fail http://localhost:8090 || exit 1
-
 # 애플리케이션 실행 명령어
 ENTRYPOINT ["java", "-jar", "app.jar"]
 

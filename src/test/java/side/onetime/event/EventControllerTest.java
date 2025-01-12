@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.EventController;
 import side.onetime.domain.enums.Category;
@@ -44,6 +45,9 @@ public class EventControllerTest extends ControllerTestConfig {
 
     @MockBean
     private JwtUtil jwtUtil;
+
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Test
     @DisplayName("이벤트를 생성한다. (토큰 유무에 따라 로그인/비로그인 구분)")

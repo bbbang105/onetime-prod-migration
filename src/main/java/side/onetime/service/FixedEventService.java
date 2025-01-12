@@ -13,7 +13,6 @@ import side.onetime.exception.CustomException;
 import side.onetime.exception.status.FixedErrorStatus;
 import side.onetime.repository.FixedEventRepository;
 import side.onetime.util.DateUtil;
-import side.onetime.util.JwtUtil;
 
 import java.util.Comparator;
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.List;
 public class FixedEventService {
     private final FixedScheduleService fixedScheduleService;
     private final FixedEventRepository fixedEventRepository;
-    private final JwtUtil jwtUtil;
 
     /**
      * 고정 이벤트 생성 메서드.
@@ -32,33 +30,14 @@ public class FixedEventService {
      * 유저 인증 정보를 기반으로 새로운 고정 이벤트를 생성하고,
      * 관련된 고정 스케줄을 등록합니다.
      *
-     * @param authorizationHeader 인증 토큰
+     * @param user 인증된 사용자 정보
      * @param createFixedEventRequest 고정 이벤트 생성 요청 데이터
      */
     @Transactional
-    public void createFixedEvent(String authorizationHeader, CreateFixedEventRequest createFixedEventRequest) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+    public void createFixedEvent(User user, CreateFixedEventRequest createFixedEventRequest) {
         FixedEvent fixedEvent = createFixedEventRequest.toEntity(user);
         fixedEventRepository.save(fixedEvent);
         fixedScheduleService.createFixedSchedules(createFixedEventRequest.schedules(), fixedEvent);
-    }
-
-    /**
-     * 고정 이벤트 수정 메서드.
-     *
-     * 고정 이벤트의 제목을 수정합니다.
-     *
-     * @param authorizationHeader 인증 토큰
-     * @param fixedEventId 수정할 고정 이벤트 ID
-     * @param modifyFixedEventRequest 고정 이벤트 수정 요청 데이터
-     */
-    @Transactional
-    public void modifyFixedEvent(String authorizationHeader, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
-                .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
-        fixedEvent.updateTitle(modifyFixedEventRequest.title());
-        fixedEventRepository.save(fixedEvent);
     }
 
     /**
@@ -66,15 +45,32 @@ public class FixedEventService {
      *
      * 고정 이벤트와 해당 이벤트에 관련된 모든 스케줄을 삭제합니다.
      *
-     * @param authorizationHeader 인증 토큰
+     * @param user 인증된 사용자 정보
      * @param fixedEventId 삭제할 고정 이벤트 ID
      */
     @Transactional
-    public void removeFixedEvent(String authorizationHeader, Long fixedEventId) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+    public void removeFixedEvent(User user, Long fixedEventId) {
         FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
                 .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
         fixedEventRepository.deleteFixedEventAndSelections(user, fixedEventId);
+    }
+
+    /**
+     * 고정 이벤트 수정 메서드.
+     *
+     * 고정 이벤트의 제목을 수정합니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @param fixedEventId 수정할 고정 이벤트 ID
+     * @param modifyFixedEventRequest 고정 이벤트 수정 요청 데이터
+     */
+    @Transactional
+    public void modifyFixedEvent(User user, Long fixedEventId, ModifyFixedEventRequest modifyFixedEventRequest) {
+        FixedEvent fixedEvent = fixedEventRepository.findByUserAndId(user, fixedEventId)
+                .orElseThrow(() -> new CustomException(FixedErrorStatus._NOT_FOUND_FIXED_EVENT));
+
+        fixedEvent.updateTitle(modifyFixedEventRequest.title());
+        fixedEventRepository.save(fixedEvent);
     }
 
     /**
@@ -83,13 +79,12 @@ public class FixedEventService {
      * 특정 요일에 해당하는 고정 이벤트 목록을 조회합니다.
      * startTime을 기준으로 오름차순 정렬하여 반환합니다.
      *
-     * @param authorizationHeader 인증 토큰
+     * @param user 인증된 사용자 정보
      * @param day 조회할 요일 (예: "mon", "tue" 등)
      * @return 고정 이벤트 목록 (startTime 기준 오름차순 정렬)
      */
     @Transactional(readOnly = true)
-    public List<FixedEventByDayResponse> getFixedEventByDay(String authorizationHeader, String day) {
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
+    public List<FixedEventByDayResponse> getFixedEventByDay(User user, String day) {
         String koreanDay = convertDayToKorean(day);
 
         return fixedEventRepository.findFixedEventsByUserAndDay(user, koreanDay).stream()

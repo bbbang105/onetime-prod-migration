@@ -40,7 +40,7 @@ public class TokenService {
     public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
         String refreshToken = reissueTokenRequest.refreshToken();
 
-        Long userId = jwtUtil.getUserIdFromToken(refreshToken);
+        Long userId = jwtUtil.getClaimFromToken(refreshToken, "userId", Long.class);
         List<String> existRefreshTokens = refreshTokenRepository.findByUserId(userId)
                 .orElseThrow(() -> new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN));
 

@@ -112,3 +112,12 @@ springdoc:
 
 qr:
   event-base-url: ${QR_EVENT_BASE_URL}
+
+management:
+  endpoint:
+    health:
+      show-details: never # 상세 정보 숨기기
+  endpoints:
+    web:
+      exposure:
+        include: health
