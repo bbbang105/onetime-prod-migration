@@ -328,7 +328,6 @@ public class EventService {
         List<GetMostPossibleTime> mostPossibleTimes = new ArrayList<>();
         GetMostPossibleTime previousTime = null;
 
-        boolean stopFlag = false;
         for (Map.Entry<Schedule, List<String>> entry : scheduleToNamesMap.entrySet()) {
             Schedule schedule = entry.getKey();
             List<String> curNames = entry.getValue();
@@ -342,7 +341,7 @@ public class EventService {
                     // 새로운 시간대를 추가하는 경우
                     if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
                         // 6개를 찾았을 시 종료
-                        stopFlag = true;
+                        break;
                     }
                     List<String> impossibleNames = allMembersName.stream()
                             .filter(name -> !curNames.contains(name))
@@ -353,9 +352,6 @@ public class EventService {
                     mostPossibleTimes.add(newTime);
                     previousTime = newTime;
                 }
-            }
-            if (stopFlag) {
-                break;
             }
         }
         return mostPossibleTimes;
