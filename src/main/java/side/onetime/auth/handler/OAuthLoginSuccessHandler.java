@@ -163,7 +163,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         String refreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
         saveRefreshToken(userId, refreshToken);
 
-        String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, accessToken, refreshToken);
+        String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, "true", accessToken, refreshToken);
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 
