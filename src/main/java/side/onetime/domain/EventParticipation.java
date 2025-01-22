@@ -36,4 +36,8 @@ public class EventParticipation extends BaseEntity {
         this.user = user;
         this.eventStatus = eventStatus;
     }
+
+    public void updateEventStatus(EventStatus eventStatus) {
+        this.eventStatus = eventStatus;
+    }
 }
