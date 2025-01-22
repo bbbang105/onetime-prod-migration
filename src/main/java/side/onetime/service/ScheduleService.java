@@ -231,7 +231,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
-        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+        List<Member> members = memberRepository.findAllByEvent(event);
 
         // 이벤트에 참여하는 모든 참여자 목록
         GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
@@ -294,7 +294,7 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
+        Member member = memberRepository.findByMemberId(UUID.fromString(memberId))
                 .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
@@ -356,7 +356,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
-        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+        List<Member> members = memberRepository.findAllByEvent(event);
 
         // 이벤트에 참여하는 모든 참여자 목록
         GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
@@ -419,7 +419,7 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
+        Member member = memberRepository.findByMemberId(UUID.fromString(memberId))
                 .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
