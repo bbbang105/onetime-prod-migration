@@ -28,7 +28,7 @@ public record GetEventResponse(
                 event.getEndTime(),
                 event.getCategory(),
                 ranges,
-                eventStatus
+                EventStatus.PARTICIPANT == eventStatus ? eventStatus : EventStatus.CREATOR
         );
     }
 }

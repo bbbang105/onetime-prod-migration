@@ -10,7 +10,7 @@ import side.onetime.global.common.dto.ErrorReasonDto;
 @RequiredArgsConstructor
 public enum EventParticipationErrorStatus implements BaseErrorCode {
     _NOT_FOUND_EVENT_PARTICIPATION(HttpStatus.NOT_FOUND, "EVENT-PARTICIPATION-001", "이벤트 참여 여부를 찾을 수 없습니다."),
-    _IS_NOT_USERS_CREATED_EVENT_PARTICIPATION(HttpStatus.BAD_REQUEST, "EVENT-PARTICIPATION-002", "해당 이벤트의 생성자가 아닙니다."),
+    _IS_NOT_AUTHORIZED_EVENT_PARTICIPATION(HttpStatus.BAD_REQUEST, "EVENT-PARTICIPATION-002", "해당 이벤트의 생성자 권한이 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

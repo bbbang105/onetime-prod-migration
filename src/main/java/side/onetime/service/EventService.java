@@ -222,18 +222,11 @@ public class EventService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        // 이벤트에 참여하는 모든 멤버
         List<Member> members = event.getMembers();
-        // 이벤트에 참여하는 모든 유저
-        List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
-        List<User> users = eventParticipations.stream()
-                .filter(eventParticipation -> {
-                    // CREATOR일 경우, 스케줄 등록을 했는지 확인
-                    if (eventParticipation.getEventStatus() == EventStatus.CREATOR) {
-                        return selectionRepository.existsByUserAndEventSchedules(eventParticipation.getUser(), eventParticipation.getEvent());
-                    }
-                    return true;
-                })
+
+        // 이벤트 참여 상태가 CREATOR가 아닌 유저만 필터링하여 가져오기
+        List<User> users = eventParticipationRepository.findAllByEvent(event).stream()
+                .filter(eventParticipation -> eventParticipation.getEventStatus() != EventStatus.CREATOR)
                 .map(EventParticipation::getUser)
                 .toList();
 
@@ -441,7 +434,7 @@ public class EventService {
      */
     @Transactional
     public void removeUserCreatedEvent(String authorizationHeader, String eventId) {
-        EventParticipation eventParticipation = verifyUserIsEventCreator(authorizationHeader, eventId);
+        EventParticipation eventParticipation = verifyUserHasEventAccess(authorizationHeader, eventId);
         eventRepository.deleteEvent(eventParticipation.getEvent());
         s3Util.deleteFile(eventParticipation.getEvent().getQrFileName()); // QR 이미지 삭제
     }
@@ -456,7 +449,7 @@ public class EventService {
      */
     @Transactional
     public void modifyUserCreatedEvent(String authorizationHeader, String eventId, ModifyUserCreatedEventRequest modifyUserCreatedEventRequest) {
-        EventParticipation eventParticipation = verifyUserIsEventCreator(authorizationHeader, eventId);
+        EventParticipation eventParticipation = verifyUserHasEventAccess(authorizationHeader, eventId);
         Event event = eventParticipation.getEvent();
 
         updateEventTitle(event, modifyUserCreatedEventRequest.title());
@@ -590,14 +583,14 @@ public class EventService {
 
     /**
      * 유저가 이벤트의 생성자인지 검증하는 메서드.
-     * 인증된 유저가 특정 이벤트의 생성자인지 확인하고, 생성자인 경우 관련 정보를 반환합니다.
+     * 인증된 유저가 특정 이벤트의 생성자이거나 특정 권한을 가진 상태인지 확인하고, 관련 정보를 반환합니다.
      *
      * @param authorizationHeader 인증된 유저의 토큰
      * @param eventId 확인할 이벤트의 ID
-     * @return 이벤트 생성자의 참여 정보
-     * @throws CustomException 유저가 생성자가 아니거나 참여 정보를 찾을 수 없는 경우
+     * @return 이벤트 참여 정보
+     * @throws CustomException 유저가 참여자로만 등록된 경우 또는 참여 정보를 찾을 수 없는 경우
      */
-    private EventParticipation verifyUserIsEventCreator(String authorizationHeader, String eventId) {
+    private EventParticipation verifyUserHasEventAccess(String authorizationHeader, String eventId) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
@@ -606,8 +599,8 @@ public class EventService {
         if (eventParticipation == null) {
             throw new CustomException(EventParticipationErrorStatus._NOT_FOUND_EVENT_PARTICIPATION);
         }
-        if (!EventStatus.CREATOR.equals(eventParticipation.getEventStatus())) {
-            throw new CustomException(EventParticipationErrorStatus._IS_NOT_USERS_CREATED_EVENT_PARTICIPATION);
+        if (EventStatus.PARTICIPANT.equals(eventParticipation.getEventStatus())) {
+            throw new CustomException(EventParticipationErrorStatus._IS_NOT_AUTHORIZED_EVENT_PARTICIPATION);
         }
 
         return eventParticipation;

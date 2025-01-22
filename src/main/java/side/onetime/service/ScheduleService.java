@@ -85,9 +85,9 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        // 참여 정보가 없는 경우 참여자로 저장
         EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
         if (eventParticipation == null) {
+            // 참여 정보가 없는 경우 참여자로 저장
             eventParticipationRepository.save(
                     EventParticipation.builder()
                             .user(user)
@@ -95,6 +95,9 @@ public class ScheduleService {
                             .eventStatus(EventStatus.PARTICIPANT)
                             .build()
             );
+        } else if (EventStatus.CREATOR == eventParticipation.getEventStatus()) {
+            // 생성자인 경우 생성자 & 참여자로 변경
+            eventParticipation.updateEventStatus(EventStatus.CREATOR_AND_PARTICIPANT);
         }
 
         List<DaySchedule> daySchedules = createDayScheduleRequest.daySchedules();
@@ -172,9 +175,9 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        // 참여 정보가 없는 경우 참여자로 저장
         EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
         if (eventParticipation == null) {
+            // 참여 정보가 없는 경우 참여자로 저장
             eventParticipationRepository.save(
                     EventParticipation.builder()
                             .user(user)
@@ -182,6 +185,9 @@ public class ScheduleService {
                             .eventStatus(EventStatus.PARTICIPANT)
                             .build()
             );
+        } else if (EventStatus.CREATOR == eventParticipation.getEventStatus()) {
+            // 생성자인 경우 생성자 & 참여자로 변경
+            eventParticipation.updateEventStatus(EventStatus.CREATOR_AND_PARTICIPANT);
         }
 
         List<DateSchedule> dateSchedules = createDateScheduleRequest.dateSchedules();
