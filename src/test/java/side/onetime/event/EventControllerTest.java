@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.EventController;
 import side.onetime.domain.enums.Category;
@@ -44,6 +45,9 @@ public class EventControllerTest extends ControllerTestConfig {
 
     @MockBean
     private JwtUtil jwtUtil;
+
+    @MockBean
+    private CustomUserDetailsService customUserDetailsService;
 
     @Test
     @DisplayName("이벤트를 생성한다. (토큰 유무에 따라 로그인/비로그인 구분)")
@@ -113,6 +117,7 @@ public class EventControllerTest extends ControllerTestConfig {
         // given
         UUID eventId = UUID.randomUUID();
         GetEventResponse response = new GetEventResponse(
+                "1f4c4558-97f8-49c1-aec4-f681173534d0",
                 "Sample Event",
                 "10:00",
                 "12:00",
@@ -135,6 +140,7 @@ public class EventControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("이벤트 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.event_id").value("1f4c4558-97f8-49c1-aec4-f681173534d0"))
                 .andExpect(jsonPath("$.payload.title").value("Sample Event"))
                 .andExpect(jsonPath("$.payload.start_time").value("10:00"))
                 .andExpect(jsonPath("$.payload.end_time").value("12:00"))
@@ -158,6 +164,7 @@ public class EventControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                                fieldWithPath("payload.event_id").type(JsonFieldType.STRING).description("이벤트 ID"),
                                                 fieldWithPath("payload.title").type(JsonFieldType.STRING).description("이벤트 제목"),
                                                 fieldWithPath("payload.start_time").type(JsonFieldType.STRING).description("이벤트 시작 시간"),
                                                 fieldWithPath("payload.end_time").type(JsonFieldType.STRING).description("이벤트 종료 시간"),

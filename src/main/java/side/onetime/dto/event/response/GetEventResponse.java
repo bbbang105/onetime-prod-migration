@@ -12,6 +12,7 @@ import java.util.List;
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record GetEventResponse(
+        String eventId,
         String title,
         String startTime,
         String endTime,
@@ -21,12 +22,13 @@ public record GetEventResponse(
 ) {
     public static GetEventResponse of(Event event, List<String> ranges, EventStatus eventStatus) {
         return new GetEventResponse(
+                String.valueOf(event.getEventId()),
                 event.getTitle(),
                 event.getStartTime(),
                 event.getEndTime(),
                 event.getCategory(),
                 ranges,
-                eventStatus
+                EventStatus.PARTICIPANT == eventStatus || eventStatus == null ? eventStatus : EventStatus.CREATOR
         );
     }
 }

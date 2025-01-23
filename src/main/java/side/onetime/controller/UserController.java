@@ -3,7 +3,9 @@ package side.onetime.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import side.onetime.auth.dto.CustomUserDetails;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
 import side.onetime.dto.user.response.GetUserProfileResponse;
@@ -40,14 +42,14 @@ public class UserController {
      *
      * 로그인한 유저의 닉네임과 이메일 정보를 조회합니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
+     * @param customUserDetails 인증된 사용자 정보
      * @return 유저의 닉네임과 이메일을 포함한 응답 객체
      */
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<GetUserProfileResponse>> getUserProfile(
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        GetUserProfileResponse getUserProfileResponse = userService.getUserProfile(authorizationHeader);
+        GetUserProfileResponse getUserProfileResponse = userService.getUserProfile(customUserDetails.user());
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_PROFILE, getUserProfileResponse);
     }
 
@@ -56,16 +58,16 @@ public class UserController {
      *
      * 유저의 닉네임을 수정하는 API입니다. 수정된 닉네임은 최대 길이 제한을 받습니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
+     * @param customUserDetails 인증된 사용자 정보
      * @param updateUserProfileRequest 수정할 닉네임을 포함하는 요청 객체
      * @return 성공 상태 응답 객체
      */
     @PatchMapping("/profile/action-update")
     public ResponseEntity<ApiResponse<SuccessStatus>> updateUserProfile(
-            @RequestHeader("Authorization") String authorizationHeader,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody UpdateUserProfileRequest updateUserProfileRequest) {
 
-        userService.updateUserProfile(authorizationHeader, updateUserProfileRequest);
+        userService.updateUserProfile(customUserDetails.user(), updateUserProfileRequest);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_PROFILE);
     }
 
@@ -74,14 +76,14 @@ public class UserController {
      *
      * 유저의 계정을 삭제하여 서비스에서 탈퇴하는 API입니다.
      *
-     * @param authorizationHeader 인증된 유저의 토큰
+     * @param customUserDetails 인증된 사용자 정보
      * @return 성공 상태 응답 객체
      */
     @PostMapping("/action-withdraw")
     public ResponseEntity<ApiResponse<SuccessStatus>> withdrawService(
-            @RequestHeader("Authorization") String authorizationHeader) {
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        userService.withdrawService(authorizationHeader);
+        userService.withdrawService(customUserDetails.user());
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_SERVICE);
     }
 }
