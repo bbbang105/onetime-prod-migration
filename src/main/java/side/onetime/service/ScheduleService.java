@@ -85,9 +85,9 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(createDayScheduleRequest.eventId()))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        // 참여 정보가 없는 경우 참여자로 저장
         EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
         if (eventParticipation == null) {
+            // 참여 정보가 없는 경우 참여자로 저장
             eventParticipationRepository.save(
                     EventParticipation.builder()
                             .user(user)
@@ -95,6 +95,9 @@ public class ScheduleService {
                             .eventStatus(EventStatus.PARTICIPANT)
                             .build()
             );
+        } else if (EventStatus.CREATOR == eventParticipation.getEventStatus()) {
+            // 생성자인 경우 생성자 & 참여자로 변경
+            eventParticipation.updateEventStatus(EventStatus.CREATOR_AND_PARTICIPANT);
         }
 
         List<DaySchedule> daySchedules = createDayScheduleRequest.daySchedules();
@@ -172,9 +175,9 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(createDateScheduleRequest.eventId()))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        // 참여 정보가 없는 경우 참여자로 저장
         EventParticipation eventParticipation = eventParticipationRepository.findByUserAndEvent(user, event);
         if (eventParticipation == null) {
+            // 참여 정보가 없는 경우 참여자로 저장
             eventParticipationRepository.save(
                     EventParticipation.builder()
                             .user(user)
@@ -182,6 +185,9 @@ public class ScheduleService {
                             .eventStatus(EventStatus.PARTICIPANT)
                             .build()
             );
+        } else if (EventStatus.CREATOR == eventParticipation.getEventStatus()) {
+            // 생성자인 경우 생성자 & 참여자로 변경
+            eventParticipation.updateEventStatus(EventStatus.CREATOR_AND_PARTICIPANT);
         }
 
         List<DateSchedule> dateSchedules = createDateScheduleRequest.dateSchedules();
@@ -225,7 +231,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
-        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+        List<Member> members = memberRepository.findAllByEvent(event);
 
         // 이벤트에 참여하는 모든 참여자 목록
         GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
@@ -288,7 +294,7 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
+        Member member = memberRepository.findByMemberId(UUID.fromString(memberId))
                 .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
@@ -350,7 +356,7 @@ public class ScheduleService {
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
         // 이벤트에 참여하는 모든 멤버
-        List<Member> members = memberRepository.findAllWithSelectionsAndSchedulesByEvent(event);
+        List<Member> members = memberRepository.findAllByEvent(event);
 
         // 이벤트에 참여하는 모든 참여자 목록
         GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
@@ -413,7 +419,7 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        Member member = memberRepository.findByMemberIdWithSelections(UUID.fromString(memberId))
+        Member member = memberRepository.findByMemberId(UUID.fromString(memberId))
                 .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
         Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
