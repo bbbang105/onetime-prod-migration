@@ -502,6 +502,7 @@ public class EventService {
                 createAndSaveDaySchedules(event, rangesToCreate, newStartTime, newEndTime);
             }
         }
+        scheduleRepository.flush();
     }
 
     /**
