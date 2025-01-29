@@ -26,7 +26,7 @@ public class SwaggerConfig {
         OpenAPI openAPI = new OpenAPI()
                 .info(new Info()
                         .title("OneTime API Documentation")
-                        .version("1.3.0")
+                        .version("v1.4.4")
                         .description("Spring REST Docs with Swagger UI.")
                         .contact(new Contact()
                         .name("Sangho Han")
