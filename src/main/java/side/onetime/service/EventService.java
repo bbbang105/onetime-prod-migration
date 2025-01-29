@@ -454,7 +454,11 @@ public class EventService {
 
         updateEventTitle(event, modifyUserCreatedEventRequest.title());
         updateEventRanges(event, event.getSchedules(), modifyUserCreatedEventRequest.ranges(), modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
-        updateEventTimes(event, event.getSchedules(), modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
+
+        // 변경된 범위에 따른 새로운 스케줄 목록
+        List<Schedule> newSchedules = scheduleRepository.findAllByEvent(event)
+                .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_ALL_SCHEDULES));
+        updateEventTimes(event, newSchedules, modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
     }
 
     /**
