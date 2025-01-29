@@ -108,7 +108,7 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
-  show-actuator: true
+  show-actuator: false
 
 qr:
   event-base-url: ${QR_EVENT_BASE_URL}
@@ -116,7 +116,7 @@ qr:
 management:
   endpoint:
     health:
-      show-details: never # 상세 정보 숨기기
+      show-details: never
   endpoints:
     web:
       exposure:
