@@ -87,4 +87,12 @@ public class User extends BaseEntity {
     public void updateMarketingPolicyAgreement(Boolean marketingPolicyAgreement) {
         this.marketingPolicyAgreement = marketingPolicyAgreement;
     }
+
+    public void updateSleepStartTime(String sleepStartTime) {
+        this.sleepStartTime = sleepStartTime;
+    }
+
+    public void updateSleepEndTime(String sleepEndTime) {
+        this.sleepEndTime = sleepEndTime;
+    }
 }

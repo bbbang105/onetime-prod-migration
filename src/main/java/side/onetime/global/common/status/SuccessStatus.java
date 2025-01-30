@@ -49,6 +49,7 @@ public enum SuccessStatus implements BaseCode {
     _GET_USER_POLICY_AGREEMENT(HttpStatus.OK, "200", "유저 약관 동의 여부 조회에 성공했습니다."),
     _UPDATE_USER_POLICY_AGREEMENT(HttpStatus.OK, "200", "유저 약관 동의 여부 수정에 성공했습니다."),
     _GET_USER_SLEEP_TIME(HttpStatus.OK, "200", "유저 수면 시간 조회에 성공했습니다."),
+    _UPDATE_USER_SLEEP_TIME(HttpStatus.OK, "200", "유저 수면 시간 수정에 성공했습니다."),
     // Fixed
     _CREATED_FIXED_SCHEDULE(HttpStatus.CREATED, "201", "고정 스케줄 등록에 성공했습니다."),
     _GET_ALL_FIXED_SCHEDULES(HttpStatus.OK, "200", "전체 고정 스케줄 조회에 성공했습니다."),
