@@ -34,11 +34,14 @@ public class User extends BaseEntity {
     @Column(name = "provider_id", nullable = false, length = 50, unique = true)
     private String providerId;
 
-    @Column(name = "essential_policy_agreement")
-    private Boolean essentialPolicyAgreement;
+    @Column(name = "service_policy_agreement")
+    private Boolean servicePolicyAgreement;
 
-    @Column(name = "optional_policy_agreement")
-    private Boolean optionalPolicyAgreement;
+    @Column(name = "privacy_policy_agreement")
+    private Boolean privacyPolicyAgreement;
+
+    @Column(name = "marketing_policy_agreement")
+    private Boolean marketingPolicyAgreement;
 
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
@@ -50,14 +53,15 @@ public class User extends BaseEntity {
     private List<FixedEvent> fixedEvents;
 
     @Builder
-    public User(String name, String email, String nickname, String provider, String providerId, Boolean essentialPolicyAgreement, Boolean optionalPolicyAgreement) {
+    public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement) {
         this.name = name;
         this.email = email;
         this.nickname = nickname;
         this.provider = provider;
         this.providerId = providerId;
-        this.essentialPolicyAgreement = essentialPolicyAgreement;
-        this.optionalPolicyAgreement = optionalPolicyAgreement;
+        this.servicePolicyAgreement = servicePolicyAgreement;
+        this.privacyPolicyAgreement = privacyPolicyAgreement;
+        this.marketingPolicyAgreement = marketingPolicyAgreement;
     }
 
     public void updateNickName(String nickname) {

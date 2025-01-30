@@ -8,13 +8,15 @@ import side.onetime.domain.User;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record GetUserPolicyAgreementResponse(
-        Boolean essentialPolicyAgreement,
-        Boolean optionalPolicyAgreement
+        Boolean servicePolicyAgreement,
+        Boolean privacyPolicyAgreement,
+        Boolean marketingPolicyAgreement
 ) {
     public static GetUserPolicyAgreementResponse from(User user) {
         return new GetUserPolicyAgreementResponse(
-                user.getEssentialPolicyAgreement() != null ? user.getEssentialPolicyAgreement() : false,
-                user.getOptionalPolicyAgreement() != null ? user.getOptionalPolicyAgreement() : false
+                user.getServicePolicyAgreement() != null ? user.getServicePolicyAgreement() : false,
+                user.getPrivacyPolicyAgreement() != null ? user.getPrivacyPolicyAgreement() : false,
+                user.getMarketingPolicyAgreement() != null ? user.getMarketingPolicyAgreement() : false
         );
     }
 }
