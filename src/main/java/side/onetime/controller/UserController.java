@@ -11,6 +11,7 @@ import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
+import side.onetime.dto.user.response.GetUserSleepTimeResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
@@ -122,5 +123,21 @@ public class UserController {
 
         userService.updateUserPolicyAgreement(customUserDetails.user(), request);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_POLICY_AGREEMENT);
+    }
+
+    /**
+     * 유저 수면 시간 조회 API.
+     *
+     * 로그인한 사용자의 수면 시작 시간과 종료 시간을 조회합니다.
+     *
+     * @param customUserDetails 인증된 사용자 정보 (JWT 인증)
+     * @return 유저의 수면 시작 시간 및 종료 시간을 포함한 응답 객체
+     */
+    @GetMapping("/sleep-time")
+    public ResponseEntity<ApiResponse<GetUserSleepTimeResponse>> getUserSleepTime(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        GetUserSleepTimeResponse response = userService.getUserSleepTime(customUserDetails.user());
+        return ApiResponse.onSuccess(SuccessStatus._GET_USER_SLEEP_TIME, response);
     }
 }
