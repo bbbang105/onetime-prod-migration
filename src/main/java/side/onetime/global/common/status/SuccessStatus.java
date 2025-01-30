@@ -51,12 +51,8 @@ public enum SuccessStatus implements BaseCode {
     _GET_USER_SLEEP_TIME(HttpStatus.OK, "200", "유저 수면 시간 조회에 성공했습니다."),
     _UPDATE_USER_SLEEP_TIME(HttpStatus.OK, "200", "유저 수면 시간 수정에 성공했습니다."),
     // Fixed
-    _CREATED_FIXED_SCHEDULE(HttpStatus.CREATED, "201", "고정 스케줄 등록에 성공했습니다."),
-    _GET_ALL_FIXED_SCHEDULES(HttpStatus.OK, "200", "전체 고정 스케줄 조회에 성공했습니다."),
-    _GET_FIXED_SCHEDULE_DETAIL(HttpStatus.OK, "200", "특정 고정 스케줄 상세 조회에 성공했습니다."),
-    _MODIFY_FIXED_SCHEDULE(HttpStatus.OK, "200", "고정 스케줄 수정에 성공했습니다."),
-    _REMOVE_FIXED_SCHEDULE(HttpStatus.OK, "200", "고정 스케줄 삭제에 성공했습니다."),
-    _GET_FIXED_EVENT_BY_DAY(HttpStatus.OK, "200", "요일 별 고정 스케줄 조회에 성공했습니다."),
+    _GET_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 조회에 성공했습니다."),
+    _UPDATE_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 수정에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;

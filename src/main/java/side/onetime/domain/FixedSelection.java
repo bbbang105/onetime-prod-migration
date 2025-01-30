@@ -18,16 +18,16 @@ public class FixedSelection extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "fixed_events_id", foreignKey = @ForeignKey(name = "fixed_selections_fk_fixed_events_id"))
-    private FixedEvent fixedEvent;
+    @JoinColumn(name = "users_id", foreignKey = @ForeignKey(name = "fixed_selections_fk_users_id"))
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "fixed_schedules_id", foreignKey = @ForeignKey(name = "fixed_selections_fk_fixed_schedules_id"))
     private FixedSchedule fixedSchedule;
 
     @Builder
-    public FixedSelection(FixedEvent fixedEvent, FixedSchedule fixedSchedule) {
-        this.fixedEvent = fixedEvent;
+    public FixedSelection(User user, FixedSchedule fixedSchedule) {
+        this.user = user;
         this.fixedSchedule = fixedSchedule;
     }
 }
