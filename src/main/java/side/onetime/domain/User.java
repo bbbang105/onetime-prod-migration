@@ -67,4 +67,16 @@ public class User extends BaseEntity {
     public void updateNickName(String nickname) {
         this.nickname = nickname;
     }
+
+    public void updateServicePolicyAgreement(Boolean servicePolicyAgreement) {
+        this.servicePolicyAgreement = servicePolicyAgreement;
+    }
+
+    public void updatePrivacyPolicyAgreement(Boolean privacyPolicyAgreement) {
+        this.privacyPolicyAgreement = privacyPolicyAgreement;
+    }
+
+    public void updateMarketingPolicyAgreement(Boolean marketingPolicyAgreement) {
+        this.marketingPolicyAgreement = marketingPolicyAgreement;
+    }
 }

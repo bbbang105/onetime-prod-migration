@@ -7,6 +7,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.auth.dto.CustomUserDetails;
 import side.onetime.dto.user.request.OnboardUserRequest;
+import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
@@ -102,5 +103,24 @@ public class UserController {
 
         GetUserPolicyAgreementResponse response = userService.getUserPolicyAgreement(customUserDetails.user());
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_POLICY_AGREEMENT, response);
+    }
+
+    /**
+     * 유저 약관 동의 여부 수정 API.
+     *
+     * 사용자의 서비스 이용약관, 개인정보 수집 및 이용 동의, 마케팅 정보 수신 동의 상태를 업데이트합니다.
+     * 모든 필드는 필수 값이며, 기존 동의 여부를 새로운 값으로 변경합니다.
+     *
+     * @param customUserDetails 인증된 사용자 정보
+     * @param request 약관 동의 여부 수정 요청 데이터 (필수 값)
+     * @return 성공 상태 응답 객체
+     */
+    @PutMapping("/policy")
+    public ResponseEntity<ApiResponse<SuccessStatus>> updateUserPolicyAgreement(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails,
+            @Valid @RequestBody UpdateUserPolicyAgreementRequest request) {
+
+        userService.updateUserPolicyAgreement(customUserDetails.user(), request);
+        return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_POLICY_AGREEMENT);
     }
 }

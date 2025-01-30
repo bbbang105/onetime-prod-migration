@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
+import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
@@ -136,5 +137,22 @@ public class UserService {
     @Transactional(readOnly = true)
     public GetUserPolicyAgreementResponse getUserPolicyAgreement(User user) {
         return GetUserPolicyAgreementResponse.from(user);
+    }
+
+    /**
+     * 유저 약관 동의 여부 수정 메서드.
+     *
+     * 인증된 유저의 서비스 이용약관, 개인정보 수집 및 이용 동의, 마케팅 정보 수신 동의 상태를 업데이트합니다.
+     * 모든 필드는 필수 값이며, `@NotNull` 검증을 거칩니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @param request 약관 동의 여부 수정 요청 데이터
+     */
+    @Transactional
+    public void updateUserPolicyAgreement(User user, UpdateUserPolicyAgreementRequest request) {
+        user.updateServicePolicyAgreement(request.servicePolicyAgreement());
+        user.updatePrivacyPolicyAgreement(request.privacyPolicyAgreement());
+        user.updateMarketingPolicyAgreement(request.marketingPolicyAgreement());
+        userRepository.save(user);
     }
 }
