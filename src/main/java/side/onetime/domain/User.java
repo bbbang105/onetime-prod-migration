@@ -49,14 +49,14 @@ public class User extends BaseEntity {
     @Column(name = "sleep_end_time")
     private String sleepEndTime;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<EventParticipation> eventParticipations;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<FixedEvent> fixedEvents;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<FixedSelection> fixedSelections;
 
     @Builder
     public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement, String sleepStartTime, String sleepEndTime) {
