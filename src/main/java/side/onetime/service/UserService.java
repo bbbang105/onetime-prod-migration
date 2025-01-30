@@ -39,11 +39,12 @@ public class UserService {
     /**
      * 유저 온보딩 메서드.
      *
-     * 회원가입 및 초기 설정을 진행합니다. 제공된 레지스터 토큰을 이용하여 유저 정보를 검증하고 저장합니다.
+     * 회원가입 이후, 유저의 필수 정보를 설정하고 온보딩을 완료합니다.
+     * 제공된 레지스터 토큰을 검증하여 유저 정보를 확인한 후, 닉네임, 약관 동의 여부, 수면 시간을 저장합니다.
      * 저장된 유저 정보를 기반으로 새로운 액세스 토큰과 리프레쉬 토큰을 생성하고 반환합니다.
      *
-     * @param onboardUserRequest 온보딩 요청 데이터
-     * @return 액세스 토큰 및 리프레쉬 토큰 응답 데이터
+     * @param onboardUserRequest 유저의 레지스터 토큰, 닉네임, 약관 동의 여부, 수면 시간 정보를 포함하는 요청 객체
+     * @return 발급된 액세스 토큰과 리프레쉬 토큰을 포함하는 응답 객체
      */
     @Transactional
     public OnboardUserResponse onboardUser(OnboardUserRequest onboardUserRequest) {
@@ -60,15 +61,20 @@ public class UserService {
             throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
         }
 
-        User user = User.builder()
+        User newUser = User.builder()
                 .name(name)
                 .email(email)
                 .nickname(onboardUserRequest.nickname())
                 .provider(provider)
                 .providerId(providerId)
+                .servicePolicyAgreement(onboardUserRequest.servicePolicyAgreement())
+                .privacyPolicyAgreement(onboardUserRequest.privacyPolicyAgreement())
+                .marketingPolicyAgreement(onboardUserRequest.marketingPolicyAgreement())
+                .sleepStartTime(onboardUserRequest.sleepStartTime())
+                .sleepEndTime(onboardUserRequest.sleepEndTime())
                 .build();
-        userRepository.save(user);
-        Long userId = user.getId();
+        userRepository.save(newUser);
+        Long userId = newUser.getId();
 
         // 액세스 & 리프레쉬 토큰 발급
         String accessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);

@@ -68,7 +68,15 @@ public class UserControllerTest extends ControllerTestConfig {
         OnboardUserResponse response = new OnboardUserResponse("sampleAccessToken", "sampleRefreshToken");
         Mockito.when(userService.onboardUser(any(OnboardUserRequest.class))).thenReturn(response);
 
-        OnboardUserRequest request = new OnboardUserRequest("sampleRegisterToken", "UserNickname");
+        OnboardUserRequest request = new OnboardUserRequest(
+                "sampleRegisterToken",
+                "UserNickname",
+                true,
+                true,
+                false,
+                "23:30",
+                "07:00"
+        );
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
@@ -94,7 +102,12 @@ public class UserControllerTest extends ControllerTestConfig {
                                         .description("유저 온보딩을 진행한다.")
                                         .requestFields(
                                                 fieldWithPath("register_token").type(JsonFieldType.STRING).description("레지스터 토큰"),
-                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("유저 닉네임")
+                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("유저 닉네임"),
+                                                fieldWithPath("service_policy_agreement").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 여부"),
+                                                fieldWithPath("privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 여부"),
+                                                fieldWithPath("marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정보 수신 동의 여부"),
+                                                fieldWithPath("sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간 (예: 23:30)"),
+                                                fieldWithPath("sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (예: 07:00)")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
