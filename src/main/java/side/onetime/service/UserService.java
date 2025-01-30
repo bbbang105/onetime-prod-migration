@@ -8,6 +8,7 @@ import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.exception.CustomException;
@@ -121,5 +122,19 @@ public class UserService {
     @Transactional
     public void withdrawService(User user) {
         userRepository.delete(user);
+    }
+
+    /**
+     * 유저 약관 동의 여부 조회 메서드.
+     *
+     * 인증된 사용자의 필수 및 선택 약관 동의 상태를 반환합니다.
+     * 값이 null일 경우 기본값(false)을 반환합니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @return 유저 약관 동의 여부 응답 객체
+     */
+    @Transactional(readOnly = true)
+    public GetUserPolicyAgreementResponse getUserPolicyAgreement(User user) {
+        return GetUserPolicyAgreementResponse.from(user);
     }
 }

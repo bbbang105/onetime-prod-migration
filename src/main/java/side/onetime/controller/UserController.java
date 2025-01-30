@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import side.onetime.auth.dto.CustomUserDetails;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.global.common.ApiResponse;
@@ -58,7 +59,7 @@ public class UserController {
      *
      * 유저의 닉네임을 수정하는 API입니다. 수정된 닉네임은 최대 길이 제한을 받습니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
+     * @param customUserDetails        인증된 사용자 정보
      * @param updateUserProfileRequest 수정할 닉네임을 포함하는 요청 객체
      * @return 성공 상태 응답 객체
      */
@@ -85,5 +86,21 @@ public class UserController {
 
         userService.withdrawService(customUserDetails.user());
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_SERVICE);
+    }
+
+    /**
+     * 유저 약관 동의 여부 조회 API.
+     *
+     * 인증된 사용자의 필수 및 선택 약관 동의 상태를 조회합니다.
+     *
+     * @param customUserDetails 인증된 사용자 정보
+     * @return 약관 동의 여부 응답 객체
+     */
+    @GetMapping("/policy")
+    public ResponseEntity<ApiResponse<GetUserPolicyAgreementResponse>> getUserPolicyAgreement(
+            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+
+        GetUserPolicyAgreementResponse response = userService.getUserPolicyAgreement(customUserDetails.user());
+        return ApiResponse.onSuccess(SuccessStatus._GET_USER_POLICY_AGREEMENT, response);
     }
 }
