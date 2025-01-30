@@ -9,8 +9,10 @@ import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
+import side.onetime.dto.user.response.GetUserSleepTimeResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.UserErrorStatus;
@@ -153,6 +155,34 @@ public class UserService {
         user.updateServicePolicyAgreement(request.servicePolicyAgreement());
         user.updatePrivacyPolicyAgreement(request.privacyPolicyAgreement());
         user.updateMarketingPolicyAgreement(request.marketingPolicyAgreement());
+        userRepository.save(user);
+    }
+
+    /**
+     * 유저 수면 시간 조회 메서드.
+     *
+     * 인증된 사용자의 수면 시작 시간과 종료 시간을 조회합니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @return 유저 수면 시간 응답 데이터 (시작 시간 및 종료 시간 포함)
+     */
+    @Transactional(readOnly = true)
+    public GetUserSleepTimeResponse getUserSleepTime(User user) {
+        return GetUserSleepTimeResponse.from(user);
+    }
+
+    /**
+     * 유저 수면 시간 수정 메서드.
+     *
+     * 인증된 사용자의 수면 시작 시간과 종료 시간을 업데이트합니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @param request 수면 시간 수정 요청 데이터 (필수 값)
+     */
+    @Transactional
+    public void updateUserSleepTime(User user, UpdateUserSleepTimeRequest request) {
+        user.updateSleepStartTime(request.sleepStartTime());
+        user.updateSleepEndTime(request.sleepEndTime());
         userRepository.save(user);
     }
 }

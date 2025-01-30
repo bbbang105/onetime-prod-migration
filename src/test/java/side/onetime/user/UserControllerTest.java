@@ -23,8 +23,10 @@ import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
+import side.onetime.dto.user.response.GetUserSleepTimeResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.service.UserService;
 import side.onetime.util.JwtUtil;
@@ -310,6 +312,93 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
                                         .requestSchema(Schema.schema("UpdateUserPolicyAgreementRequestSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 수면 시간을 조회한다.")
+    public void getUserSleepTime() throws Exception {
+        // given
+        GetUserSleepTimeResponse response = new GetUserSleepTimeResponse("23:30", "07:00");
+        Mockito.when(userService.getUserSleepTime(any(User.class))).thenReturn(response);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/api/v1/users/sleep-time")
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 수면 시간 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.sleep_start_time").value("23:30"))
+                .andExpect(jsonPath("$.payload.sleep_end_time").value("07:00"))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/get-sleep-time",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 수면 시간을 조회한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                                fieldWithPath("payload.sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간 (HH:mm)"),
+                                                fieldWithPath("payload.sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (HH:mm)")
+                                        )
+                                        .responseSchema(Schema.schema("GetUserSleepTimeResponseSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 수면 시간을 수정한다.")
+    public void updateUserSleepTime() throws Exception {
+        // given
+        UpdateUserSleepTimeRequest request = new UpdateUserSleepTimeRequest("22:00", "06:30");
+        Mockito.doNothing().when(userService).updateUserSleepTime(any(User.class), any(UpdateUserSleepTimeRequest.class));
+
+        String requestContent = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.put("/api/v1/users/sleep-time")
+                        .content(requestContent)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 수면 시간 수정에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/update-sleep-time",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 수면 시간을 수정한다.")
+                                        .requestFields(
+                                                fieldWithPath("sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간 (HH:mm)"),
+                                                fieldWithPath("sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (HH:mm)")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .requestSchema(Schema.schema("UpdateUserSleepTimeRequestSchema"))
                                         .build()
                         )
                 ));

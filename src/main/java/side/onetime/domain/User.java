@@ -43,6 +43,12 @@ public class User extends BaseEntity {
     @Column(name = "marketing_policy_agreement")
     private Boolean marketingPolicyAgreement;
 
+    @Column(name = "sleep_start_time")
+    private String sleepStartTime;
+
+    @Column(name = "sleep_end_time")
+    private String sleepEndTime;
+
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
@@ -53,7 +59,7 @@ public class User extends BaseEntity {
     private List<FixedEvent> fixedEvents;
 
     @Builder
-    public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement) {
+    public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement, String sleepStartTime, String sleepEndTime) {
         this.name = name;
         this.email = email;
         this.nickname = nickname;
@@ -62,6 +68,8 @@ public class User extends BaseEntity {
         this.servicePolicyAgreement = servicePolicyAgreement;
         this.privacyPolicyAgreement = privacyPolicyAgreement;
         this.marketingPolicyAgreement = marketingPolicyAgreement;
+        this.sleepStartTime = sleepStartTime;
+        this.sleepEndTime = sleepEndTime;
     }
 
     public void updateNickName(String nickname) {
@@ -78,5 +86,13 @@ public class User extends BaseEntity {
 
     public void updateMarketingPolicyAgreement(Boolean marketingPolicyAgreement) {
         this.marketingPolicyAgreement = marketingPolicyAgreement;
+    }
+
+    public void updateSleepStartTime(String sleepStartTime) {
+        this.sleepStartTime = sleepStartTime;
+    }
+
+    public void updateSleepEndTime(String sleepEndTime) {
+        this.sleepEndTime = sleepEndTime;
     }
 }
