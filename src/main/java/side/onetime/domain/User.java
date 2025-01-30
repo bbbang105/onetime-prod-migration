@@ -34,6 +34,15 @@ public class User extends BaseEntity {
     @Column(name = "provider_id", nullable = false, length = 50, unique = true)
     private String providerId;
 
+    @Column(name = "service_policy_agreement")
+    private Boolean servicePolicyAgreement;
+
+    @Column(name = "privacy_policy_agreement")
+    private Boolean privacyPolicyAgreement;
+
+    @Column(name = "marketing_policy_agreement")
+    private Boolean marketingPolicyAgreement;
+
     @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
@@ -44,15 +53,30 @@ public class User extends BaseEntity {
     private List<FixedEvent> fixedEvents;
 
     @Builder
-    public User(String name, String email, String nickname, String provider, String providerId) {
+    public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement) {
         this.name = name;
         this.email = email;
         this.nickname = nickname;
         this.provider = provider;
         this.providerId = providerId;
+        this.servicePolicyAgreement = servicePolicyAgreement;
+        this.privacyPolicyAgreement = privacyPolicyAgreement;
+        this.marketingPolicyAgreement = marketingPolicyAgreement;
     }
 
     public void updateNickName(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void updateServicePolicyAgreement(Boolean servicePolicyAgreement) {
+        this.servicePolicyAgreement = servicePolicyAgreement;
+    }
+
+    public void updatePrivacyPolicyAgreement(Boolean privacyPolicyAgreement) {
+        this.privacyPolicyAgreement = privacyPolicyAgreement;
+    }
+
+    public void updateMarketingPolicyAgreement(Boolean marketingPolicyAgreement) {
+        this.marketingPolicyAgreement = marketingPolicyAgreement;
     }
 }

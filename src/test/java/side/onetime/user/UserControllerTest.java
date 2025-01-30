@@ -3,7 +3,6 @@ package side.onetime.user;
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,7 +21,9 @@ import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.UserController;
 import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
+import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.service.UserService;
@@ -46,8 +47,6 @@ public class UserControllerTest extends ControllerTestConfig {
 
     @MockBean
     private CustomUserDetailsService customUserDetailsService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private CustomUserDetails customUserDetails;
 
@@ -221,6 +220,96 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 약관 동의 여부를 조회한다.")
+    public void getUserPolicyAgreement() throws Exception {
+        // given
+        GetUserPolicyAgreementResponse response = new GetUserPolicyAgreementResponse(true, true, false);
+        Mockito.when(userService.getUserPolicyAgreement(any(User.class))).thenReturn(response);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/api/v1/users/policy")
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 약관 동의 여부 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.service_policy_agreement").value(true))
+                .andExpect(jsonPath("$.payload.privacy_policy_agreement").value(true))
+                .andExpect(jsonPath("$.payload.marketing_policy_agreement").value(false))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/get-policy-agreement",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 약관 동의 여부를 조회한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                                fieldWithPath("payload.service_policy_agreement").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 여부"),
+                                                fieldWithPath("payload.privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 여부"),
+                                                fieldWithPath("payload.marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정보 수신 동의 여부")
+                                        )
+                                        .responseSchema(Schema.schema("GetUserPolicyAgreementResponseSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 약관 동의 여부를 수정한다.")
+    public void updateUserPolicyAgreement() throws Exception {
+        // given
+        UpdateUserPolicyAgreementRequest request = new UpdateUserPolicyAgreementRequest(true, true, false);
+        Mockito.doNothing().when(userService).updateUserPolicyAgreement(any(User.class), any(UpdateUserPolicyAgreementRequest.class));
+
+        String requestContent = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.put("/api/v1/users/policy")
+                        .content(requestContent)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 약관 동의 여부 수정에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/update-policy-agreement",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 약관 동의 여부를 수정한다.")
+                                        .requestFields(
+                                                fieldWithPath("service_policy_agreement").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 여부"),
+                                                fieldWithPath("privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 여부"),
+                                                fieldWithPath("marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정보 수신 동의 여부")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .requestSchema(Schema.schema("UpdateUserPolicyAgreementRequestSchema"))
                                         .build()
                         )
                 ));
