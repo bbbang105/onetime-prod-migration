@@ -22,8 +22,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 public abstract class ControllerTestConfig {
     @Autowired
     protected WebApplicationContext context;
+
     @Autowired
     protected ObjectMapper objectMapper;
+
     protected MockMvc mockMvc;
 
     @BeforeEach

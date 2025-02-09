@@ -2,7 +2,6 @@ package side.onetime.member;
 
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,7 +14,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.MemberController;
-import side.onetime.domain.enums.Category;
 import side.onetime.dto.member.request.IsDuplicateRequest;
 import side.onetime.dto.member.request.LoginMemberRequest;
 import side.onetime.dto.member.request.RegisterMemberRequest;
@@ -46,8 +44,6 @@ public class MemberControllerTest extends ControllerTestConfig {
 
     @MockBean
     private CustomUserDetailsService customUserDetailsService;
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
     @DisplayName("멤버를 등록한다.")

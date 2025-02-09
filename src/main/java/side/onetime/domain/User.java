@@ -34,25 +34,65 @@ public class User extends BaseEntity {
     @Column(name = "provider_id", nullable = false, length = 50, unique = true)
     private String providerId;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Column(name = "service_policy_agreement")
+    private Boolean servicePolicyAgreement;
+
+    @Column(name = "privacy_policy_agreement")
+    private Boolean privacyPolicyAgreement;
+
+    @Column(name = "marketing_policy_agreement")
+    private Boolean marketingPolicyAgreement;
+
+    @Column(name = "sleep_start_time")
+    private String sleepStartTime;
+
+    @Column(name = "sleep_end_time")
+    private String sleepEndTime;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<EventParticipation> eventParticipations;
 
-    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<FixedEvent> fixedEvents;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<FixedSelection> fixedSelections;
 
     @Builder
-    public User(String name, String email, String nickname, String provider, String providerId) {
+    public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement, String sleepStartTime, String sleepEndTime) {
         this.name = name;
         this.email = email;
         this.nickname = nickname;
         this.provider = provider;
         this.providerId = providerId;
+        this.servicePolicyAgreement = servicePolicyAgreement;
+        this.privacyPolicyAgreement = privacyPolicyAgreement;
+        this.marketingPolicyAgreement = marketingPolicyAgreement;
+        this.sleepStartTime = sleepStartTime;
+        this.sleepEndTime = sleepEndTime;
     }
 
     public void updateNickName(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void updateServicePolicyAgreement(Boolean servicePolicyAgreement) {
+        this.servicePolicyAgreement = servicePolicyAgreement;
+    }
+
+    public void updatePrivacyPolicyAgreement(Boolean privacyPolicyAgreement) {
+        this.privacyPolicyAgreement = privacyPolicyAgreement;
+    }
+
+    public void updateMarketingPolicyAgreement(Boolean marketingPolicyAgreement) {
+        this.marketingPolicyAgreement = marketingPolicyAgreement;
+    }
+
+    public void updateSleepStartTime(String sleepStartTime) {
+        this.sleepStartTime = sleepStartTime;
+    }
+
+    public void updateSleepEndTime(String sleepEndTime) {
+        this.sleepEndTime = sleepEndTime;
     }
 }

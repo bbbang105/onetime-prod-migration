@@ -1,7 +1,11 @@
 package side.onetime.repository.custom;
 
-import side.onetime.domain.FixedEvent;
+import side.onetime.domain.FixedSelection;
+import side.onetime.domain.User;
+
+import java.util.List;
 
 public interface FixedSelectionRepositoryCustom {
-    void deleteFixedSelectionsByEvent(FixedEvent fixedEvent);
+    void deleteFixedSelectionsByUser(User user);
+    List<FixedSelection> findAllByUser(User user);
 }

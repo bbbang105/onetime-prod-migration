@@ -3,7 +3,6 @@ package side.onetime.user;
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,12 @@ import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.UserController;
 import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
+import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
+import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
+import side.onetime.dto.user.response.GetUserSleepTimeResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.service.UserService;
 import side.onetime.util.JwtUtil;
@@ -47,8 +50,6 @@ public class UserControllerTest extends ControllerTestConfig {
     @MockBean
     private CustomUserDetailsService customUserDetailsService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     private CustomUserDetails customUserDetails;
 
     @BeforeEach
@@ -67,7 +68,15 @@ public class UserControllerTest extends ControllerTestConfig {
         OnboardUserResponse response = new OnboardUserResponse("sampleAccessToken", "sampleRefreshToken");
         Mockito.when(userService.onboardUser(any(OnboardUserRequest.class))).thenReturn(response);
 
-        OnboardUserRequest request = new OnboardUserRequest("sampleRegisterToken", "UserNickname");
+        OnboardUserRequest request = new OnboardUserRequest(
+                "sampleRegisterToken",
+                "UserNickname",
+                true,
+                true,
+                false,
+                "23:30",
+                "07:00"
+        );
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
@@ -93,7 +102,12 @@ public class UserControllerTest extends ControllerTestConfig {
                                         .description("유저 온보딩을 진행한다.")
                                         .requestFields(
                                                 fieldWithPath("register_token").type(JsonFieldType.STRING).description("레지스터 토큰"),
-                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("유저 닉네임")
+                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("유저 닉네임"),
+                                                fieldWithPath("service_policy_agreement").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 여부"),
+                                                fieldWithPath("privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 여부"),
+                                                fieldWithPath("marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정보 수신 동의 여부"),
+                                                fieldWithPath("sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간 (예: 23:30)"),
+                                                fieldWithPath("sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (예: 07:00)")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
@@ -221,6 +235,183 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 약관 동의 여부를 조회한다.")
+    public void getUserPolicyAgreement() throws Exception {
+        // given
+        GetUserPolicyAgreementResponse response = new GetUserPolicyAgreementResponse(true, true, false);
+        Mockito.when(userService.getUserPolicyAgreement(any(User.class))).thenReturn(response);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/api/v1/users/policy")
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 약관 동의 여부 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.service_policy_agreement").value(true))
+                .andExpect(jsonPath("$.payload.privacy_policy_agreement").value(true))
+                .andExpect(jsonPath("$.payload.marketing_policy_agreement").value(false))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/get-policy-agreement",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 약관 동의 여부를 조회한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                                fieldWithPath("payload.service_policy_agreement").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 여부"),
+                                                fieldWithPath("payload.privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 여부"),
+                                                fieldWithPath("payload.marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정보 수신 동의 여부")
+                                        )
+                                        .responseSchema(Schema.schema("GetUserPolicyAgreementResponseSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 약관 동의 여부를 수정한다.")
+    public void updateUserPolicyAgreement() throws Exception {
+        // given
+        UpdateUserPolicyAgreementRequest request = new UpdateUserPolicyAgreementRequest(true, true, false);
+        Mockito.doNothing().when(userService).updateUserPolicyAgreement(any(User.class), any(UpdateUserPolicyAgreementRequest.class));
+
+        String requestContent = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.put("/api/v1/users/policy")
+                        .content(requestContent)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 약관 동의 여부 수정에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/update-policy-agreement",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 약관 동의 여부를 수정한다.")
+                                        .requestFields(
+                                                fieldWithPath("service_policy_agreement").type(JsonFieldType.BOOLEAN).description("서비스 이용약관 동의 여부"),
+                                                fieldWithPath("privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 여부"),
+                                                fieldWithPath("marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정보 수신 동의 여부")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .requestSchema(Schema.schema("UpdateUserPolicyAgreementRequestSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 수면 시간을 조회한다.")
+    public void getUserSleepTime() throws Exception {
+        // given
+        GetUserSleepTimeResponse response = new GetUserSleepTimeResponse("23:30", "07:00");
+        Mockito.when(userService.getUserSleepTime(any(User.class))).thenReturn(response);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.get("/api/v1/users/sleep-time")
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 수면 시간 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.sleep_start_time").value("23:30"))
+                .andExpect(jsonPath("$.payload.sleep_end_time").value("07:00"))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/get-sleep-time",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 수면 시간을 조회한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
+                                                fieldWithPath("payload.sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간 (HH:mm)"),
+                                                fieldWithPath("payload.sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (HH:mm)")
+                                        )
+                                        .responseSchema(Schema.schema("GetUserSleepTimeResponseSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저 수면 시간을 수정한다.")
+    public void updateUserSleepTime() throws Exception {
+        // given
+        UpdateUserSleepTimeRequest request = new UpdateUserSleepTimeRequest("22:00", "06:30");
+        Mockito.doNothing().when(userService).updateUserSleepTime(any(User.class), any(UpdateUserSleepTimeRequest.class));
+
+        String requestContent = objectMapper.writeValueAsString(request);
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.put("/api/v1/users/sleep-time")
+                        .content(requestContent)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 수면 시간 수정에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/update-sleep-time",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저 수면 시간을 수정한다.")
+                                        .requestFields(
+                                                fieldWithPath("sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간 (HH:mm)"),
+                                                fieldWithPath("sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (HH:mm)")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .requestSchema(Schema.schema("UpdateUserSleepTimeRequestSchema"))
                                         .build()
                         )
                 ));

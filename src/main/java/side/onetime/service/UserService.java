@@ -7,8 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
+import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
+import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
+import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
+import side.onetime.dto.user.response.GetUserSleepTimeResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.UserErrorStatus;
@@ -35,11 +39,12 @@ public class UserService {
     /**
      * 유저 온보딩 메서드.
      *
-     * 회원가입 및 초기 설정을 진행합니다. 제공된 레지스터 토큰을 이용하여 유저 정보를 검증하고 저장합니다.
+     * 회원가입 이후, 유저의 필수 정보를 설정하고 온보딩을 완료합니다.
+     * 제공된 레지스터 토큰을 검증하여 유저 정보를 확인한 후, 닉네임, 약관 동의 여부, 수면 시간을 저장합니다.
      * 저장된 유저 정보를 기반으로 새로운 액세스 토큰과 리프레쉬 토큰을 생성하고 반환합니다.
      *
-     * @param onboardUserRequest 온보딩 요청 데이터
-     * @return 액세스 토큰 및 리프레쉬 토큰 응답 데이터
+     * @param onboardUserRequest 유저의 레지스터 토큰, 닉네임, 약관 동의 여부, 수면 시간 정보를 포함하는 요청 객체
+     * @return 발급된 액세스 토큰과 리프레쉬 토큰을 포함하는 응답 객체
      */
     @Transactional
     public OnboardUserResponse onboardUser(OnboardUserRequest onboardUserRequest) {
@@ -56,15 +61,20 @@ public class UserService {
             throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
         }
 
-        User user = User.builder()
+        User newUser = User.builder()
                 .name(name)
                 .email(email)
                 .nickname(onboardUserRequest.nickname())
                 .provider(provider)
                 .providerId(providerId)
+                .servicePolicyAgreement(onboardUserRequest.servicePolicyAgreement())
+                .privacyPolicyAgreement(onboardUserRequest.privacyPolicyAgreement())
+                .marketingPolicyAgreement(onboardUserRequest.marketingPolicyAgreement())
+                .sleepStartTime(onboardUserRequest.sleepStartTime())
+                .sleepEndTime(onboardUserRequest.sleepEndTime())
                 .build();
-        userRepository.save(user);
-        Long userId = user.getId();
+        userRepository.save(newUser);
+        Long userId = newUser.getId();
 
         // 액세스 & 리프레쉬 토큰 발급
         String accessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
@@ -121,5 +131,64 @@ public class UserService {
     @Transactional
     public void withdrawService(User user) {
         userRepository.delete(user);
+    }
+
+    /**
+     * 유저 약관 동의 여부 조회 메서드.
+     *
+     * 인증된 사용자의 필수 및 선택 약관 동의 상태를 반환합니다.
+     * 값이 null일 경우 기본값(false)을 반환합니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @return 유저 약관 동의 여부 응답 객체
+     */
+    @Transactional(readOnly = true)
+    public GetUserPolicyAgreementResponse getUserPolicyAgreement(User user) {
+        return GetUserPolicyAgreementResponse.from(user);
+    }
+
+    /**
+     * 유저 약관 동의 여부 수정 메서드.
+     *
+     * 인증된 유저의 서비스 이용약관, 개인정보 수집 및 이용 동의, 마케팅 정보 수신 동의 상태를 업데이트합니다.
+     * 모든 필드는 필수 값이며, `@NotNull` 검증을 거칩니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @param request 약관 동의 여부 수정 요청 데이터
+     */
+    @Transactional
+    public void updateUserPolicyAgreement(User user, UpdateUserPolicyAgreementRequest request) {
+        user.updateServicePolicyAgreement(request.servicePolicyAgreement());
+        user.updatePrivacyPolicyAgreement(request.privacyPolicyAgreement());
+        user.updateMarketingPolicyAgreement(request.marketingPolicyAgreement());
+        userRepository.save(user);
+    }
+
+    /**
+     * 유저 수면 시간 조회 메서드.
+     *
+     * 인증된 사용자의 수면 시작 시간과 종료 시간을 조회합니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @return 유저 수면 시간 응답 데이터 (시작 시간 및 종료 시간 포함)
+     */
+    @Transactional(readOnly = true)
+    public GetUserSleepTimeResponse getUserSleepTime(User user) {
+        return GetUserSleepTimeResponse.from(user);
+    }
+
+    /**
+     * 유저 수면 시간 수정 메서드.
+     *
+     * 인증된 사용자의 수면 시작 시간과 종료 시간을 업데이트합니다.
+     *
+     * @param user 인증된 사용자 정보
+     * @param request 수면 시간 수정 요청 데이터 (필수 값)
+     */
+    @Transactional
+    public void updateUserSleepTime(User user, UpdateUserSleepTimeRequest request) {
+        user.updateSleepStartTime(request.sleepStartTime());
+        user.updateSleepEndTime(request.sleepEndTime());
+        userRepository.save(user);
     }
 }

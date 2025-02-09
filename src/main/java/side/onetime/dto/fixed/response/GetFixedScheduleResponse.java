@@ -6,16 +6,12 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 
 import java.util.List;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+@JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record FixedEventResponse(
-        Long id,
+public record GetFixedScheduleResponse(
         List<FixedScheduleResponse> schedules
 ) {
-    public static FixedEventResponse of(Long id, List<FixedScheduleResponse> schedules) {
-        return new FixedEventResponse(
-                id,
-                schedules
-        );
-    }
+        public static GetFixedScheduleResponse from(List<FixedScheduleResponse> schedules) {
+                return new GetFixedScheduleResponse(schedules);
+        }
 }
