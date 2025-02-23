@@ -72,6 +72,7 @@ public class UserService {
                 .marketingPolicyAgreement(onboardUserRequest.marketingPolicyAgreement())
                 .sleepStartTime(onboardUserRequest.sleepStartTime())
                 .sleepEndTime(onboardUserRequest.sleepEndTime())
+                .language(onboardUserRequest.language())
                 .build();
         userRepository.save(newUser);
         Long userId = newUser.getId();
