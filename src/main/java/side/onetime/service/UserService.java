@@ -14,17 +14,15 @@ import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.GetUserSleepTimeResponse;
 import side.onetime.dto.user.response.OnboardUserResponse;
-import side.onetime.exception.CustomException;
-import side.onetime.exception.status.UserErrorStatus;
 import side.onetime.repository.RefreshTokenRepository;
 import side.onetime.repository.UserRepository;
 import side.onetime.util.JwtUtil;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    private static final int NICKNAME_LENGTH_LIMIT = 30;
 
     @Value("${jwt.access-token.expiration-time}")
     private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
@@ -56,10 +54,6 @@ public class UserService {
         String providerId = jwtUtil.getClaimFromToken(registerToken, "providerId", String.class);
         String name = jwtUtil.getClaimFromToken(registerToken, "name", String.class);
         String email = jwtUtil.getClaimFromToken(registerToken, "email", String.class);
-
-        if (onboardUserRequest.nickname().length() > NICKNAME_LENGTH_LIMIT) {
-            throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
-        }
 
         User newUser = User.builder()
                 .name(name)
@@ -113,17 +107,8 @@ public class UserService {
      */
     @Transactional
     public void updateUserProfile(User user, UpdateUserProfileRequest updateUserProfileRequest) {
-        if (updateUserProfileRequest.nickname() != null) {
-            String nickname = updateUserProfileRequest.nickname();
-            if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
-                // 닉네임 길이 제한을 넘은 경우
-                throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
-            }
-            user.updateNickName(nickname);
-        }
-        if (updateUserProfileRequest.language() != null) {
-            user.updateLanguage(updateUserProfileRequest.language());
-        }
+        Optional.ofNullable(updateUserProfileRequest.nickname()).ifPresent(user::updateNickName);
+        Optional.ofNullable(updateUserProfileRequest.language()).ifPresent(user::updateLanguage);
         userRepository.save(user);
     }
 
