@@ -108,7 +108,6 @@ springdoc:
     operations-sorter: alpha
   api-docs:
     path: /v3/api-docs
-    server: "https://onetime-test.store"
   show-actuator: false
 
 qr:

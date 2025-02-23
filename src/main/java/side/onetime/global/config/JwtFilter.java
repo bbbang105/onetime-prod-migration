@@ -41,16 +41,20 @@ public class JwtFilter extends OncePerRequestFilter {
                 filterChain.doFilter(request, response);
                 return;
             }
-
             String token = jwtUtil.getTokenFromHeader(request.getHeader("Authorization"));
             jwtUtil.validateToken(token);
             Long userId = jwtUtil.getClaimFromToken(token, "userId", Long.class);
-
             setAuthentication(userId);
 
         } catch (Exception e) {
             log.error("JWT validation failed: " + e.getMessage());
-            SecurityContextHolder.clearContext();
+
+            // ✅ 직접 401 응답 반환
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"message\": \"Invalid or expired token\", \"status\": 401}");
+            response.getWriter().flush();
+            return;
         }
         filterChain.doFilter(request, response);
     }
@@ -79,9 +83,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/api/v1/users/onboarding") ||
-                path.startsWith("/swagger-ui")  ||  // Swagger UI 예외 추가
-                path.startsWith("/v3/api-docs") ||  // Swagger API 문서 예외 추가
-                path.startsWith("/actuator");  // Health Check 관련 예외 추가
+        return path.startsWith("/api/v1/users/onboarding");
     }
 }
