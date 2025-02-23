@@ -41,56 +41,30 @@ public class EventService {
 
     /**
      * 비로그인 사용자를 위한 이벤트 생성 메서드.
-     * 이 메서드는 비로그인 사용자가 제공한 정보를 기반으로 새로운 이벤트를 생성하고, QR 코드를 생성하여 S3에 업로드합니다.
      *
-     * @param createEventRequest 이벤트 생성 요청 데이터 (제목, 시간, 카테고리, 설문 범위 등)
-     * @return 생성된 이벤트의 응답 데이터 (이벤트 ID 포함)
-     * @throws CustomException QR 코드 생성 실패 또는 잘못된 날짜/요일 포맷일 경우
+     * @param createEventRequest 이벤트 생성 요청 데이터
+     * @return 생성된 이벤트 응답
      */
     @Transactional
     public CreateEventResponse createEventForAnonymousUser(CreateEventRequest createEventRequest) {
-        Event event = createEventRequest.toEntity();
-
-        // QR 코드 생성 및 업로드
-        String qrFileName = generateAndUploadQrCode(event.getEventId());
-        event.addQrFileName(qrFileName);
-        eventRepository.save(event);
-
-        if (createEventRequest.category().equals(Category.DATE)) {
-            if (!isDateFormat(createEventRequest.ranges().get(0))) {
-                throw new CustomException(EventErrorStatus._IS_NOT_DATE_FORMAT);
-            }
-            createAndSaveDateSchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
-        } else {
-            if (isDateFormat(createEventRequest.ranges().get(0))) {
-                throw new CustomException(EventErrorStatus._IS_NOT_DAY_FORMAT);
-            }
-            createAndSaveDaySchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
-        }
-
+        Event event = saveEventWithQrCode(createEventRequest);
+        validateAndSaveSchedules(event, createEventRequest);
         return CreateEventResponse.of(event);
     }
 
     /**
      * 인증된 사용자를 위한 이벤트 생성 메서드.
-     * 이 메서드는 인증된 사용자가 제공한 정보를 기반으로 새로운 이벤트를 생성하고, QR 코드를 생성하여 S3에 업로드합니다.
-     * 생성된 이벤트에 대해 참여 정보(EventParticipation)도 저장됩니다.
      *
-     * @param createEventRequest 이벤트 생성 요청 데이터 (제목, 시간, 카테고리, 설문 범위 등)
+     * @param createEventRequest 이벤트 생성 요청 데이터
      * @param authorizationHeader 인증된 사용자의 토큰
-     * @return 생성된 이벤트의 응답 데이터 (이벤트 ID 포함)
-     * @throws CustomException QR 코드 생성 실패 또는 잘못된 날짜/요일 포맷일 경우
+     * @return 생성된 이벤트 응답
      */
     @Transactional
     public CreateEventResponse createEventForAuthenticatedUser(CreateEventRequest createEventRequest, String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        Event event = createEventRequest.toEntity();
+        Event event = saveEventWithQrCode(createEventRequest);
 
-        // QR 코드 생성 및 업로드
-        String qrFileName = generateAndUploadQrCode(event.getEventId());
-        event.addQrFileName(qrFileName);
-        eventRepository.save(event);
-        // 이벤트 참여 여부 저장
+        // 이벤트 참여 정보 저장
         EventParticipation eventParticipation = EventParticipation.builder()
                 .user(user)
                 .event(event)
@@ -98,6 +72,33 @@ public class EventService {
                 .build();
         eventParticipationRepository.save(eventParticipation);
 
+        validateAndSaveSchedules(event, createEventRequest);
+        return CreateEventResponse.of(event);
+    }
+
+    /**
+     * 이벤트 저장 및 QR 코드 생성 후 저장하는 메서드.
+     *
+     * @param createEventRequest 이벤트 생성 요청 데이터
+     * @return 저장된 이벤트 객체
+     */
+    private Event saveEventWithQrCode(CreateEventRequest createEventRequest) {
+        Event event = createEventRequest.toEntity();
+
+        // QR 코드 생성 및 업로드
+        String qrFileName = generateAndUploadQrCode(event.getEventId());
+        event.addQrFileName(qrFileName);
+
+        return eventRepository.save(event);
+    }
+
+    /**
+     * 날짜/요일 기반 스케줄을 검증 후 저장하는 메서드.
+     *
+     * @param event 이벤트 객체
+     * @param createEventRequest 이벤트 요청 데이터
+     */
+    private void validateAndSaveSchedules(Event event, CreateEventRequest createEventRequest) {
         if (createEventRequest.category().equals(Category.DATE)) {
             if (!isDateFormat(createEventRequest.ranges().get(0))) {
                 throw new CustomException(EventErrorStatus._IS_NOT_DATE_FORMAT);
@@ -109,8 +110,6 @@ public class EventService {
             }
             createAndSaveDaySchedules(event, createEventRequest.ranges(), createEventRequest.startTime(), createEventRequest.endTime());
         }
-
-        return CreateEventResponse.of(event);
     }
 
     /**
@@ -139,8 +138,7 @@ public class EventService {
      * @param startTime 시작 시간 (HH:mm 포맷)
      * @param endTime 종료 시간 (HH:mm 포맷)
      */
-    @Transactional
-    protected void createAndSaveDateSchedules(Event event, List<String> ranges, String startTime, String endTime) {
+    private void createAndSaveDateSchedules(Event event, List<String> ranges, String startTime, String endTime) {
         List<String> timeSets = DateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = ranges.stream()
                 .flatMap(range -> timeSets.stream()
@@ -162,8 +160,7 @@ public class EventService {
      * @param startTime 시작 시간 (HH:mm 포맷)
      * @param endTime 종료 시간 (HH:mm 포맷)
      */
-    @Transactional
-    protected void createAndSaveDaySchedules(Event event, List<String> ranges, String startTime, String endTime) {
+    private void createAndSaveDaySchedules(Event event, List<String> ranges, String startTime, String endTime) {
         List<String> timeSets = DateUtil.createTimeSets(startTime, endTime);
         List<Schedule> schedules = ranges.stream()
                 .flatMap(range -> timeSets.stream()
@@ -468,7 +465,7 @@ public class EventService {
      * @param event 이벤트 객체
      * @param newTitle 새로운 제목
      */
-    protected void updateEventTitle(Event event, String newTitle) {
+    private void updateEventTitle(Event event, String newTitle) {
         if (newTitle != null) {
             event.updateTitle(newTitle);
         }
@@ -484,7 +481,7 @@ public class EventService {
      * @param newStartTime 새로 설정할 시작 시간
      * @param newEndTime 새로 설정할 종료 시간
      */
-    protected void updateEventRanges(Event event, List<Schedule> schedules, List<String> newRanges, String newStartTime, String newEndTime) {
+    private void updateEventRanges(Event event, List<Schedule> schedules, List<String> newRanges, String newStartTime, String newEndTime) {
         Set<String> existRanges = event.getCategory() == Category.DATE
                 ? schedules.stream().map(Schedule::getDate).filter(Objects::nonNull).collect(Collectors.toSet())
                 : schedules.stream().map(Schedule::getDay).filter(Objects::nonNull).collect(Collectors.toSet());
@@ -518,7 +515,7 @@ public class EventService {
      * @param newStartTime 새로 설정할 시작 시간
      * @param newEndTime 새로 설정할 종료 시간
      */
-    protected void updateEventTimes(Event event, List<Schedule> schedules, String newStartTime, String newEndTime) {
+    private void updateEventTimes(Event event, List<Schedule> schedules, String newStartTime, String newEndTime) {
         if (!event.getStartTime().equals(newStartTime) || !event.getEndTime().equals(newEndTime)) {
             List<String> newTimeSets = DateUtil.createTimeSets(newStartTime, newEndTime);
 
