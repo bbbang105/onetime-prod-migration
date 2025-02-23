@@ -105,8 +105,8 @@ public class UserService {
     /**
      * 유저 정보 수정 메서드.
      *
-     * 인증된 유저의 닉네임을 수정합니다.
-     * 수정된 닉네임은 길이 제한을 검증하며 저장됩니다.
+     * 인증된 유저의 닉네임 or 언어를 수정합니다.
+     * 수정된 닉네임은 길이 제한을 검증합니다.
      *
      * @param user 인증된 사용자 정보
      * @param updateUserProfileRequest 유저 정보 수정 요청 데이터

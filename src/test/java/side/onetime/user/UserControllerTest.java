@@ -134,7 +134,8 @@ public class UserControllerTest extends ControllerTestConfig {
         String nickname = "UserNickname";
         String email = "user@example.com";
         Language language = Language.KOR;
-        GetUserProfileResponse response = new GetUserProfileResponse(nickname, email, language);
+        String socialPlatform = "google";
+        GetUserProfileResponse response = new GetUserProfileResponse(nickname, email, language, socialPlatform);
 
         Mockito.when(userService.getUserProfile(any(User.class))).thenReturn(response);
 
@@ -151,6 +152,7 @@ public class UserControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.payload.nickname").value(nickname))
                 .andExpect(jsonPath("$.payload.email").value(email))
                 .andExpect(jsonPath("$.payload.language").value(language.toString()))
+                .andExpect(jsonPath("$.payload.social_platform").value(socialPlatform))
                 .andDo(MockMvcRestDocumentationWrapper.document("user/get-profile",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -165,7 +167,8 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("유저 정보 데이터"),
                                                 fieldWithPath("payload.nickname").type(JsonFieldType.STRING).description("유저 닉네임"),
                                                 fieldWithPath("payload.email").type(JsonFieldType.STRING).description("유저 이메일"),
-                                                fieldWithPath("payload.language").type(JsonFieldType.STRING).description("유저 언어")
+                                                fieldWithPath("payload.language").type(JsonFieldType.STRING).description("유저 언어"),
+                                                fieldWithPath("payload.social_platform").type(JsonFieldType.STRING).description("유저 소셜 로그인 플랫폼")
                                         )
                                         .responseSchema(Schema.schema("GetUserProfileResponseSchema"))
                                         .build()
