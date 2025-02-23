@@ -48,13 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         } catch (Exception e) {
             log.error("JWT validation failed: " + e.getMessage());
-
-            // ✅ 직접 401 응답 반환
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"message\": \"Invalid or expired token\", \"status\": 401}");
-            response.getWriter().flush();
-            return;
+            SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);
     }
