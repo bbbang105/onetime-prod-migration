@@ -36,10 +36,14 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
+            // ✅ OPTIONS 요청일 경우 필터를 건너뛰고 바로 다음 필터 실행
+            if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
             String token = jwtUtil.getTokenFromHeader(request.getHeader("Authorization"));
             jwtUtil.validateToken(token);
             Long userId = jwtUtil.getClaimFromToken(token, "userId", Long.class);
-
             setAuthentication(userId);
 
         } catch (Exception e) {

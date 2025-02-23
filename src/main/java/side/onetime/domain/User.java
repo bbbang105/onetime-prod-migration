@@ -5,6 +5,7 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import side.onetime.domain.enums.Language;
 import side.onetime.global.common.dao.BaseEntity;
 
 import java.util.List;
@@ -25,7 +26,7 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Column(name = "nickname", nullable = false, length = 10)
+    @Column(name = "nickname", nullable = false, length = 30)
     private String nickname;
 
     @Column(name = "provider", nullable = false, length = 50)
@@ -49,6 +50,10 @@ public class User extends BaseEntity {
     @Column(name = "sleep_end_time")
     private String sleepEndTime;
 
+    @Column(name = "language", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Language language;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Selection> selections;
 
@@ -59,7 +64,7 @@ public class User extends BaseEntity {
     private List<FixedSelection> fixedSelections;
 
     @Builder
-    public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement, String sleepStartTime, String sleepEndTime) {
+    public User(String name, String email, String nickname, String provider, String providerId, Boolean servicePolicyAgreement, Boolean privacyPolicyAgreement, Boolean marketingPolicyAgreement, String sleepStartTime, String sleepEndTime, Language language) {
         this.name = name;
         this.email = email;
         this.nickname = nickname;
@@ -70,6 +75,7 @@ public class User extends BaseEntity {
         this.marketingPolicyAgreement = marketingPolicyAgreement;
         this.sleepStartTime = sleepStartTime;
         this.sleepEndTime = sleepEndTime;
+        this.language = language;
     }
 
     public void updateNickName(String nickname) {
@@ -94,5 +100,9 @@ public class User extends BaseEntity {
 
     public void updateSleepEndTime(String sleepEndTime) {
         this.sleepEndTime = sleepEndTime;
+    }
+
+    public void updateLanguage(Language language) {
+        this.language = language;
     }
 }

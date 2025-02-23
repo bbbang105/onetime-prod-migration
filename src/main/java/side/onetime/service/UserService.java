@@ -24,7 +24,7 @@ import side.onetime.util.JwtUtil;
 @RequiredArgsConstructor
 public class UserService {
 
-    private static final int NICKNAME_LENGTH_LIMIT = 10;
+    private static final int NICKNAME_LENGTH_LIMIT = 30;
 
     @Value("${jwt.access-token.expiration-time}")
     private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
@@ -72,6 +72,7 @@ public class UserService {
                 .marketingPolicyAgreement(onboardUserRequest.marketingPolicyAgreement())
                 .sleepStartTime(onboardUserRequest.sleepStartTime())
                 .sleepEndTime(onboardUserRequest.sleepEndTime())
+                .language(onboardUserRequest.language())
                 .build();
         userRepository.save(newUser);
         Long userId = newUser.getId();
@@ -104,20 +105,25 @@ public class UserService {
     /**
      * 유저 정보 수정 메서드.
      *
-     * 인증된 유저의 닉네임을 수정합니다.
-     * 수정된 닉네임은 길이 제한을 검증하며 저장됩니다.
+     * 인증된 유저의 닉네임 or 언어를 수정합니다.
+     * 수정된 닉네임은 길이 제한을 검증합니다.
      *
      * @param user 인증된 사용자 정보
      * @param updateUserProfileRequest 유저 정보 수정 요청 데이터
      */
     @Transactional
     public void updateUserProfile(User user, UpdateUserProfileRequest updateUserProfileRequest) {
-        String nickname = updateUserProfileRequest.nickname();
-
-        if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
-            throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
+        if (updateUserProfileRequest.nickname() != null) {
+            String nickname = updateUserProfileRequest.nickname();
+            if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
+                // 닉네임 길이 제한을 넘은 경우
+                throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
+            }
+            user.updateNickName(nickname);
         }
-        user.updateNickName(nickname);
+        if (updateUserProfileRequest.language() != null) {
+            user.updateLanguage(updateUserProfileRequest.language());
+        }
         userRepository.save(user);
     }
 

@@ -20,6 +20,7 @@ import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.UserController;
 import side.onetime.domain.User;
+import side.onetime.domain.enums.Language;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
@@ -75,7 +76,8 @@ public class UserControllerTest extends ControllerTestConfig {
                 true,
                 false,
                 "23:30",
-                "07:00"
+                "07:00",
+                Language.KOR
         );
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -107,7 +109,8 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 수집 및 이용 동의 여부"),
                                                 fieldWithPath("marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정보 수신 동의 여부"),
                                                 fieldWithPath("sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간 (예: 23:30)"),
-                                                fieldWithPath("sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (예: 07:00)")
+                                                fieldWithPath("sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간 (예: 07:00)"),
+                                                fieldWithPath("language").type(JsonFieldType.STRING).description("언어 (예: KOR, ENG)")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
@@ -130,7 +133,9 @@ public class UserControllerTest extends ControllerTestConfig {
         // given
         String nickname = "UserNickname";
         String email = "user@example.com";
-        GetUserProfileResponse response = new GetUserProfileResponse(nickname, email);
+        Language language = Language.KOR;
+        String socialPlatform = "google";
+        GetUserProfileResponse response = new GetUserProfileResponse(nickname, email, language, socialPlatform);
 
         Mockito.when(userService.getUserProfile(any(User.class))).thenReturn(response);
 
@@ -146,6 +151,8 @@ public class UserControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.message").value("유저 정보 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.payload.nickname").value(nickname))
                 .andExpect(jsonPath("$.payload.email").value(email))
+                .andExpect(jsonPath("$.payload.language").value(language.toString()))
+                .andExpect(jsonPath("$.payload.social_platform").value(socialPlatform))
                 .andDo(MockMvcRestDocumentationWrapper.document("user/get-profile",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -159,7 +166,9 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("유저 정보 데이터"),
                                                 fieldWithPath("payload.nickname").type(JsonFieldType.STRING).description("유저 닉네임"),
-                                                fieldWithPath("payload.email").type(JsonFieldType.STRING).description("유저 이메일")
+                                                fieldWithPath("payload.email").type(JsonFieldType.STRING).description("유저 이메일"),
+                                                fieldWithPath("payload.language").type(JsonFieldType.STRING).description("유저 언어"),
+                                                fieldWithPath("payload.social_platform").type(JsonFieldType.STRING).description("유저 소셜 로그인 플랫폼")
                                         )
                                         .responseSchema(Schema.schema("GetUserProfileResponseSchema"))
                                         .build()
@@ -171,7 +180,10 @@ public class UserControllerTest extends ControllerTestConfig {
     @DisplayName("유저 정보를 수정한다.")
     public void updateUserProfile() throws Exception {
         // given
-        UpdateUserProfileRequest request = new UpdateUserProfileRequest("NewNickname");
+        UpdateUserProfileRequest request = new UpdateUserProfileRequest(
+                "NewNickname",
+                Language.ENG
+                );
         Mockito.doNothing().when(userService).updateUserProfile(any(User.class), any(UpdateUserProfileRequest.class));
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -195,7 +207,8 @@ public class UserControllerTest extends ControllerTestConfig {
                                         .tag("User API")
                                         .description("유저 정보를 수정한다.")
                                         .requestFields(
-                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("수정할 닉네임")
+                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("수정할 닉네임"),
+                                                fieldWithPath("language").type(JsonFieldType.STRING).description("수정할 언어")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),

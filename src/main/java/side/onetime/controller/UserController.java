@@ -43,10 +43,10 @@ public class UserController {
     /**
      * 유저 정보 조회 API.
      *
-     * 로그인한 유저의 닉네임과 이메일 정보를 조회합니다.
+     * 로그인한 유저의 정보를 조회합니다.
      *
      * @param customUserDetails 인증된 사용자 정보
-     * @return 유저의 닉네임과 이메일을 포함한 응답 객체
+     * @return 유저의 정보를 포함한 응답 객체
      */
     @GetMapping("/profile")
     public ResponseEntity<ApiResponse<GetUserProfileResponse>> getUserProfile(
@@ -59,10 +59,10 @@ public class UserController {
     /**
      * 유저 정보 수정 API.
      *
-     * 유저의 닉네임을 수정하는 API입니다. 수정된 닉네임은 최대 길이 제한을 받습니다.
+     * 유저의 정보를 수정하는 API입니다.
      *
      * @param customUserDetails        인증된 사용자 정보
-     * @param updateUserProfileRequest 수정할 닉네임을 포함하는 요청 객체
+     * @param updateUserProfileRequest 수정할 닉네임 or 언어를 포함하는 요청 객체
      * @return 성공 상태 응답 객체
      */
     @PatchMapping("/profile/action-update")
