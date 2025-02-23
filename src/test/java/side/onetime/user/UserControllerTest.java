@@ -177,7 +177,10 @@ public class UserControllerTest extends ControllerTestConfig {
     @DisplayName("유저 정보를 수정한다.")
     public void updateUserProfile() throws Exception {
         // given
-        UpdateUserProfileRequest request = new UpdateUserProfileRequest("NewNickname");
+        UpdateUserProfileRequest request = new UpdateUserProfileRequest(
+                "NewNickname",
+                Language.ENG
+                );
         Mockito.doNothing().when(userService).updateUserProfile(any(User.class), any(UpdateUserProfileRequest.class));
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -201,7 +204,8 @@ public class UserControllerTest extends ControllerTestConfig {
                                         .tag("User API")
                                         .description("유저 정보를 수정한다.")
                                         .requestFields(
-                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("수정할 닉네임")
+                                                fieldWithPath("nickname").type(JsonFieldType.STRING).description("수정할 닉네임"),
+                                                fieldWithPath("language").type(JsonFieldType.STRING).description("수정할 언어")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),

@@ -24,7 +24,7 @@ import side.onetime.util.JwtUtil;
 @RequiredArgsConstructor
 public class UserService {
 
-    private static final int NICKNAME_LENGTH_LIMIT = 10;
+    private static final int NICKNAME_LENGTH_LIMIT = 30;
 
     @Value("${jwt.access-token.expiration-time}")
     private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
@@ -113,12 +113,17 @@ public class UserService {
      */
     @Transactional
     public void updateUserProfile(User user, UpdateUserProfileRequest updateUserProfileRequest) {
-        String nickname = updateUserProfileRequest.nickname();
-
-        if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
-            throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
+        if (updateUserProfileRequest.nickname() != null) {
+            String nickname = updateUserProfileRequest.nickname();
+            if (nickname.length() > NICKNAME_LENGTH_LIMIT) {
+                // 닉네임 길이 제한을 넘은 경우
+                throw new CustomException(UserErrorStatus._NICKNAME_TOO_LONG);
+            }
+            user.updateNickName(nickname);
         }
-        user.updateNickName(nickname);
+        if (updateUserProfileRequest.language() != null) {
+            user.updateLanguage(updateUserProfileRequest.language());
+        }
         userRepository.save(user);
     }
 

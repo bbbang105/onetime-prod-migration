@@ -26,7 +26,7 @@ public class User extends BaseEntity {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Column(name = "nickname", nullable = false, length = 10)
+    @Column(name = "nickname", nullable = false, length = 30)
     private String nickname;
 
     @Column(name = "provider", nullable = false, length = 50)
@@ -100,5 +100,9 @@ public class User extends BaseEntity {
 
     public void updateSleepEndTime(String sleepEndTime) {
         this.sleepEndTime = sleepEndTime;
+    }
+
+    public void updateLanguage(Language language) {
+        this.language = language;
     }
 }
