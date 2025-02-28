@@ -24,7 +24,7 @@ public class Event extends BaseEntity {
     @Column(name = "events_uuid", columnDefinition = "BINARY(16)", unique = true)
     private UUID eventId;
 
-    @Column(name = "title", nullable = false, length = 30)
+    @Column(name = "title", nullable = false, length = 50)
     private String title;
 
     @Column(name = "start_time", nullable = false)
