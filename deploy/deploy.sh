@@ -23,8 +23,8 @@ DEFAULT_CONF="/etc/nginx/nginx.conf"
 DOCKER_COMPOSE_FILE="/home/ubuntu/docker-compose.yaml"
 
 # discord webhook 관련 변수
-MESSAGE_SUCCESS="🥳 배포가 성공적으로 수행되었습니다!"
-MESSAGE_FAILURE="🚨 배포 과정에서 오류가 발생했습니다. 빠른 확인바랍니다."
+MESSAGE_SUCCESS="⏰ OneTime 배포가 성공적으로 수행되었습니다!"
+MESSAGE_FAILURE="🚨 OneTime 배포 과정에서 오류가 발생했습니다. 빠른 확인바랍니다."
 
 # 💬 디스코드 메시지 보내기 함수
 send_discord_message() {
