@@ -237,11 +237,11 @@ public class ScheduleService {
         GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
         List<String> participantNames = getParticipantsResponse.names();
 
-        // 이벤트에 참여하는 모든 유저
+        // 이벤트에 참여하는 모든 유저 (CREATOR가 아닌 경우만 포함)
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
         List<User> users = eventParticipations.stream()
+                .filter(eventParticipation -> eventParticipation.getEventStatus() != EventStatus.CREATOR)
                 .map(EventParticipation::getUser)
-                .filter(user -> participantNames.contains(user.getNickname())) // 유저가 참여자 목록에 있는지 확인
                 .toList();
 
         List<PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
@@ -362,11 +362,11 @@ public class ScheduleService {
         GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
         List<String> participantNames = getParticipantsResponse.names();
 
-        // 이벤트에 참여하는 모든 유저
+        // 이벤트에 참여하는 모든 유저 (CREATOR가 아닌 경우만 포함)
         List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
         List<User> users = eventParticipations.stream()
+                .filter(eventParticipation -> eventParticipation.getEventStatus() != EventStatus.CREATOR)
                 .map(EventParticipation::getUser)
-                .filter(user -> participantNames.contains(user.getNickname())) // 유저가 참여자 목록에 있는지 확인
                 .toList();
 
         List<PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
