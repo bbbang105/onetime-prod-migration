@@ -357,9 +357,16 @@ public class EventService {
                         // 6개를 찾았을 시 종료
                         break;
                     }
-                    List<String> impossibleNames = allMembersName.stream()
-                            .filter(name -> !curNames.contains(name))
-                            .toList();
+                    List<String> impossibleNames = new ArrayList<>();
+                    // 유저, 멤버 동명이인을 고려하기 위함
+                    List<String> curNamesCopy = new ArrayList<>(curNames);
+                    for (String name : allMembersName) {
+                        if (curNamesCopy.contains(name)) {
+                            curNamesCopy.remove(name);
+                        } else {
+                            impossibleNames.add(name);
+                        }
+                    }
 
                     // 새로운 시간대를 추가
                     GetMostPossibleTime newTime = createMostPossibleTime(schedule, curNames, impossibleNames, category);
