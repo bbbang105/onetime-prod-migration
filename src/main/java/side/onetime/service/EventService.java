@@ -255,8 +255,9 @@ public class EventService {
         GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
         List<String> participantNames = getParticipantsResponse.names();
 
-        // 유저 필터링: 참여자 목록에 있는 유저만 포함
+        // 유저 필터링: CREATOR가 아닌 경우에만 포함
         List<String> allUserNicknames = eventParticipations.stream()
+                .filter(ep -> ep.getEventStatus() != EventStatus.CREATOR)
                 .map(EventParticipation::getUser)
                 .map(User::getNickname)
                 .filter(participantNames::contains)
