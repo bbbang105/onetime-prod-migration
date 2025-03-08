@@ -121,7 +121,7 @@ public class UserService {
      */
     @Transactional
     public void withdrawService(User user) {
-        userRepository.delete(user);
+        userRepository.withdraw(user);
     }
 
     /**
