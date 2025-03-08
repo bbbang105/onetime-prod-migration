@@ -2,16 +2,8 @@ package side.onetime.repository.custom;
 
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
-import side.onetime.domain.Event;
-import side.onetime.domain.EventParticipation;
-import side.onetime.domain.User;
+import side.onetime.domain.*;
 import side.onetime.domain.enums.EventStatus;
-import side.onetime.domain.QEvent;
-import side.onetime.domain.QEventParticipation;
-import side.onetime.domain.QMember;
-import side.onetime.domain.QSchedule;
-import side.onetime.domain.QSelection;
-import side.onetime.domain.QUser;
 
 import java.util.List;
 
@@ -65,6 +57,10 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                     .where(QEvent.event.eq(event))
                     .execute();
         }
+
+        queryFactory.delete(QFixedSelection.fixedSelection)
+                .where(QFixedSelection.fixedSelection.user.eq(user))
+                .execute();
 
         queryFactory.delete(QUser.user)
                 .where(QUser.user.eq(user))
