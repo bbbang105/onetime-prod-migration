@@ -24,7 +24,8 @@ public class EventCleanupScheduler {
      * 매일 새벽 4시에 실행되어, 30일 이상 지난 이벤트 데이터를 삭제하고 관련된 QR 이미지를 S3에서 삭제합니다.
      * 삭제 기준은 이벤트 생성일(createdDate)이며, cron 표현식은 설정 파일에 정의됩니다.
      */
-    @Scheduled(cron = "${scheduling.cron}")
+    // [25.03.20] 데이터 분석으로 인한 DB 보존 -> 스케줄러 임시 멈춤
+    // @Scheduled(cron = "${scheduling.cron}")
     @Transactional
     public void deleteOldEvents() {
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
