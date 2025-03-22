@@ -53,6 +53,8 @@ public enum SuccessStatus implements BaseCode {
     // Fixed
     _GET_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 조회에 성공했습니다."),
     _UPDATE_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 수정에 성공했습니다."),
+    // Admin User
+    _REGISTER_ADMIN_USER(HttpStatus.CREATED, "201", "관리자 계정 등록에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;
