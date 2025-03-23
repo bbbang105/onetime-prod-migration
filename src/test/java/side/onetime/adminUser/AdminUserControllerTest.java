@@ -14,12 +14,16 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.AdminUserController;
+import side.onetime.domain.enums.AdminStatus;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
+import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
 import side.onetime.service.AdminUserService;
 import side.onetime.util.JwtUtil;
+
+import java.util.List;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
@@ -151,7 +155,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                 .thenReturn(response);
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/profile")
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/profile")
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
@@ -175,6 +179,55 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.email").type(JsonFieldType.STRING).description("관리자 이메일")
                                         )
                                         .responseSchema(Schema.schema("GetAdminUserProfileResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("전체 관리자 정보를 조회한다.")
+    public void getAllAdminUserDetail() throws Exception {
+        // given
+        String accessToken = "Bearer temp.jwt.access.token";
+
+        List<AdminUserDetailResponse> response = List.of(
+                new AdminUserDetailResponse(1L, "마스터 관리자", "master@example.com", AdminStatus.MASTER),
+                new AdminUserDetailResponse(2L, "일반 관리자", "admin@example.com", AdminStatus.APPROVED)
+        );
+
+        // when
+        Mockito.when(adminUserService.getAllAdminUserDetail(any(String.class)))
+                .thenReturn(response);
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/all")
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("전체 관리자 정보 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload[0].id").value(1L))
+                .andExpect(jsonPath("$.payload[0].name").value("마스터 관리자"))
+                .andExpect(jsonPath("$.payload[0].email").value("master@example.com"))
+                .andExpect(jsonPath("$.payload[0].admin_status").value("MASTER"))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/get-all",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("전체 관리자 정보를 조회한다. (마스터 관리자만 가능)")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.ARRAY).description("응답 데이터"),
+                                                fieldWithPath("payload[].id").type(JsonFieldType.NUMBER).description("관리자 ID"),
+                                                fieldWithPath("payload[].name").type(JsonFieldType.STRING).description("관리자 이름"),
+                                                fieldWithPath("payload[].email").type(JsonFieldType.STRING).description("관리자 이메일"),
+                                                fieldWithPath("payload[].admin_status").type(JsonFieldType.STRING).description("관리자 상태 (MASTER, APPROVED, PENDING_APPROVAL)")
+                                        )
+                                        .responseSchema(Schema.schema("GetAllAdminUserDetailResponse"))
                                         .build()
                         )
                 ));

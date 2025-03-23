@@ -7,12 +7,15 @@ import side.onetime.domain.AdminUser;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
+import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.AdminUserErrorStatus;
 import side.onetime.repository.AdminUserRepository;
 import side.onetime.util.JwtUtil;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -73,5 +76,28 @@ public class AdminUserService {
     public GetAdminUserProfileResponse getAdminUserProfile(String authorizationHeader) {
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         return GetAdminUserProfileResponse.from(adminUser);
+    }
+
+    /**
+     * 전체 관리자 정보 조회 메서드.
+     *
+     * Authorization 헤더에서 액세스 토큰을 추출하고, 해당 토큰의 소유자가 마스터 관리자일 경우
+     * 시스템에 등록된 모든 관리자 정보를 조회하여 반환합니다.
+     *
+     * - 마스터 관리자가 아닐 경우 예외가 발생합니다.
+     * - 토큰이 유효하지 않거나 관리자 정보가 존재하지 않을 경우 예외가 발생합니다.
+     *
+     * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
+     * @return 전체 관리자 정보 리스트
+     */
+    public List<AdminUserDetailResponse> getAllAdminUserDetail(String authorizationHeader) {
+        AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        if (!AdminStatus.MASTER.equals(adminUser.getAdminStatus())) {
+            throw new CustomException(AdminUserErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
+        }
+
+        return adminUserRepository.findAll().stream()
+                .map(AdminUserDetailResponse::from)
+                .toList();
     }
 }

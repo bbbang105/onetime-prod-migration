@@ -6,11 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
+import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
 import side.onetime.service.AdminUserService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -61,11 +64,30 @@ public class AdminUserController {
      * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
      * @return 관리자 프로필 정보가 포함된 응답 객체
      */
-    @PostMapping("/profile")
+    @GetMapping("/profile")
     public ResponseEntity<ApiResponse<GetAdminUserProfileResponse>> getAdminUserProfile(
             @RequestHeader("Authorization") String authorizationHeader) {
 
         GetAdminUserProfileResponse response = adminUserService.getAdminUserProfile(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_ADMIN_USER_PROFILE, response);
+    }
+
+    /**
+     * 전체 관리자 정보 조회 API.
+     *
+     * 요청 헤더에 포함된 액세스 토큰을 기반으로, 마스터 권한을 가진 관리자인 경우
+     * 시스템에 등록된 모든 관리자 계정 정보를 조회하여 반환합니다.
+     *
+     * 마스터 관리자가 아닐 경우 예외가 발생하며, 유효한 경우 모든 관리자 이름, 이메일, 상태 정보가 포함됩니다.
+     *
+     * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
+     * @return 전체 관리자 프로필 목록이 포함된 응답 객체
+     */
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<AdminUserDetailResponse>>> getAllAdminUserDetail(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        List<AdminUserDetailResponse> response = adminUserService.getAllAdminUserDetail(authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_ADMIN_USER_DETAIL, response);
     }
 }
