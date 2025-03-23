@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
+import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
 import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
@@ -89,5 +90,25 @@ public class AdminUserController {
 
         List<AdminUserDetailResponse> response = adminUserService.getAllAdminUserDetail(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_ADMIN_USER_DETAIL, response);
+    }
+
+    /**
+     * 관리자 권한 상태 수정 API.
+     *
+     * 마스터 관리자가 다른 관리자 계정의 권한 상태를 수정합니다.
+     * 요청된 관리자 ID와 수정할 권한 상태를 바탕으로 권한을 변경하며,
+     * 요청한 사용자가 마스터 관리자가 아닐 경우 예외가 발생합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param request 수정할 관리자 ID와 변경할 권한 상태를 담은 요청 객체
+     * @return 성공 응답 메시지
+     */
+    @PatchMapping("/status")
+    public ResponseEntity<ApiResponse<SuccessStatus>> updateAdminUserStatus(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @Valid @RequestBody UpdateAdminUserStatusRequest request) {
+
+        adminUserService.updateAdminUserStatus(authorizationHeader, request);
+        return ApiResponse.onSuccess(SuccessStatus._UPDATE_ADMIN_USER_STATUS);
     }
 }

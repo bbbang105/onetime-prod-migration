@@ -17,6 +17,7 @@ import side.onetime.controller.AdminUserController;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
+import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
 import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
@@ -228,6 +229,50 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload[].admin_status").type(JsonFieldType.STRING).description("관리자 상태 (MASTER, APPROVED, PENDING_APPROVAL)")
                                         )
                                         .responseSchema(Schema.schema("GetAllAdminUserDetailResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("관리자 권한을 수정한다.")
+    public void updateAdminUserStatus() throws Exception {
+        // given
+        String accessToken = "Bearer temp.jwt.access.token";
+        String requestContent = objectMapper.writeValueAsString(
+                new UpdateAdminUserStatusRequest(2L, AdminStatus.APPROVED)
+        );
+
+        // when
+        Mockito.doNothing().when(adminUserService).updateAdminUserStatus(any(String.class), any(UpdateAdminUserStatusRequest.class));
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/admin/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", accessToken)
+                        .content(requestContent))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("관리자 권한 수정에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/update-status",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("관리자 권한을 수정한다. (마스터 관리자만 가능)")
+                                        .requestFields(
+                                                fieldWithPath("id").type(JsonFieldType.NUMBER).description("수정 대상 관리자 ID"),
+                                                fieldWithPath("admin_status").type(JsonFieldType.STRING).description("변경할 관리자 상태 (MASTER, APPROVED, PENDING_APPROVAL)")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .requestSchema(Schema.schema("UpdateAdminUserStatusRequest"))
+                                        .responseSchema(Schema.schema("CommonSuccessResponse"))
                                         .build()
                         )
                 ));
