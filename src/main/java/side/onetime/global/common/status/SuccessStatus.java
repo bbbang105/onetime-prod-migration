@@ -56,6 +56,7 @@ public enum SuccessStatus implements BaseCode {
     // Admin User
     _REGISTER_ADMIN_USER(HttpStatus.CREATED, "201", "관리자 계정 등록에 성공했습니다."),
     _LOGIN_ADMIN_USER(HttpStatus.OK, "200", "관리자 계정 로그인에 성공했습니다."),
+    _GET_ADMIN_USER_PROFILE(HttpStatus.OK, "200", "관리자 프로필 조회에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;

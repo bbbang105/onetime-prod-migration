@@ -3,12 +3,10 @@ package side.onetime.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
+import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
@@ -52,5 +50,22 @@ public class AdminUserController {
 
         LoginAdminUserResponse response = adminUserService.loginAdminUser(request);
         return ApiResponse.onSuccess(SuccessStatus._LOGIN_ADMIN_USER, response);
+    }
+
+    /**
+     * 관리자 프로필 조회 API.
+     *
+     * 요청 헤더에 포함된 액세스 토큰을 기반으로 로그인된 관리자 정보를 조회합니다.
+     * 유효한 토큰이 아닐 경우 예외가 발생하며, 유효한 경우 이름, 이메일 정보를 반환합니다.
+     *
+     * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
+     * @return 관리자 프로필 정보가 포함된 응답 객체
+     */
+    @PostMapping("/profile")
+    public ResponseEntity<ApiResponse<GetAdminUserProfileResponse>> getAdminUserProfile(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        GetAdminUserProfileResponse response = adminUserService.getAdminUserProfile(authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ADMIN_USER_PROFILE, response);
     }
 }
