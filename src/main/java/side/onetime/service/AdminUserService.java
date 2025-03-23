@@ -7,12 +7,16 @@ import side.onetime.domain.AdminUser;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
+import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
+import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.AdminUserErrorStatus;
 import side.onetime.repository.AdminUserRepository;
 import side.onetime.util.JwtUtil;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +52,7 @@ public class AdminUserService {
      *
      * @param request 로그인 요청 정보 (이메일, 비밀번호)
      */
+    @Transactional(readOnly = true)
     public LoginAdminUserResponse loginAdminUser(LoginAdminUserRequest request) {
         AdminUser adminUser = adminUserRepository.findAdminUserByEmail(request.email())
                         .orElseThrow(() -> new CustomException(AdminUserErrorStatus._NOT_FOUND_ADMIN_USER));
@@ -70,8 +75,57 @@ public class AdminUserService {
      * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
      * @return 관리자 프로필 응답 객체
      */
+    @Transactional(readOnly = true)
     public GetAdminUserProfileResponse getAdminUserProfile(String authorizationHeader) {
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         return GetAdminUserProfileResponse.from(adminUser);
+    }
+
+    /**
+     * 전체 관리자 정보 조회 메서드.
+     *
+     * Authorization 헤더에서 액세스 토큰을 추출하고, 해당 토큰의 소유자가 마스터 관리자일 경우
+     * 시스템에 등록된 모든 관리자 정보를 조회하여 반환합니다.
+     *
+     * - 마스터 관리자가 아닐 경우 예외가 발생합니다.
+     * - 토큰이 유효하지 않거나 관리자 정보가 존재하지 않을 경우 예외가 발생합니다.
+     *
+     * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
+     * @return 전체 관리자 정보 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<AdminUserDetailResponse> getAllAdminUserDetail(String authorizationHeader) {
+        AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        if (!AdminStatus.MASTER.equals(adminUser.getAdminStatus())) {
+            throw new CustomException(AdminUserErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
+        }
+
+        return adminUserRepository.findAll().stream()
+                .map(AdminUserDetailResponse::from)
+                .toList();
+    }
+
+    /**
+     * 관리자 권한 상태 수정 메서드.
+     *
+     * 요청자의 토큰에서 관리자 정보를 추출하고, 마스터 관리자 권한을 확인합니다.
+     * 대상 관리자 ID를 통해 조회 후, 요청된 권한 상태로 업데이트합니다.
+     *
+     * - 마스터 관리자가 아닐 경우 예외가 발생합니다.
+     * - 대상 관리자가 존재하지 않을 경우 예외가 발생합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param request 수정할 관리자 ID와 변경할 권한 상태를 담은 요청 객체
+     */
+    @Transactional
+    public void updateAdminUserStatus(String authorizationHeader, UpdateAdminUserStatusRequest request) {
+        AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        if (!AdminStatus.MASTER.equals(adminUser.getAdminStatus())) {
+            throw new CustomException(AdminUserErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
+        }
+
+        AdminUser targetAdminUser = adminUserRepository.findById(request.id())
+                .orElseThrow(() -> new CustomException(AdminUserErrorStatus._NOT_FOUND_ADMIN_USER));
+        targetAdminUser.updateAdminStatus(request.adminStatus());
     }
 }

@@ -38,4 +38,8 @@ public class AdminUser extends BaseEntity {
         this.password = password;
         this.adminStatus = AdminStatus.PENDING_APPROVAL;
     }
+
+    public void updateAdminStatus(AdminStatus adminStatus) {
+        this.adminStatus = adminStatus;
+    }
 }
