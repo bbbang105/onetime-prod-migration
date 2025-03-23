@@ -1,7 +1,6 @@
 package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.RefreshToken;
@@ -23,12 +22,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
-    @Value("${jwt.access-token.expiration-time}")
-    private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
-
-    @Value("${jwt.refresh-token.expiration-time}")
-    private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
@@ -72,8 +65,8 @@ public class UserService {
         Long userId = newUser.getId();
 
         // 액세스 & 리프레쉬 토큰 발급
-        String accessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
-        String refreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
+        String accessToken = jwtUtil.generateAccessToken(userId, "USER");
+        String refreshToken = jwtUtil.generateRefreshToken(userId);
 
         // 새로운 리프레쉬 토큰 Redis 저장
         RefreshToken newRefreshToken = new RefreshToken(userId, refreshToken);

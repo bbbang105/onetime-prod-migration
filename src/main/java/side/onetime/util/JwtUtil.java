@@ -8,10 +8,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import side.onetime.domain.AdminUser;
 import side.onetime.domain.User;
 import side.onetime.exception.CustomException;
+import side.onetime.exception.status.AdminUserErrorStatus;
 import side.onetime.exception.status.TokenErrorStatus;
 import side.onetime.exception.status.UserErrorStatus;
+import side.onetime.repository.AdminUserRepository;
 import side.onetime.repository.UserRepository;
 
 import javax.crypto.SecretKey;
@@ -23,7 +26,21 @@ import java.util.Date;
 public class JwtUtil {
     @Value("${jwt.secret}")
     private String SECRET_KEY;
+
+    @Value("${jwt.access-token.expiration-time}")
+    private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간
+
+    @Value("${jwt.admin-user-access-token.expiration-time}")
+    private long ADMIN_USER_ACCESS_TOKEN_EXPIRATION_TIME; // 어드민 유저 액세스 토큰 유효기간
+
+    @Value("${jwt.refresh-token.expiration-time}")
+    private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간
+
+    @Value("${jwt.register-token.expiration-time}")
+    private long REGISTER_TOKEN_EXPIRATION_TIME; // 레지스터 토큰 유효기간
+
     private final UserRepository userRepository;
+    private final AdminUserRepository adminUserRepository;
 
     /**
      * JWT 서명 키를 생성 및 반환.
@@ -39,14 +56,30 @@ public class JwtUtil {
      * 액세스 토큰 생성 메서드.
      *
      * @param userId 유저 ID
-     * @param expirationMillis 만료 시간(밀리초)
+     * @param userType 유저 타입 (예: "USER" 또는 "ADMIN")
      * @return 생성된 액세스 토큰
      */
-    public String generateAccessToken(Long userId, long expirationMillis) {
-        log.info("액세스 토큰이 발행되었습니다.");
+    public String generateAccessToken(Long userId, String userType) {
+        long expirationMillis;
+
+        switch (userType.toUpperCase()) {
+            case "ADMIN" -> {
+                log.info("관리자용 액세스 토큰이 발행되었습니다.");
+                expirationMillis = ADMIN_USER_ACCESS_TOKEN_EXPIRATION_TIME;
+            }
+            case "USER" -> {
+                log.info("일반 유저용 액세스 토큰이 발행되었습니다.");
+                expirationMillis = ACCESS_TOKEN_EXPIRATION_TIME;
+            }
+            default -> {
+                log.warn("알 수 없는 타입의 액세스 토큰이 발행되었습니다. (userType: {})", userType);
+                throw new CustomException(TokenErrorStatus._INVALID_USER_TYPE);
+            }
+        }
 
         return Jwts.builder()
                 .claim("userId", userId)
+                .claim("userType", userType.toUpperCase())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMillis))
                 .signWith(this.getSigningKey())
@@ -60,10 +93,9 @@ public class JwtUtil {
      * @param providerId 제공자 ID
      * @param name 사용자 이름
      * @param email 사용자 이메일
-     * @param expirationMillis 만료 시간(밀리초)
      * @return 생성된 레지스터 토큰
      */
-    public String generateRegisterToken(String provider, String providerId, String name, String email, long expirationMillis) {
+    public String generateRegisterToken(String provider, String providerId, String name, String email) {
         log.info("레지스터 토큰이 발행되었습니다.");
 
         return Jwts.builder()
@@ -71,8 +103,9 @@ public class JwtUtil {
                 .claim("providerId", providerId) // 클레임에 providerId 추가
                 .claim("name", name)             // 클레임에 name 추가
                 .claim("email", email)           // 클레임에 email 추가
+                .claim("type", "REGISTER_TOKEN")
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .expiration(new Date(System.currentTimeMillis() + REGISTER_TOKEN_EXPIRATION_TIME))
                 .signWith(this.getSigningKey())
                 .compact();
     }
@@ -81,16 +114,16 @@ public class JwtUtil {
      * 리프레시 토큰 생성 메서드.
      *
      * @param userId 유저 ID
-     * @param expirationMillis 만료 시간(밀리초)
      * @return 생성된 리프레시 토큰
      */
-    public String generateRefreshToken(Long userId, long expirationMillis) {
+    public String generateRefreshToken(Long userId) {
         log.info("리프레쉬 토큰이 발행되었습니다.");
 
         return Jwts.builder()
                 .claim("userId", userId)
+                .claim("type", "REFRESH_TOKEN")
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + expirationMillis))
+                .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
                 .signWith(this.getSigningKey())
                 .compact();
     }
@@ -140,6 +173,20 @@ public class JwtUtil {
 
         return userRepository.findById(getClaimFromToken(token, "userId", Long.class))
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
+    }
+
+    /**
+     * 헤더에서 어드민 유저 객체 반환.
+     *
+     * @param authorizationHeader Authorization 헤더
+     * @return 어드민 유저 객체
+     */
+    public AdminUser getAdminUserFromHeader(String authorizationHeader) {
+        String token = getTokenFromHeader(authorizationHeader);
+        validateToken(token);
+
+        return adminUserRepository.findById(getClaimFromToken(token, "userId", Long.class))
+                .orElseThrow(() -> new CustomException(AdminUserErrorStatus._NOT_FOUND_ADMIN_USER));
     }
 
     /**
