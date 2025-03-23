@@ -2,7 +2,6 @@ package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import side.onetime.domain.RefreshToken;
 import side.onetime.dto.token.request.ReissueTokenRequest;
@@ -18,12 +17,6 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class TokenService {
-
-    @Value("${jwt.access-token.expiration-time}")
-    private long ACCESS_TOKEN_EXPIRATION_TIME; // 액세스 토큰 유효기간.
-
-    @Value("${jwt.refresh-token.expiration-time}")
-    private long REFRESH_TOKEN_EXPIRATION_TIME; // 리프레쉬 토큰 유효기간.
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
@@ -50,10 +43,10 @@ public class TokenService {
         }
 
         // 새로운 AccessToken 생성.
-        String newAccessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
+        String newAccessToken = jwtUtil.generateAccessToken(userId, "USER");
 
         // 새로운 RefreshToken 생성 및 저장.
-        String newRefreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
+        String newRefreshToken = jwtUtil.generateRefreshToken(userId);
         refreshTokenRepository.save(new RefreshToken(userId, newRefreshToken));
 
         log.info("토큰 재발행에 성공하였습니다.");

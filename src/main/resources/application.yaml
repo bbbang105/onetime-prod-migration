@@ -93,6 +93,8 @@ jwt:
     register: ${REGISTER_TOKEN_REDIRECT_URI}
   access-token:
     expiration-time: ${ACCESS_TOKEN_EXPIRATION_TIME}
+  admin-user-access-token:
+    expiration-time: ${ADMIN_USER_ACCESS_TOKEN_EXPIRATION_TIME}
   refresh-token:
     expiration-time: ${REFRESH_TOKEN_EXPIRATION_TIME}
   register-token:

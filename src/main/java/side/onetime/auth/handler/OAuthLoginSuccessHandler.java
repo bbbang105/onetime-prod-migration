@@ -35,15 +35,6 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     @Value("${jwt.redirect.register}")
     private String REGISTER_TOKEN_REDIRECT_URI;
 
-    @Value("${jwt.access-token.expiration-time}")
-    private long ACCESS_TOKEN_EXPIRATION_TIME;
-
-    @Value("${jwt.refresh-token.expiration-time}")
-    private long REFRESH_TOKEN_EXPIRATION_TIME;
-
-    @Value("${jwt.register-token.expiration-time}")
-    private long REGISTER_TOKEN_EXPIRATION_TIME;
-
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RefreshTokenRepository refreshTokenRepository;
@@ -139,7 +130,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
      */
     private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name, String email) throws IOException {
         log.info("신규 유저입니다.");
-        String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email, REGISTER_TOKEN_EXPIRATION_TIME);
+        String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email);
         String redirectUri = String.format(REGISTER_TOKEN_REDIRECT_URI, registerToken, URLEncoder.encode(name, StandardCharsets.UTF_8));
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
@@ -159,8 +150,8 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         log.info("기존 유저입니다.");
         Long userId = user.getId();
 
-        String accessToken = jwtUtil.generateAccessToken(userId, ACCESS_TOKEN_EXPIRATION_TIME);
-        String refreshToken = jwtUtil.generateRefreshToken(userId, REFRESH_TOKEN_EXPIRATION_TIME);
+        String accessToken = jwtUtil.generateAccessToken(userId,"USER");
+        String refreshToken = jwtUtil.generateRefreshToken(userId);
         saveRefreshToken(userId, refreshToken);
 
         String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, "true", accessToken, refreshToken);
