@@ -1,11 +1,13 @@
 package side.onetime.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
@@ -110,6 +112,24 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         String errorMessage = "지원하지 않는 미디어 타입입니다: " + ex.getContentType();
         logError("HttpMediaTypeNotSupportedException", errorMessage);
         return ApiResponse.onFailure(ErrorStatus._UNSUPPORTED_MEDIA_TYPE, errorMessage);
+    }
+
+    // Jackson 역직렬화 중 enum 값이 유효하지 않은 경우 처리
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex,
+                                                                  HttpHeaders headers,
+                                                                  HttpStatusCode status,
+                                                                  WebRequest request) {
+        if (ex.getCause() instanceof InvalidFormatException formatException) {
+            if (formatException.getTargetType().isEnum()) {
+                String errorMessage = "올바르지 않은 enum 값입니다. 허용되지 않은 값: " + formatException.getValue();
+                logError("Invalid enum value", errorMessage);
+                return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST, errorMessage);
+            }
+        }
+        String errorMessage = "요청 본문이 잘못되었습니다.";
+        logError("HttpMessageNotReadableException", errorMessage);
+        return ApiResponse.onFailure(ErrorStatus._BAD_REQUEST, errorMessage);
     }
 
     // 내부 서버 에러 처리 (500)
