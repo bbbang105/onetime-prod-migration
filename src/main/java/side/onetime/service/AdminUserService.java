@@ -128,4 +128,17 @@ public class AdminUserService {
                 .orElseThrow(() -> new CustomException(AdminUserErrorStatus._NOT_FOUND_ADMIN_USER));
         targetAdminUser.updateAdminStatus(request.adminStatus());
     }
+
+    /**
+     * 관리자 계정 탈퇴 처리 메서드.
+     *
+     * 액세스 토큰을 기반으로 관리자 정보를 조회한 뒤 DB에서 삭제합니다.
+     *
+     * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
+     */
+    @Transactional
+    public void withdrawAdminUser(String authorizationHeader) {
+        AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        adminUserRepository.delete(adminUser);
+    }
 }

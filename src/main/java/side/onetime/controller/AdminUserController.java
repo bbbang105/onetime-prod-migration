@@ -111,4 +111,21 @@ public class AdminUserController {
         adminUserService.updateAdminUserStatus(authorizationHeader, request);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_ADMIN_USER_STATUS);
     }
+
+    /**
+     * 관리자 계정 탈퇴 API.
+     *
+     * Authorization 헤더에 포함된 액세스 토큰을 통해 인증된 관리자 계정을 삭제합니다.
+     * - 토큰에 포함된 ID로 관리자 정보를 조회하여 삭제합니다.
+     *
+     * @param authorizationHeader Authorization 헤더에 포함된 액세스 토큰
+     * @return 성공 응답 메시지
+     */
+    @PostMapping("/withdraw")
+    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawAdminUser(
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        adminUserService.withdrawAdminUser(authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_ADMIN_USER);
+    }
 }

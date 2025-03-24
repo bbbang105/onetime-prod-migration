@@ -277,4 +277,38 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                         )
                 ));
     }
+
+    @Test
+    @DisplayName("관리자 계정을 탈퇴한다.")
+    public void withdrawAdminUser() throws Exception {
+        // given
+        String accessToken = "Bearer temp.jwt.access.token";
+
+        // when
+        Mockito.doNothing().when(adminUserService).withdrawAdminUser(any(String.class));
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/withdraw")
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("관리자 계정 탈퇴에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/withdraw",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("관리자 계정을 탈퇴한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .responseSchema(Schema.schema("CommonSuccessResponse"))
+                                        .build()
+                        )
+                ));
+    }
 }
