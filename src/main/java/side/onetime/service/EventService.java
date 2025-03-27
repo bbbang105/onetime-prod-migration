@@ -190,7 +190,7 @@ public class EventService {
         List<Schedule> schedules = scheduleRepository.findAllByEvent(event)
                 .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_ALL_SCHEDULES));
 
-        List<String> ranges = event.getCategory().equals(Category.DATE)
+        List<String> ranges = event.getCategory() == Category.DATE
                 ? DateUtil.getSortedDateRanges(schedules.stream().map(Schedule::getDate).toList(), "yyyy.MM.dd")
                 : DateUtil.getSortedDayRanges(schedules.stream().map(Schedule::getDay).toList());
 
