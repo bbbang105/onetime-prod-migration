@@ -9,7 +9,12 @@ import side.onetime.repository.custom.EventParticipationRepositoryCustom;
 import java.util.List;
 
 public interface EventParticipationRepository extends JpaRepository<EventParticipation,Long>, EventParticipationRepositoryCustom {
+
     List<EventParticipation> findAllByEvent(Event event);
+
     List<EventParticipation> findAllByUser(User user);
+
     EventParticipation findByUserAndEvent(User user, Event event);
+
+    List<EventParticipation> findAllByEventIdIn(List<Long> eventIds);
 }

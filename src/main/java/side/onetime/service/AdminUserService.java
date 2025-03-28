@@ -4,11 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import side.onetime.domain.AdminUser;
-import side.onetime.domain.Event;
-import side.onetime.domain.Schedule;
-import side.onetime.domain.User;
+import side.onetime.domain.*;
 import side.onetime.domain.enums.AdminStatus;
+import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
 import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
@@ -31,9 +29,9 @@ public class AdminUserService {
     private final EventRepository eventRepository;
     private final EventParticipationRepository eventParticipationRepository;
     private final ScheduleRepository scheduleRepository;
-    private final EventService eventService;
-    private final JwtUtil jwtUtil;
+    private final MemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final JwtUtil jwtUtil;
 
     /**
      * 관리자 계정 등록 메서드.
@@ -181,13 +179,24 @@ public class AdminUserService {
         Map<Long, List<Schedule>> scheduleMap = scheduleRepository.findAllByEventIdIn(eventIds).stream()
                 .collect(Collectors.groupingBy(schedule -> schedule.getEvent().getId()));
 
-        Map<Long, Integer> participantCountMap = getParticipantsCountMapByEventIds(eventIds);
+        // 1. 모든 EventParticipation 조회
+        Map<Long, List<EventParticipation>> epMap = eventParticipationRepository.findAllByEventIdIn(eventIds).stream()
+                .filter(ep -> ep.getEventStatus() != EventStatus.CREATOR)
+                .collect(Collectors.groupingBy(ep -> ep.getEvent().getId()));
 
+        // 2. 모든 Member 조회
+        Map<Long, List<Member>> memberMap = memberRepository.findAllByEventIdIn(eventIds).stream()
+                .collect(Collectors.groupingBy(member -> member.getEvent().getId()));
+
+        // 3. 참여자 수 계산
         List<DashboardEvent> dashboardEvents = events.stream()
                 .map(event -> {
                     List<Schedule> schedules = scheduleMap.getOrDefault(event.getId(), List.of());
-                    int participantCount = participantCountMap.getOrDefault(event.getId(), 0);
-                    return DashboardEvent.of(event, schedules, participantCount);
+                    int userCount = epMap.getOrDefault(event.getId(), List.of()).size();
+                    int memberCount = memberMap.getOrDefault(event.getId(), List.of()).size();
+                    int totalParticipantCount = userCount + memberCount;
+
+                    return DashboardEvent.of(event, schedules, totalParticipantCount);
                 })
                 .toList();
 
@@ -229,17 +238,5 @@ public class AdminUserService {
                     return DashboardUser.from(user, participantCount);
                 })
                 .toList();
-    }
-
-    /**
-     * 이벤트 ID 목록을 기반으로 참여자 수 Map을 조회합니다.
-     * 내부적으로 EventParticipationRepository의 커스텀 구현을 사용하여
-     * 한 번의 쿼리로 모든 이벤트에 대한 참여자 수를 조회합니다.
-     *
-     * @param eventIds 이벤트 ID 리스트
-     * @return Map<이벤트 ID, 참여자 수>
-     */
-    public Map<Long, Integer> getParticipantsCountMapByEventIds(List<Long> eventIds) {
-        return eventParticipationRepository.countParticipantsByEventIds(eventIds);
     }
 }
