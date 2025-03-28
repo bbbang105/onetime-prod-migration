@@ -8,6 +8,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import side.onetime.domain.Event;
+import side.onetime.domain.QEvent;
 import side.onetime.domain.QEventParticipation;
 import side.onetime.domain.enums.Category;
 import side.onetime.exception.CustomException;
@@ -109,21 +110,20 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 
     /**
      * 정렬 및 페이징 기능을 포함한 이벤트 조회 메서드
-     * keyword: 정렬 필드명(title, category, startTime, endTime, createDate, participantCount)
+     * keyword: 정렬 필드명(title, category, startTime, endTime, createDate, id, event_id)
      * sorting: asc / desc
      */
     @Override
     public List<Event> findAllWithSort(Pageable pageable, String keyword, String sorting) {
         Order order = sorting.equalsIgnoreCase("asc") ? Order.ASC : Order.DESC;
+        String field = NamingUtil.toCamelCase(keyword); // snake_case → camelCase 변환
 
-        // snake_case → camelCase 변환
-        String field = NamingUtil.toCamelCase(keyword);
+        QEvent event = QEvent.event;
+        QEventParticipation ep = QEventParticipation.eventParticipation;
 
         JPAQuery<Event> query = queryFactory.selectFrom(event);
 
         if ("participantCount".equals(field)) {
-            QEventParticipation ep = eventParticipation;
-
             query
                     .leftJoin(ep).on(ep.event.eq(event))
                     .groupBy(event);
@@ -138,13 +138,18 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
             PathBuilder<Event> pathBuilder = new PathBuilder<>(Event.class, "event");
 
             OrderSpecifier<?> orderSpecifier = switch (field) {
+                case "id" ->
+                        new OrderSpecifier<>(order, pathBuilder.getNumber("id", Long.class));
+                case "eventId" ->
+                        new OrderSpecifier<>(order, pathBuilder.getString("eventId")); // eventId는 String 기반
                 case "title", "startTime", "endTime" ->
                         new OrderSpecifier<>(order, pathBuilder.getString(field));
                 case "category" ->
                         new OrderSpecifier<>(order, pathBuilder.getEnum(field, Category.class));
                 case "createdDate" ->
                         new OrderSpecifier<>(order, pathBuilder.getComparable(field, LocalDateTime.class));
-                default -> throw new CustomException(AdminUserErrorStatus._INVALID_SORT_KEYWORD);
+                default ->
+                        throw new CustomException(AdminUserErrorStatus._INVALID_SORT_KEYWORD);
             };
 
             query.orderBy(orderSpecifier);
