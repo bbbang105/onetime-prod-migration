@@ -60,7 +60,8 @@ public enum SuccessStatus implements BaseCode {
     _GET_ALL_ADMIN_USER_DETAIL(HttpStatus.OK, "200", "전체 관리자 정보 조회에 성공했습니다."),
     _UPDATE_ADMIN_USER_STATUS(HttpStatus.OK, "200", "관리자 권한 수정에 성공했습니다."),
     _WITHDRAW_ADMIN_USER(HttpStatus.OK, "200", "관리자 계정 탈퇴에 성공했습니다."),
-    _GET_ALL_DASHBOARD_EVENTS(HttpStatus.OK, "200", "이벤트 관리 정보 조회에 성공했습니다."),
+    _GET_ALL_DASHBOARD_EVENTS(HttpStatus.OK, "200", "관리자 이벤트 대시보드 정보 조회에 성공했습니다."),
+    _GET_ALL_DASHBOARD_USERS(HttpStatus.OK, "200", "관리자 유저 대시보드 정보 조회에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;

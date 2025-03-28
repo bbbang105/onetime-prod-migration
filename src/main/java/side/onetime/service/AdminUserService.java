@@ -1,31 +1,25 @@
 package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import side.onetime.domain.AdminUser;
-import side.onetime.domain.Event;
-import side.onetime.domain.Schedule;
+import side.onetime.domain.*;
 import side.onetime.domain.enums.AdminStatus;
+import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
 import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
-import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
-import side.onetime.dto.adminUser.response.DashboardEvent;
-import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
-import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
-import side.onetime.dto.event.response.GetParticipantsResponse;
+import side.onetime.dto.adminUser.response.*;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.AdminUserErrorStatus;
-import side.onetime.exception.status.ScheduleErrorStatus;
-import side.onetime.repository.AdminUserRepository;
-import side.onetime.repository.EventRepository;
-import side.onetime.repository.ScheduleRepository;
+import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,8 +27,10 @@ public class AdminUserService {
 
     private final AdminUserRepository adminUserRepository;
     private final EventRepository eventRepository;
+    private final EventParticipationRepository eventParticipationRepository;
     private final ScheduleRepository scheduleRepository;
-    private final EventService eventService;
+    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
 
     /**
@@ -159,7 +155,7 @@ public class AdminUserService {
      *
      * 어드민 권한 사용자가 전체 이벤트 목록을 페이지 단위로 조회할 수 있습니다.
      * 정렬 기준으로 전달된 snake_case 필드명을 camelCase로 변환하여 동적으로 정렬하며,
-     * 각 이벤트에 대해 스케줄 정보를 조회하여 ranges 정보를 포함한 DashboardEvent로 변환합니다.
+     * 각 이벤트에 대해 스케줄 및 참여자 수를 일괄 조회한 뒤 DashboardEvent로 변환합니다.
      *
      * @param authorizationHeader Authorization 헤더에서 추출한 토큰
      * @param pageable 페이지 정보 (페이지 번호, 크기 등 - 정렬은 직접 처리)
@@ -169,16 +165,77 @@ public class AdminUserService {
      */
     @Transactional(readOnly = true)
     public List<DashboardEvent> getAllDashboardEvents(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+
+        boolean isSortByParticipant = keyword.equals("participant_count");
+        List<Event> events = isSortByParticipant
+                ? eventRepository.findAll()
+                : eventRepository.findAllWithSort(pageable, keyword, sorting);
+
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .toList();
+
+        Map<Long, List<Schedule>> scheduleMap = scheduleRepository.findAllByEventIdIn(eventIds).stream()
+                .collect(Collectors.groupingBy(schedule -> schedule.getEvent().getId()));
+
+        // 1. 모든 EventParticipation 조회
+        Map<Long, List<EventParticipation>> epMap = eventParticipationRepository.findAllByEventIdIn(eventIds).stream()
+                .filter(ep -> ep.getEventStatus() != EventStatus.CREATOR)
+                .collect(Collectors.groupingBy(ep -> ep.getEvent().getId()));
+
+        // 2. 모든 Member 조회
+        Map<Long, List<Member>> memberMap = memberRepository.findAllByEventIdIn(eventIds).stream()
+                .collect(Collectors.groupingBy(member -> member.getEvent().getId()));
+
+        // 3. 참여자 수 계산
+        List<DashboardEvent> dashboardEvents = events.stream()
+                .map(event -> {
+                    List<Schedule> schedules = scheduleMap.getOrDefault(event.getId(), List.of());
+                    int userCount = epMap.getOrDefault(event.getId(), List.of()).size();
+                    int memberCount = memberMap.getOrDefault(event.getId(), List.of()).size();
+                    int totalParticipantCount = userCount + memberCount;
+
+                    return DashboardEvent.of(event, schedules, totalParticipantCount);
+                })
+                .toList();
+
+        if (isSortByParticipant) {
+            Comparator<DashboardEvent> comparator = Comparator.comparingInt(DashboardEvent::participantCount);
+            if (sorting.equalsIgnoreCase("desc")) comparator = comparator.reversed();
+            dashboardEvents = dashboardEvents.stream()
+                    .sorted(comparator)
+                    .skip(pageable.getOffset())
+                    .limit(pageable.getPageSize())
+                    .toList();
+        }
+
+        return dashboardEvents;
+    }
+
+    /**
+     * 대시보드 사용자 목록 조회 메서드
+     *
+     * 어드민 권한 사용자가 전체 사용자 정보를 페이지 단위로 조회할 수 있습니다.
+     * 사용자 목록은 정렬 기준(keyword)과 정렬 방향(sorting)에 따라 정렬되며,
+     * 각 사용자 데이터는 참여 이벤트 수를 포함한 DashboardUser DTO로 변환됩니다.
+     *
+     * @param authorizationHeader Authorization 헤더에서 추출한 토큰
+     * @param pageable 페이지 정보 (페이지 번호, 크기 등)
+     * @param keyword 정렬 기준 필드 (예: name, email, created_date 등)
+     * @param sorting 정렬 방향 ("asc" 또는 "desc")
+     * @return 정렬 및 페이징된 DashboardUser 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<DashboardUser> getAllDashboardUsers(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
 
-        List<Event> events = eventRepository.findAllWithSort(pageable, keyword, sorting);
+        List<User> users = userRepository.findAllWithSort(pageable, keyword, sorting);
 
-        return events.stream()
-                .map(event -> {
-                    List<Schedule> schedules = scheduleRepository.findAllByEvent(event)
-                            .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_ALL_SCHEDULES));
-                    int participantCount = eventService.getParticipants(String.valueOf(event.getEventId())).names().size();
-                    return DashboardEvent.of(event, schedules, participantCount);
+        return users.stream()
+                .map(user -> {
+                    int participantCount = eventParticipationRepository.findAllByUser(user).size();
+                    return DashboardUser.from(user, participantCount);
                 })
                 .toList();
     }

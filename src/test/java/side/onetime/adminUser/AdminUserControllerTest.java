@@ -17,13 +17,11 @@ import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.AdminUserController;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.domain.enums.Category;
+import side.onetime.domain.enums.Language;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
 import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
-import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
-import side.onetime.dto.adminUser.response.DashboardEvent;
-import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
-import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
+import side.onetime.dto.adminUser.response.*;
 import side.onetime.service.AdminUserService;
 import side.onetime.util.JwtUtil;
 
@@ -317,14 +315,14 @@ public class AdminUserControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("대시보드 이벤트 관리 정보를 조회한다.")
+    @DisplayName("관리자 이벤트 대시보드 정보를 조회한다.")
     public void getAllDashboardEvents() throws Exception {
         // given
         String accessToken = "Bearer temp.jwt.access.token";
 
         List<DashboardEvent> response = List.of(
                 new DashboardEvent(
-                        "1", "이벤트 제목", "2025-04-01 10:00:00", "2025-04-01 12:00:00",
+                        100L, "1", "이벤트 제목", "2025-04-01 10:00:00", "2025-04-01 12:00:00",
                         Category.DATE, 10, "2025-03-01 12:00:00",
                         List.of("2025.04.01")
                 )
@@ -343,7 +341,8 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("이벤트 관리 정보 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("관리자 이벤트 대시보드 정보 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload[0].id").value(100L))
                 .andExpect(jsonPath("$.payload[0].event_id").value("1"))
                 .andExpect(jsonPath("$.payload[0].title").value("이벤트 제목"))
                 .andExpect(jsonPath("$.payload[0].participant_count").value(10))
@@ -353,7 +352,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Admin API")
-                                        .description("대시보드 이벤트 관리 정보를 조회한다.")
+                                        .description("관리자 이벤트 대시보드 정보를 조회한다.")
                                         .queryParameters(
                                                 parameterWithName("page").description("조회할 페이지 번호 (1부터 시작)"),
                                                 parameterWithName("keyword").description("정렬 기준 필드명 (예: created_date, end_time 등)"),
@@ -364,7 +363,8 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.ARRAY).description("이벤트 리스트"),
-                                                fieldWithPath("payload[].event_id").type(JsonFieldType.STRING).description("이벤트 ID"),
+                                                fieldWithPath("payload[].id").type(JsonFieldType.NUMBER).description("이벤트 내부 ID"),
+                                                fieldWithPath("payload[].event_id").type(JsonFieldType.STRING).description("이벤트 외부 식별자 (UUID)"),
                                                 fieldWithPath("payload[].title").type(JsonFieldType.STRING).description("이벤트 제목"),
                                                 fieldWithPath("payload[].start_time").type(JsonFieldType.STRING).description("시작 시간"),
                                                 fieldWithPath("payload[].end_time").type(JsonFieldType.STRING).description("종료 시간"),
@@ -374,6 +374,72 @@ public class AdminUserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload[].ranges").type(JsonFieldType.ARRAY).description("이벤트 날짜 또는 요일 범위")
                                         )
                                         .responseSchema(Schema.schema("GetAllDashboardEventsResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("관리자 유저 대시보드 정보를 조회한다.")
+    public void getAllDashboardUsers() throws Exception {
+        // given
+        String accessToken = "Bearer temp.jwt.access.token";
+
+        List<DashboardUser> response = List.of(
+                new DashboardUser(
+                        1L, "홍길동", "hong@example.com", "길동이", "KAKAO", "kakao_123",
+                        true, true, false, "23:00", "07:00", Language.KOR, 3
+                )
+        );
+
+        // when
+        Mockito.when(adminUserService.getAllDashboardUsers(any(String.class), any(Pageable.class), any(String.class), any(String.class)))
+                .thenReturn(response);
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/dashboard/users")
+                        .header("Authorization", accessToken)
+                        .param("page", "1")
+                        .param("keyword", "created_date")
+                        .param("sorting", "desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("관리자 유저 대시보드 정보 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload[0].name").value("홍길동"))
+                .andExpect(jsonPath("$.payload[0].participation_count").value(3))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/dashboard-users",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("관리자 유저 대시보드 정보를 조회한다.")
+                                        .queryParameters(
+                                                parameterWithName("page").description("조회할 페이지 번호 (1부터 시작)"),
+                                                parameterWithName("keyword").description("정렬 기준 필드명 (예: created_date, email 등)"),
+                                                parameterWithName("sorting").description("정렬 방향 (asc 또는 desc)")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.ARRAY).description("사용자 리스트"),
+                                                fieldWithPath("payload[].id").type(JsonFieldType.NUMBER).description("사용자 ID"),
+                                                fieldWithPath("payload[].name").type(JsonFieldType.STRING).description("이름"),
+                                                fieldWithPath("payload[].email").type(JsonFieldType.STRING).description("이메일"),
+                                                fieldWithPath("payload[].nickname").type(JsonFieldType.STRING).description("닉네임"),
+                                                fieldWithPath("payload[].provider").type(JsonFieldType.STRING).description("소셜 로그인 제공자"),
+                                                fieldWithPath("payload[].provider_id").type(JsonFieldType.STRING).description("소셜 로그인 식별자"),
+                                                fieldWithPath("payload[].service_policy_agreement").type(JsonFieldType.BOOLEAN).description("서비스 정책 동의 여부"),
+                                                fieldWithPath("payload[].privacy_policy_agreement").type(JsonFieldType.BOOLEAN).description("개인정보 정책 동의 여부"),
+                                                fieldWithPath("payload[].marketing_policy_agreement").type(JsonFieldType.BOOLEAN).description("마케팅 정책 동의 여부"),
+                                                fieldWithPath("payload[].sleep_start_time").type(JsonFieldType.STRING).description("수면 시작 시간"),
+                                                fieldWithPath("payload[].sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간"),
+                                                fieldWithPath("payload[].language").type(JsonFieldType.STRING).description("선호 언어"),
+                                                fieldWithPath("payload[].participation_count").type(JsonFieldType.NUMBER).description("참여한 이벤트 수")
+                                        )
+                                        .responseSchema(Schema.schema("GetAllDashboardUsersResponse"))
                                         .build()
                         )
                 ));

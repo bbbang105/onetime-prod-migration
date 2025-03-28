@@ -14,6 +14,7 @@ import java.util.List;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record DashboardEvent(
+        Long id,
         String eventId,
         String title,
         String startTime,
@@ -29,6 +30,7 @@ public record DashboardEvent(
                 : DateUtil.getSortedDayRanges(schedules.stream().map(Schedule::getDay).toList());
 
         return new DashboardEvent(
+                event.getId(),
                 String.valueOf(event.getEventId()),
                 event.getTitle(),
                 event.getStartTime(),
