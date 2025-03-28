@@ -1,13 +1,17 @@
 package side.onetime.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
 import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
 import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
+import side.onetime.dto.adminUser.response.DashboardEvent;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
 import side.onetime.global.common.ApiResponse;
@@ -127,5 +131,32 @@ public class AdminUserController {
 
         adminUserService.withdrawAdminUser(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_ADMIN_USER);
+    }
+
+    /**
+     * 대시보드 이벤트 목록 조회 API
+     *
+     * 어드민 권한 사용자가 전체 이벤트를 최신순 또는 원하는 기준으로 조회할 수 있는 API입니다.
+     * 정렬 기준은 snake_case 형식의 필드명(keyword)으로 전달하며,
+     * 내부적으로 camelCase로 변환하여 처리합니다.
+     *
+     * 응답은 페이지 단위로 제공되며, 각 페이지는 최대 20개의 이벤트를 포함합니다.
+     *
+     * @param authorizationHeader Authorization 헤더 (Bearer 토큰)
+     * @param page 조회할 페이지 번호 (1부터 시작)
+     * @param keyword 정렬 기준 필드명 (예: "created_date", "end_time" 등 - snake_case로 전달)
+     * @param sorting 정렬 방식 ("asc" 또는 "desc")
+     * @return 이벤트 목록 데이터 (페이지 단위)
+     */
+    @GetMapping("/dashboard/events")
+    public ResponseEntity<ApiResponse<List<DashboardEvent>>> getAllDashboardEvents(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) int page,
+            @RequestParam(value = "keyword", defaultValue = "created_date") String keyword,
+            @RequestParam(value = "sorting", defaultValue = "asc") String sorting
+    ) {
+        Pageable pageable = PageRequest.of(page - 1, 20);
+        List<DashboardEvent> response = adminUserService.getAllDashboardEvents(authorizationHeader, pageable, keyword, sorting);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DASHBOARD_EVENTS, response);
     }
 }

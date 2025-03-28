@@ -1,19 +1,28 @@
 package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.AdminUser;
+import side.onetime.domain.Event;
+import side.onetime.domain.Schedule;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
 import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
 import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
 import side.onetime.dto.adminUser.response.AdminUserDetailResponse;
+import side.onetime.dto.adminUser.response.DashboardEvent;
 import side.onetime.dto.adminUser.response.GetAdminUserProfileResponse;
 import side.onetime.dto.adminUser.response.LoginAdminUserResponse;
+import side.onetime.dto.event.response.GetParticipantsResponse;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.AdminUserErrorStatus;
+import side.onetime.exception.status.ScheduleErrorStatus;
 import side.onetime.repository.AdminUserRepository;
+import side.onetime.repository.EventRepository;
+import side.onetime.repository.ScheduleRepository;
 import side.onetime.util.JwtUtil;
 
 import java.util.List;
@@ -23,6 +32,9 @@ import java.util.List;
 public class AdminUserService {
 
     private final AdminUserRepository adminUserRepository;
+    private final EventRepository eventRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final EventService eventService;
     private final JwtUtil jwtUtil;
 
     /**
@@ -140,5 +152,34 @@ public class AdminUserService {
     public void withdrawAdminUser(String authorizationHeader) {
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         adminUserRepository.delete(adminUser);
+    }
+
+    /**
+     * 대시보드 이벤트 목록 조회 메서드
+     *
+     * 어드민 권한 사용자가 전체 이벤트 목록을 페이지 단위로 조회할 수 있습니다.
+     * 정렬 기준으로 전달된 snake_case 필드명을 camelCase로 변환하여 동적으로 정렬하며,
+     * 각 이벤트에 대해 스케줄 정보를 조회하여 ranges 정보를 포함한 DashboardEvent로 변환합니다.
+     *
+     * @param authorizationHeader Authorization 헤더에서 추출한 토큰
+     * @param pageable 페이지 정보 (페이지 번호, 크기 등 - 정렬은 직접 처리)
+     * @param keyword 정렬 기준 필드명 (snake_case)
+     * @param sorting 정렬 방향 ("asc", "desc")
+     * @return DashboardEvent 리스트 (페이징된 이벤트 정보)
+     */
+    @Transactional(readOnly = true)
+    public List<DashboardEvent> getAllDashboardEvents(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
+        AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
+
+        List<Event> events = eventRepository.findAllWithSort(pageable, keyword, sorting);
+
+        return events.stream()
+                .map(event -> {
+                    List<Schedule> schedules = scheduleRepository.findAllByEvent(event)
+                            .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_ALL_SCHEDULES));
+                    int participantCount = eventService.getParticipants(String.valueOf(event.getEventId())).names().size();
+                    return DashboardEvent.of(event, schedules, participantCount);
+                })
+                .toList();
     }
 }
