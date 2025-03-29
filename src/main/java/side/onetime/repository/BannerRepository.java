@@ -1,5 +1,6 @@
 package side.onetime.repository;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import side.onetime.domain.Banner;
 
@@ -10,7 +11,7 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
 
     Optional<Banner> findByIdAndIsDeletedFalse(Long id);
 
-    List<Banner> findAllByIsDeletedFalseOrderByCreatedDateDesc();
+    List<Banner> findAllByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);
 
     Optional<Banner> findByIsActivatedTrueAndIsDeletedFalse();
 }

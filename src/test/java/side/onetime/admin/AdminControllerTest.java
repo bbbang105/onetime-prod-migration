@@ -548,17 +548,20 @@ public class AdminControllerTest extends ControllerTestConfig {
     public void getAllBanners() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
+        int page = 1;
+
         List<GetBannerResponse> response = List.of(
                 new GetBannerResponse(1L, "배너1", "내용1", "#FF5733", Language.KOR, true, "2025-04-01 12:00:00"),
                 new GetBannerResponse(2L, "배너2", "내용2", "#123456", Language.ENG, false, "2025-04-01 12:00:00")
         );
 
         // when
-        Mockito.when(adminService.getAllBanners(any(String.class))).thenReturn(response);
+        Mockito.when(adminService.getAllBanners(any(String.class), any(Pageable.class))).thenReturn(response);
 
         // then
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/banners/all")
-                        .header("Authorization", accessToken))
+                        .header("Authorization", accessToken)
+                        .param("page", String.valueOf(page)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
@@ -570,6 +573,9 @@ public class AdminControllerTest extends ControllerTestConfig {
                                 ResourceSnippetParameters.builder()
                                         .tag("Admin API")
                                         .description("띠배너를 전체 조회한다.")
+                                        .queryParameters(
+                                                parameterWithName("page").description("조회할 페이지 번호 (1부터 시작)")
+                                        )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),

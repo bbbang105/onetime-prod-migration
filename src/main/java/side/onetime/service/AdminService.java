@@ -290,9 +290,9 @@ public class AdminService {
      * @return 배너 응답 객체 리스트
      */
     @Transactional(readOnly = true)
-    public List<GetBannerResponse> getAllBanners(String authorizationHeader) {
+    public List<GetBannerResponse> getAllBanners(String authorizationHeader, Pageable pageable) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        return bannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc().stream()
+        return bannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc(pageable).stream()
                 .map(GetBannerResponse::from)
                 .toList();
     }
