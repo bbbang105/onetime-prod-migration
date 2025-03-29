@@ -12,7 +12,7 @@ import side.onetime.domain.QEvent;
 import side.onetime.domain.QEventParticipation;
 import side.onetime.domain.enums.Category;
 import side.onetime.exception.CustomException;
-import side.onetime.exception.status.AdminUserErrorStatus;
+import side.onetime.exception.status.AdminErrorStatus;
 import side.onetime.util.NamingUtil;
 
 import java.time.LocalDateTime;
@@ -149,7 +149,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
                 case "createdDate" ->
                         new OrderSpecifier<>(order, pathBuilder.getComparable(field, LocalDateTime.class));
                 default ->
-                        throw new CustomException(AdminUserErrorStatus._INVALID_SORT_KEYWORD);
+                        throw new CustomException(AdminErrorStatus._INVALID_SORT_KEYWORD);
             };
 
             query.orderBy(orderSpecifier);

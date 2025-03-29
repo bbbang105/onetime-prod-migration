@@ -8,7 +8,7 @@ import side.onetime.global.common.dto.ErrorReasonDto;
 
 @Getter
 @RequiredArgsConstructor
-public enum AdminUserErrorStatus implements BaseErrorCode {
+public enum AdminErrorStatus implements BaseErrorCode {
     _IS_DUPLICATED_EMAIL(HttpStatus.BAD_REQUEST, "ADMIN-USER-001", "이미 존재하는 이메일입니다."),
     _NOT_FOUND_ADMIN_USER(HttpStatus.NOT_FOUND, "ADMIN-USER-002", "관리자 계정을 찾을 수 없습니다."),
     _IS_NOT_APPROVED_ADMIN_USER(HttpStatus.UNAUTHORIZED, "ADMIN-USER-003", "승인되지 않은 관리자 계정입니다."),

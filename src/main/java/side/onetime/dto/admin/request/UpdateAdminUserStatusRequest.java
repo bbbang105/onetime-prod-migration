@@ -1,4 +1,4 @@
-package side.onetime.dto.adminUser.request;
+package side.onetime.dto.admin.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;

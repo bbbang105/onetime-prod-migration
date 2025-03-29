@@ -1,4 +1,4 @@
-package side.onetime.adminUser;
+package side.onetime.admin;
 
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
@@ -14,15 +14,15 @@ import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
-import side.onetime.controller.AdminUserController;
+import side.onetime.controller.AdminController;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.Language;
-import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
-import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
-import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
-import side.onetime.dto.adminUser.response.*;
-import side.onetime.service.AdminUserService;
+import side.onetime.dto.admin.request.LoginAdminUserRequest;
+import side.onetime.dto.admin.request.RegisterAdminUserRequest;
+import side.onetime.dto.admin.request.UpdateAdminUserStatusRequest;
+import side.onetime.dto.admin.response.*;
+import side.onetime.service.AdminService;
 import side.onetime.util.JwtUtil;
 
 import java.util.List;
@@ -35,11 +35,11 @@ import static org.springframework.restdocs.request.RequestDocumentation.paramete
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AdminUserController.class)
-public class AdminUserControllerTest extends ControllerTestConfig {
+@WebMvcTest(AdminController.class)
+public class AdminControllerTest extends ControllerTestConfig {
 
     @MockBean
-    private AdminUserService adminUserService;
+    private AdminService adminService;
 
     @MockBean
     private JwtUtil jwtUtil;
@@ -59,7 +59,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
-        Mockito.doNothing().when(adminUserService).registerAdminUser(any(RegisterAdminUserRequest.class));
+        Mockito.doNothing().when(adminService).registerAdminUser(any(RegisterAdminUserRequest.class));
 
         // then
         mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/register")
@@ -105,7 +105,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         String tempAccessToken = "temp.jwt.access.token";
 
         // when
-        Mockito.when(adminUserService.loginAdminUser(any(LoginAdminUserRequest.class)))
+        Mockito.when(adminService.loginAdminUser(any(LoginAdminUserRequest.class)))
                 .thenReturn(LoginAdminUserResponse.of(tempAccessToken));
 
         // then
@@ -154,7 +154,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         );
 
         // when
-        Mockito.when(adminUserService.getAdminUserProfile(any(String.class)))
+        Mockito.when(adminService.getAdminUserProfile(any(String.class)))
                 .thenReturn(response);
 
         // then
@@ -199,7 +199,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         );
 
         // when
-        Mockito.when(adminUserService.getAllAdminUserDetail(any(String.class)))
+        Mockito.when(adminService.getAllAdminUserDetail(any(String.class)))
                 .thenReturn(response);
 
         // then
@@ -246,7 +246,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         );
 
         // when
-        Mockito.doNothing().when(adminUserService).updateAdminUserStatus(any(String.class), any(UpdateAdminUserStatusRequest.class));
+        Mockito.doNothing().when(adminService).updateAdminUserStatus(any(String.class), any(UpdateAdminUserStatusRequest.class));
 
         // then
         mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/admin/status")
@@ -287,7 +287,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer temp.jwt.access.token";
 
         // when
-        Mockito.doNothing().when(adminUserService).withdrawAdminUser(any(String.class));
+        Mockito.doNothing().when(adminService).withdrawAdminUser(any(String.class));
 
         // then
         mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/withdraw")
@@ -329,7 +329,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         );
 
         // when
-        Mockito.when(adminUserService.getAllDashboardEvents(any(String.class), any(Pageable.class), any(String.class), any(String.class)))
+        Mockito.when(adminService.getAllDashboardEvents(any(String.class), any(Pageable.class), any(String.class), any(String.class)))
                 .thenReturn(response);
 
         // then
@@ -393,7 +393,7 @@ public class AdminUserControllerTest extends ControllerTestConfig {
         );
 
         // when
-        Mockito.when(adminUserService.getAllDashboardUsers(any(String.class), any(Pageable.class), any(String.class), any(String.class)))
+        Mockito.when(adminService.getAllDashboardUsers(any(String.class), any(Pageable.class), any(String.class), any(String.class)))
                 .thenReturn(response);
 
         // then

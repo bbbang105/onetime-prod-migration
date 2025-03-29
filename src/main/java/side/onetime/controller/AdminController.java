@@ -7,21 +7,21 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
-import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
-import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
-import side.onetime.dto.adminUser.response.*;
+import side.onetime.dto.admin.request.LoginAdminUserRequest;
+import side.onetime.dto.admin.request.RegisterAdminUserRequest;
+import side.onetime.dto.admin.request.UpdateAdminUserStatusRequest;
+import side.onetime.dto.admin.response.*;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
-import side.onetime.service.AdminUserService;
+import side.onetime.service.AdminService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-public class AdminUserController {
-    private final AdminUserService adminUserService;
+public class AdminController {
+    private final AdminService adminService;
 
     /**
      * 관리자 계정 회원가입 API.
@@ -36,7 +36,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<SuccessStatus>> registerAdminUser(
             @Valid @RequestBody RegisterAdminUserRequest request) {
 
-        adminUserService.registerAdminUser(request);
+        adminService.registerAdminUser(request);
         return ApiResponse.onSuccess(SuccessStatus._REGISTER_ADMIN_USER);
     }
 
@@ -53,7 +53,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<LoginAdminUserResponse>> loginAdminUser(
             @Valid @RequestBody LoginAdminUserRequest request) {
 
-        LoginAdminUserResponse response = adminUserService.loginAdminUser(request);
+        LoginAdminUserResponse response = adminService.loginAdminUser(request);
         return ApiResponse.onSuccess(SuccessStatus._LOGIN_ADMIN_USER, response);
     }
 
@@ -70,7 +70,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<GetAdminUserProfileResponse>> getAdminUserProfile(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        GetAdminUserProfileResponse response = adminUserService.getAdminUserProfile(authorizationHeader);
+        GetAdminUserProfileResponse response = adminService.getAdminUserProfile(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_ADMIN_USER_PROFILE, response);
     }
 
@@ -89,7 +89,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<List<AdminUserDetailResponse>>> getAllAdminUserDetail(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        List<AdminUserDetailResponse> response = adminUserService.getAllAdminUserDetail(authorizationHeader);
+        List<AdminUserDetailResponse> response = adminService.getAllAdminUserDetail(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_ADMIN_USER_DETAIL, response);
     }
 
@@ -109,7 +109,7 @@ public class AdminUserController {
             @RequestHeader("Authorization") String authorizationHeader,
             @Valid @RequestBody UpdateAdminUserStatusRequest request) {
 
-        adminUserService.updateAdminUserStatus(authorizationHeader, request);
+        adminService.updateAdminUserStatus(authorizationHeader, request);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_ADMIN_USER_STATUS);
     }
 
@@ -126,7 +126,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<SuccessStatus>> withdrawAdminUser(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        adminUserService.withdrawAdminUser(authorizationHeader);
+        adminService.withdrawAdminUser(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_ADMIN_USER);
     }
 
@@ -153,7 +153,7 @@ public class AdminUserController {
             @RequestParam(value = "sorting", defaultValue = "desc") String sorting
     ) {
         Pageable pageable = PageRequest.of(page - 1, 20);
-        List<DashboardEvent> response = adminUserService.getAllDashboardEvents(authorizationHeader, pageable, keyword, sorting);
+        List<DashboardEvent> response = adminService.getAllDashboardEvents(authorizationHeader, pageable, keyword, sorting);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DASHBOARD_EVENTS, response);
     }
 
@@ -177,7 +177,7 @@ public class AdminUserController {
             @RequestParam(value = "sorting", defaultValue = "desc") String sorting
     ) {
         Pageable pageable = PageRequest.of(page - 1, 20);
-        List<DashboardUser> response = adminUserService.getAllDashboardUsers(authorizationHeader, pageable, keyword, sorting);
+        List<DashboardUser> response = adminService.getAllDashboardUsers(authorizationHeader, pageable, keyword, sorting);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DASHBOARD_USERS, response);
     }
 }

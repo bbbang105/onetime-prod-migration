@@ -7,12 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.domain.enums.EventStatus;
-import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
-import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
-import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
-import side.onetime.dto.adminUser.response.*;
+import side.onetime.dto.admin.request.LoginAdminUserRequest;
+import side.onetime.dto.admin.request.RegisterAdminUserRequest;
+import side.onetime.dto.admin.request.UpdateAdminUserStatusRequest;
+import side.onetime.dto.admin.response.*;
 import side.onetime.exception.CustomException;
-import side.onetime.exception.status.AdminUserErrorStatus;
+import side.onetime.exception.status.AdminErrorStatus;
 import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
 
@@ -23,9 +23,9 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class AdminUserService {
+public class AdminService {
 
-    private final AdminUserRepository adminUserRepository;
+    private final AdminRepository adminRepository;
     private final EventRepository eventRepository;
     private final EventParticipationRepository eventParticipationRepository;
     private final ScheduleRepository scheduleRepository;
@@ -43,11 +43,11 @@ public class AdminUserService {
      */
     @Transactional
     public void registerAdminUser(RegisterAdminUserRequest request) {
-        if (adminUserRepository.existsAdminUsersByEmail(request.email())) {
-            throw new CustomException(AdminUserErrorStatus._IS_DUPLICATED_EMAIL);
+        if (adminRepository.existsAdminUsersByEmail(request.email())) {
+            throw new CustomException(AdminErrorStatus._IS_DUPLICATED_EMAIL);
         }
         AdminUser newAdminUser = request.toEntity();
-        adminUserRepository.save(newAdminUser);
+        adminRepository.save(newAdminUser);
     }
 
     /**
@@ -62,13 +62,13 @@ public class AdminUserService {
      */
     @Transactional(readOnly = true)
     public LoginAdminUserResponse loginAdminUser(LoginAdminUserRequest request) {
-        AdminUser adminUser = adminUserRepository.findAdminUserByEmail(request.email())
-                        .orElseThrow(() -> new CustomException(AdminUserErrorStatus._NOT_FOUND_ADMIN_USER));
+        AdminUser adminUser = adminRepository.findAdminUserByEmail(request.email())
+                        .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_ADMIN_USER));
         if (AdminStatus.PENDING_APPROVAL == adminUser.getAdminStatus()) {
-            throw new CustomException(AdminUserErrorStatus._IS_NOT_APPROVED_ADMIN_USER);
+            throw new CustomException(AdminErrorStatus._IS_NOT_APPROVED_ADMIN_USER);
         }
         if (!request.password().equals(adminUser.getPassword())) {
-            throw new CustomException(AdminUserErrorStatus._IS_NOT_EQUAL_PASSWORD);
+            throw new CustomException(AdminErrorStatus._IS_NOT_EQUAL_PASSWORD);
         }
         return LoginAdminUserResponse.of(jwtUtil.generateAccessToken(adminUser.getId(), "ADMIN"));
     }
@@ -105,10 +105,10 @@ public class AdminUserService {
     public List<AdminUserDetailResponse> getAllAdminUserDetail(String authorizationHeader) {
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         if (!AdminStatus.MASTER.equals(adminUser.getAdminStatus())) {
-            throw new CustomException(AdminUserErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
+            throw new CustomException(AdminErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
         }
 
-        return adminUserRepository.findAll().stream()
+        return adminRepository.findAll().stream()
                 .map(AdminUserDetailResponse::from)
                 .toList();
     }
@@ -129,11 +129,11 @@ public class AdminUserService {
     public void updateAdminUserStatus(String authorizationHeader, UpdateAdminUserStatusRequest request) {
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         if (!AdminStatus.MASTER.equals(adminUser.getAdminStatus())) {
-            throw new CustomException(AdminUserErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
+            throw new CustomException(AdminErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
         }
 
-        AdminUser targetAdminUser = adminUserRepository.findById(request.id())
-                .orElseThrow(() -> new CustomException(AdminUserErrorStatus._NOT_FOUND_ADMIN_USER));
+        AdminUser targetAdminUser = adminRepository.findById(request.id())
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_ADMIN_USER));
         targetAdminUser.updateAdminStatus(request.adminStatus());
     }
 
@@ -147,7 +147,7 @@ public class AdminUserService {
     @Transactional
     public void withdrawAdminUser(String authorizationHeader) {
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        adminUserRepository.delete(adminUser);
+        adminRepository.delete(adminUser);
     }
 
     /**

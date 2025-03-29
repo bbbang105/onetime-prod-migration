@@ -11,7 +11,7 @@ import side.onetime.domain.*;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.domain.enums.Language;
 import side.onetime.exception.CustomException;
-import side.onetime.exception.status.AdminUserErrorStatus;
+import side.onetime.exception.status.AdminErrorStatus;
 import side.onetime.util.NamingUtil;
 
 import java.time.LocalDateTime;
@@ -118,7 +118,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                         new OrderSpecifier<>(order, pathBuilder.getEnum(field, Language.class));
                 case "createdDate" ->
                         new OrderSpecifier<>(order, pathBuilder.getComparable(field, LocalDateTime.class));
-                default -> throw new CustomException(AdminUserErrorStatus._INVALID_SORT_KEYWORD);
+                default -> throw new CustomException(AdminErrorStatus._INVALID_SORT_KEYWORD);
             };
 
             query.orderBy(orderSpecifier);
