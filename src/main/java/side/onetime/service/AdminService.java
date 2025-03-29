@@ -7,9 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.domain.enums.EventStatus;
-import side.onetime.dto.admin.request.LoginAdminUserRequest;
-import side.onetime.dto.admin.request.RegisterAdminUserRequest;
-import side.onetime.dto.admin.request.UpdateAdminUserStatusRequest;
+import side.onetime.dto.admin.request.*;
 import side.onetime.dto.admin.response.*;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.AdminErrorStatus;
@@ -31,6 +29,7 @@ public class AdminService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final BannerRepository bannerRepository;
     private final JwtUtil jwtUtil;
 
     /**
@@ -43,6 +42,7 @@ public class AdminService {
      */
     @Transactional
     public void registerAdminUser(RegisterAdminUserRequest request) {
+
         if (adminRepository.existsAdminUsersByEmail(request.email())) {
             throw new CustomException(AdminErrorStatus._IS_DUPLICATED_EMAIL);
         }
@@ -62,6 +62,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public LoginAdminUserResponse loginAdminUser(LoginAdminUserRequest request) {
+
         AdminUser adminUser = adminRepository.findAdminUserByEmail(request.email())
                         .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_ADMIN_USER));
         if (AdminStatus.PENDING_APPROVAL == adminUser.getAdminStatus()) {
@@ -85,6 +86,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public GetAdminUserProfileResponse getAdminUserProfile(String authorizationHeader) {
+
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         return GetAdminUserProfileResponse.from(adminUser);
     }
@@ -103,6 +105,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public List<AdminUserDetailResponse> getAllAdminUserDetail(String authorizationHeader) {
+
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         if (!AdminStatus.MASTER.equals(adminUser.getAdminStatus())) {
             throw new CustomException(AdminErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
@@ -127,6 +130,7 @@ public class AdminService {
      */
     @Transactional
     public void updateAdminUserStatus(String authorizationHeader, UpdateAdminUserStatusRequest request) {
+
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         if (!AdminStatus.MASTER.equals(adminUser.getAdminStatus())) {
             throw new CustomException(AdminErrorStatus._ONLY_CAN_MASTER_ADMIN_USER);
@@ -146,6 +150,7 @@ public class AdminService {
      */
     @Transactional
     public void withdrawAdminUser(String authorizationHeader) {
+
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
         adminRepository.delete(adminUser);
     }
@@ -165,6 +170,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public List<DashboardEvent> getAllDashboardEvents(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
+
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
 
         boolean isSortByParticipant = keyword.equals("participant_count");
@@ -228,6 +234,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public List<DashboardUser> getAllDashboardUsers(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
+
         AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
 
         List<User> users = userRepository.findAllWithSort(pageable, keyword, sorting);
@@ -238,5 +245,103 @@ public class AdminService {
                     return DashboardUser.from(user, participantCount);
                 })
                 .toList();
+    }
+
+    /**
+     * 띠배너 등록 메서드.
+     *
+     * 요청 정보를 바탕으로 배너를 등록합니다.
+     * 기본적으로 비활성화 및 삭제되지 않은 상태로 저장됩니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param request 띠배너 등록 요청 객체
+     */
+    @Transactional
+    public void registerBanner(String authorizationHeader, RegisterBannerRequest request) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner newBanner = request.toEntity();
+        bannerRepository.save(newBanner);
+    }
+
+    /**
+     * 단일 띠배너 조회 메서드.
+     *
+     * 삭제되지 않은 상태의 배너를 ID 기준으로 조회합니다.
+     * 해당 배너가 존재하지 않을 경우 예외가 발생합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param id 조회할 배너 ID
+     * @return 배너 응답 객체
+     */
+    @Transactional(readOnly = true)
+    public GetBannerResponse getBanner(String authorizationHeader, Long id) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+        return GetBannerResponse.from(banner);
+    }
+
+    /**
+     * 전체 띠배너 조회 메서드.
+     *
+     * 삭제되지 않은 모든 배너를 조회하여 응답 객체로 반환합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @return 배너 응답 객체 리스트
+     */
+    @Transactional(readOnly = true)
+    public List<GetBannerResponse> getAllBanners(String authorizationHeader) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        return bannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc().stream()
+                .map(GetBannerResponse::from)
+                .toList();
+    }
+
+    /**
+     * 띠배너 수정 메서드.
+     *
+     * 삭제되지 않은 배너를 ID 기준으로 조회합니다.
+     * 요청 객체에서 null이 아닌 필드만 선택적으로 수정합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param id 수정할 배너 ID
+     * @param request 수정 요청 객체
+     */
+    @Transactional
+    public void updateBanner(String authorizationHeader, Long id, UpdateBannerRequest request) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+
+        if (request.title() != null) banner.updateTitle(request.title());
+        if (request.content() != null) banner.updateContent(request.content());
+        if (request.colorCode() != null) banner.updateColorCode(request.colorCode());
+        if (request.language() != null) banner.updateLanguage(request.language());
+
+        if (Boolean.TRUE.equals(request.isActivated())) {
+            bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
+                    .filter(b -> !b.getId().equals(id))
+                    .ifPresent(b -> b.updateIsActivated(false));
+            banner.updateIsActivated(true);
+        } else if (Boolean.FALSE.equals(request.isActivated())) {
+            banner.updateIsActivated(false);
+        }
+    }
+
+    /**
+     * 띠배너 삭제 메서드 (논리 삭제).
+     *
+     * 삭제되지 않은 배너를 ID 기준으로 조회합니다.
+     * 해당 배너의 삭제 상태를 true로 변경합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param id 삭제할 배너 ID
+     */
+    @Transactional
+    public void deleteBanner(String authorizationHeader, Long id) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+        banner.markAsDeleted();
     }
 }

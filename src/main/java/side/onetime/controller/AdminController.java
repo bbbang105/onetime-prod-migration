@@ -7,9 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import side.onetime.dto.admin.request.LoginAdminUserRequest;
-import side.onetime.dto.admin.request.RegisterAdminUserRequest;
-import side.onetime.dto.admin.request.UpdateAdminUserStatusRequest;
+import side.onetime.dto.admin.request.*;
 import side.onetime.dto.admin.response.*;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
@@ -21,6 +19,7 @@ import java.util.List;
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
 public class AdminController {
+
     private final AdminService adminService;
 
     /**
@@ -179,5 +178,96 @@ public class AdminController {
         Pageable pageable = PageRequest.of(page - 1, 20);
         List<DashboardUser> response = adminService.getAllDashboardUsers(authorizationHeader, pageable, keyword, sorting);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DASHBOARD_USERS, response);
+    }
+
+    /**
+     * 띠배너 등록 API.
+     *
+     * 요청으로 전달된 정보를 바탕으로 새로운 띠배너를 등록합니다.
+     * 기본적으로 비활성화 상태이며 삭제되지 않은 상태로 생성됩니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param request 띠배너 등록 요청 정보
+     * @return 성공 응답 메시지
+     */
+    @PostMapping("/banners/register")
+    public ResponseEntity<ApiResponse<SuccessStatus>> registerBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @Valid @RequestBody RegisterBannerRequest request) {
+        adminService.registerBanner(authorizationHeader, request);
+        return ApiResponse.onSuccess(SuccessStatus._REGISTER_BANNER);
+    }
+
+    /**
+     * 띠배너 단건 조회 API.
+     *
+     * 삭제되지 않은 배너 중, ID에 해당하는 배너를 조회합니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param id 조회할 배너 ID
+     * @return 배너 응답 객체
+     */
+    @GetMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<GetBannerResponse>> getBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long id) {
+        GetBannerResponse response = adminService.getBanner(authorizationHeader, id);
+        return ApiResponse.onSuccess(SuccessStatus._GET_BANNER, response);
+    }
+
+    /**
+     * 띠배너 전체 조회 API.
+     *
+     * 삭제되지 않은 모든 배너를 조회합니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @return 배너 응답 객체 리스트
+     */
+    @GetMapping("/banners/all")
+    public ResponseEntity<ApiResponse<List<GetBannerResponse>>> getAllBanners(
+            @RequestHeader("Authorization") String authorizationHeader) {
+        List<GetBannerResponse> response = adminService.getAllBanners(authorizationHeader);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_BANNERS, response);
+    }
+
+    /**
+     * 띠배너 수정 API.
+     *
+     * 일부 필드만 수정이 가능한 PATCH 방식의 API입니다.
+     * 전달받은 요청에서 null이 아닌 필드만 수정되며,
+     * 삭제된 배너는 수정할 수 없습니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param id 수정할 배너 ID
+     * @param request 수정 요청 DTO
+     * @return 성공 응답 메시지
+     */
+    @PatchMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> updateBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateBannerRequest request
+    ) {
+        adminService.updateBanner(authorizationHeader, id, request);
+        return ApiResponse.onSuccess(SuccessStatus._UPDATE_BANNER);
+    }
+
+    /**
+     * 띠배너 삭제 API.
+     *
+     * 배너를 DB에서 실제로 삭제하지 않고, isDeleted 플래그만 true로 변경합니다.
+     * 해당 배너는 이후 조회되지 않으며 비활성화 상태로 간주됩니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param id 삭제할 배너 ID
+     * @return 성공 응답 메시지
+     */
+    @DeleteMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> deleteBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long id
+    ) {
+        adminService.deleteBanner(authorizationHeader, id);
+        return ApiResponse.onSuccess(SuccessStatus._DELETE_BANNER);
     }
 }
