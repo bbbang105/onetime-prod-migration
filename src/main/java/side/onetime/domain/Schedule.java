@@ -23,13 +23,13 @@ public class Schedule extends BaseEntity {
     @JoinColumn(name = "events_id", foreignKey = @ForeignKey(name = "schedules_fk_events_id"))
     private Event event;
 
-    @Column(name = "date")
+    @Column(name = "date", length = 10)
     private String date;
 
     @Column(name = "day", length = 10)
     private String day;
 
-    @Column(name = "time", nullable = false)
+    @Column(name = "time", nullable = false, length = 10)
     private String time;
 
     @OneToMany(mappedBy = "schedule",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
