@@ -19,6 +19,7 @@ import side.onetime.service.UrlService;
 @RequestMapping("/api/v1/urls")
 @RequiredArgsConstructor
 public class UrlController {
+
     private final UrlService urlService;
 
     /**

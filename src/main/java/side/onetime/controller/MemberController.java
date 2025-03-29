@@ -21,6 +21,7 @@ import side.onetime.service.MemberService;
 @RequestMapping("/api/v1/members")
 @RequiredArgsConstructor
 public class MemberController {
+
     private final MemberService memberService;
 
     /**
