@@ -321,7 +321,7 @@ public class AdminControllerTest extends ControllerTestConfig {
 
         List<DashboardEvent> events = List.of(
                 new DashboardEvent(
-                        100L, "1", "이벤트 제목", "2025-04-01 10:00:00", "2025-04-01 12:00:00",
+                        100L, "1", "이벤트 제목", "10:00", "12:00",
                         Category.DATE, 10, "2025-03-01 12:00:00",
                         List.of("2025.04.01")
                 )
