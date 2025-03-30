@@ -159,64 +159,67 @@ public class AdminService {
      * 대시보드 이벤트 목록 조회 메서드
      *
      * 어드민 권한 사용자가 전체 이벤트 목록을 페이지 단위로 조회할 수 있습니다.
-     * 정렬 기준으로 전달된 snake_case 필드명을 camelCase로 변환하여 동적으로 정렬하며,
      * 각 이벤트에 대해 스케줄 및 참여자 수를 일괄 조회한 뒤 DashboardEvent로 변환합니다.
+     *
+     * 정렬 기준이 participant_count인 경우 메모리 내 정렬 후 페이징 처리됩니다.
+     * 그 외 기준은 DB 정렬 및 페이징 후 결과가 반환됩니다.
      *
      * @param authorizationHeader Authorization 헤더에서 추출한 토큰
      * @param pageable 페이지 정보 (페이지 번호, 크기 등 - 정렬은 직접 처리)
      * @param keyword 정렬 기준 필드명 (snake_case)
      * @param sorting 정렬 방향 ("asc", "desc")
-     * @return DashboardEvent 리스트 (페이징된 이벤트 정보)
+     * @return DashboardEvent 리스트 및 페이지 정보 포함 응답 DTO
      */
     @Transactional(readOnly = true)
-    public List<DashboardEvent> getAllDashboardEvents(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
-
+    public GetAllDashboardEventsResponse getAllDashboardEvents(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
 
         boolean isSortByParticipant = keyword.equals("participant_count");
-        List<Event> events = isSortByParticipant
+
+        List<Event> allEvents = isSortByParticipant
                 ? eventRepository.findAll()
                 : eventRepository.findAllWithSort(pageable, keyword, sorting);
 
-        List<Long> eventIds = events.stream()
-                .map(Event::getId)
-                .toList();
+        int totalElements = (int) eventRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+
+        List<Event> pagedEvents = isSortByParticipant
+                ? allEvents.stream()
+                .sorted(Comparator.comparingInt(event -> {
+                    Long eventId = event.getId();
+                    int userCount = (int) eventParticipationRepository.findAllByEventIdIn(List.of(eventId)).stream()
+                            .filter(ep -> ep.getEventStatus() != EventStatus.CREATOR)
+                            .count();
+                    int memberCount = (int) memberRepository.findAllByEventIdIn(List.of(eventId)).stream().count();
+                    return userCount + memberCount;
+                }))
+                .skip(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .toList()
+                : allEvents;
+
+        List<Long> eventIds = pagedEvents.stream().map(Event::getId).toList();
 
         Map<Long, List<Schedule>> scheduleMap = scheduleRepository.findAllByEventIdIn(eventIds).stream()
-                .collect(Collectors.groupingBy(schedule -> schedule.getEvent().getId()));
+                .collect(Collectors.groupingBy(s -> s.getEvent().getId()));
 
-        // 1. 모든 EventParticipation 조회
         Map<Long, List<EventParticipation>> epMap = eventParticipationRepository.findAllByEventIdIn(eventIds).stream()
                 .filter(ep -> ep.getEventStatus() != EventStatus.CREATOR)
                 .collect(Collectors.groupingBy(ep -> ep.getEvent().getId()));
 
-        // 2. 모든 Member 조회
         Map<Long, List<Member>> memberMap = memberRepository.findAllByEventIdIn(eventIds).stream()
-                .collect(Collectors.groupingBy(member -> member.getEvent().getId()));
+                .collect(Collectors.groupingBy(m -> m.getEvent().getId()));
 
-        // 3. 참여자 수 계산
-        List<DashboardEvent> dashboardEvents = events.stream()
+        List<DashboardEvent> dashboardEvents = pagedEvents.stream()
                 .map(event -> {
                     List<Schedule> schedules = scheduleMap.getOrDefault(event.getId(), List.of());
                     int userCount = epMap.getOrDefault(event.getId(), List.of()).size();
                     int memberCount = memberMap.getOrDefault(event.getId(), List.of()).size();
-                    int totalParticipantCount = userCount + memberCount;
+                    return DashboardEvent.of(event, schedules, userCount + memberCount);
+                }).toList();
 
-                    return DashboardEvent.of(event, schedules, totalParticipantCount);
-                })
-                .toList();
-
-        if (isSortByParticipant) {
-            Comparator<DashboardEvent> comparator = Comparator.comparingInt(DashboardEvent::participantCount);
-            if (sorting.equalsIgnoreCase("desc")) comparator = comparator.reversed();
-            dashboardEvents = dashboardEvents.stream()
-                    .sorted(comparator)
-                    .skip(pageable.getOffset())
-                    .limit(pageable.getPageSize())
-                    .toList();
-        }
-
-        return dashboardEvents;
+        PageInfo pageInfo = PageInfo.of(pageable.getPageNumber() + 1, pageable.getPageSize(), totalElements, totalPages);
+        return GetAllDashboardEventsResponse.of(dashboardEvents, pageInfo);
     }
 
     /**
@@ -226,25 +229,37 @@ public class AdminService {
      * 사용자 목록은 정렬 기준(keyword)과 정렬 방향(sorting)에 따라 정렬되며,
      * 각 사용자 데이터는 참여 이벤트 수를 포함한 DashboardUser DTO로 변환됩니다.
      *
+     * 전체 유저 수를 기준으로 totalElements와 totalPages를 계산하여 PageInfo에 포함합니다.
+     *
      * @param authorizationHeader Authorization 헤더에서 추출한 토큰
      * @param pageable 페이지 정보 (페이지 번호, 크기 등)
      * @param keyword 정렬 기준 필드 (예: name, email, created_date 등)
      * @param sorting 정렬 방향 ("asc" 또는 "desc")
-     * @return 정렬 및 페이징된 DashboardUser 리스트
+     * @return DashboardUser 리스트 및 페이지 정보 포함 응답 DTO
      */
     @Transactional(readOnly = true)
-    public List<DashboardUser> getAllDashboardUsers(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
-
-        AdminUser adminUser = jwtUtil.getAdminUserFromHeader(authorizationHeader);
+    public GetAllDashboardUsersResponse getAllDashboardUsers(String authorizationHeader, Pageable pageable, String keyword, String sorting) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
 
         List<User> users = userRepository.findAllWithSort(pageable, keyword, sorting);
 
-        return users.stream()
+        List<DashboardUser> dashboardUsers = users.stream()
                 .map(user -> {
                     int participantCount = eventParticipationRepository.findAllByUser(user).size();
                     return DashboardUser.from(user, participantCount);
-                })
-                .toList();
+                }).toList();
+
+        int totalElements = (int) userRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+
+        PageInfo pageInfo = PageInfo.of(
+                pageable.getPageNumber() + 1,
+                pageable.getPageSize(),
+                totalElements,
+                totalPages
+        );
+
+        return GetAllDashboardUsersResponse.of(dashboardUsers, pageInfo);
     }
 
     /**
