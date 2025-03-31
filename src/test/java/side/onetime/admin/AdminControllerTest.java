@@ -617,13 +617,17 @@ public class AdminControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer test.jwt.token";
         int page = 1;
 
-        List<GetBannerResponse> response = List.of(
+        List<GetBannerResponse> banners = List.of(
                 new GetBannerResponse(1L, "내용1", "#FF5733", Language.KOR, true, "2025-04-01 12:00:00"),
                 new GetBannerResponse(2L, "내용2", "#123456", Language.ENG, false, "2025-04-01 12:00:00")
         );
 
+        PageInfo pageInfo = PageInfo.of(1, 20, 2, 1);
+        GetAllBannersResponse response = GetAllBannersResponse.of(banners, pageInfo);
+
         // when
-        Mockito.when(adminService.getAllBanners(any(String.class), any(Pageable.class))).thenReturn(response);
+        Mockito.when(adminService.getAllBanners(any(String.class), any(Pageable.class)))
+                .thenReturn(response);
 
         // then
         mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/banners/all")
@@ -633,6 +637,12 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("띠배너 전체 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.banners[0].id").value(1L))
+                .andExpect(jsonPath("$.payload.banners[1].id").value(2L))
+                .andExpect(jsonPath("$.payload.page_info.page").value(1))
+                .andExpect(jsonPath("$.payload.page_info.size").value(20))
+                .andExpect(jsonPath("$.payload.page_info.total_elements").value(2))
+                .andExpect(jsonPath("$.payload.page_info.total_pages").value(1))
                 .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-get-all",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -647,13 +657,18 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                                fieldWithPath("payload").type(JsonFieldType.ARRAY).description("배너 목록"),
-                                                fieldWithPath("payload[].id").type(JsonFieldType.NUMBER).description("배너 ID"),
-                                                fieldWithPath("payload[].content").type(JsonFieldType.STRING).description("내용"),
-                                                fieldWithPath("payload[].color_code").type(JsonFieldType.STRING).description("색상 코드"),
-                                                fieldWithPath("payload[].language").type(JsonFieldType.STRING).description("언어"),
-                                                fieldWithPath("payload[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
-                                                fieldWithPath("payload[].created_date").type(JsonFieldType.STRING).description("생성일자")
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("페이로드 객체"),
+                                                fieldWithPath("payload.banners").type(JsonFieldType.ARRAY).description("배너 목록"),
+                                                fieldWithPath("payload.banners[].id").type(JsonFieldType.NUMBER).description("배너 ID"),
+                                                fieldWithPath("payload.banners[].content").type(JsonFieldType.STRING).description("내용"),
+                                                fieldWithPath("payload.banners[].color_code").type(JsonFieldType.STRING).description("색상 코드"),
+                                                fieldWithPath("payload.banners[].language").type(JsonFieldType.STRING).description("언어"),
+                                                fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
+                                                fieldWithPath("payload.banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.page_info.page").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                                                fieldWithPath("payload.page_info.size").type(JsonFieldType.NUMBER).description("페이지당 항목 수"),
+                                                fieldWithPath("payload.page_info.total_elements").type(JsonFieldType.NUMBER).description("전체 항목 수"),
+                                                fieldWithPath("payload.page_info.total_pages").type(JsonFieldType.NUMBER).description("전체 페이지 수")
                                         )
                                         .responseSchema(Schema.schema("GetAllBannersResponse"))
                                         .build()

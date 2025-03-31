@@ -322,11 +322,24 @@ public class AdminService {
      * @return 배너 응답 객체 리스트
      */
     @Transactional(readOnly = true)
-    public List<GetBannerResponse> getAllBanners(String authorizationHeader, Pageable pageable) {
+    public GetAllBannersResponse getAllBanners(String authorizationHeader, Pageable pageable) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        return bannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc(pageable).stream()
+
+        List<GetBannerResponse> banners =  bannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc(pageable).stream()
                 .map(GetBannerResponse::from)
                 .toList();
+
+        int totalElements = (int) bannerRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+
+        PageInfo pageInfo = PageInfo.of(
+                pageable.getPageNumber() + 1,
+                pageable.getPageSize(),
+                totalElements,
+                totalPages
+        );
+
+        return GetAllBannersResponse.of(banners, pageInfo);
     }
 
     /**

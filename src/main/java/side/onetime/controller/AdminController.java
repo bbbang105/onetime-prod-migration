@@ -234,12 +234,12 @@ public class AdminController {
      * @return 배너 응답 객체 리스트
      */
     @GetMapping("/banners/all")
-    public ResponseEntity<ApiResponse<List<GetBannerResponse>>> getAllBanners(
+    public ResponseEntity<ApiResponse<GetAllBannersResponse>> getAllBanners(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(value = "page", defaultValue = "1") @Min(1) int page
     ) {
         Pageable pageable = PageRequest.of(page - 1, 20);
-        List<GetBannerResponse> response = adminService.getAllBanners(authorizationHeader, pageable);
+        GetAllBannersResponse response = adminService.getAllBanners(authorizationHeader, pageable);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_BANNERS, response);
     }
 
