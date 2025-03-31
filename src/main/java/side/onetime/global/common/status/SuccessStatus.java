@@ -66,6 +66,7 @@ public enum SuccessStatus implements BaseCode {
     // Banner
     _REGISTER_BANNER(HttpStatus.CREATED, "201", "띠배너 등록에 성공했습니다."),
     _GET_BANNER(HttpStatus.OK, "200", "띠배너 단건 조회에 성공했습니다."),
+    _GET_ACTIVATED_BANNER(HttpStatus.OK, "200", "활성화된 띠배너 조회에 성공했습니다."),
     _GET_ALL_BANNERS(HttpStatus.OK, "200", "띠배너 전체 조회에 성공했습니다."),
     _UPDATE_BANNER(HttpStatus.OK, "200", "띠배너 수정에 성공했습니다."),
     _DELETE_BANNER(HttpStatus.OK, "200", "띠배너 삭제에 성공했습니다."),

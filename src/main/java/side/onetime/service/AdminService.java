@@ -297,6 +297,23 @@ public class AdminService {
     }
 
     /**
+     * 활성화된 띠배너 조회 메서드.
+     *
+     * 주어진 ID에 해당하며 현재 활성화 상태인 띠배너를 조회합니다.
+     * - 해당 배너가 존재하지 않을 경우 예외가 발생합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @return 활성화된 배너 응답 객체
+     */
+    @Transactional(readOnly = true)
+    public GetActivatedBannerResponse getActivatedBanner(String authorizationHeader) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner banner = bannerRepository.findByIsActivatedTrue()
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_ACTIVATED_BANNER));
+        return GetActivatedBannerResponse.from(banner);
+    }
+
+    /**
      * 전체 띠배너 조회 메서드.
      *
      * 삭제되지 않은 모든 배너를 조회하여 응답 객체로 반환합니다.
