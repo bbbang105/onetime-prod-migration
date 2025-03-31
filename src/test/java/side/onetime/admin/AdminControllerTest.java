@@ -475,8 +475,9 @@ public class AdminControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer test.jwt.token";
         RegisterBannerRequest request = new RegisterBannerRequest(
                 "최신 소식 안내",
+                "News",
                 "#FFFFFF",
-                Language.KOR
+                "#FFFFFF"
         );
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -500,9 +501,10 @@ public class AdminControllerTest extends ControllerTestConfig {
                                         .tag("Admin API")
                                         .description("띠배너를 등록한다.")
                                         .requestFields(
-                                                fieldWithPath("content").type(JsonFieldType.STRING).description("띠배너 내용"),
-                                                fieldWithPath("color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
-                                                fieldWithPath("language").type(JsonFieldType.STRING).description("언어 (KOR, ENG)")
+                                                fieldWithPath("content_kor").type(JsonFieldType.STRING).optional().description("한국어 내용"),
+                                                fieldWithPath("content_eng").type(JsonFieldType.STRING).optional().description("영어 내용"),
+                                                fieldWithPath("background_color_code").type(JsonFieldType.STRING).optional().description("배경 색상 코드"),
+                                                fieldWithPath("text_color_code").type(JsonFieldType.STRING).optional().description("텍스트 색상 코드")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
@@ -523,7 +525,7 @@ public class AdminControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer test.jwt.token";
         Long bannerId = 1L;
         GetBannerResponse response = new GetBannerResponse(
-                bannerId, "공지사항", "#FF5733", Language.KOR, true, "2025-04-01 12:00:00"
+                bannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00"
         );
 
         // when
@@ -552,9 +554,10 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("배너 정보"),
                                                 fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("배너 ID"),
-                                                fieldWithPath("payload.content").type(JsonFieldType.STRING).description("내용"),
-                                                fieldWithPath("payload.color_code").type(JsonFieldType.STRING).description("색상 코드"),
-                                                fieldWithPath("payload.language").type(JsonFieldType.STRING).description("언어"),
+                                                fieldWithPath("payload.content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("payload.content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("payload.text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
                                                 fieldWithPath("payload.is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
                                                 fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자")
                                         )
@@ -571,7 +574,7 @@ public class AdminControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer test.jwt.token";
         Long bannerId = 1L;
         GetActivatedBannerResponse response = new GetActivatedBannerResponse(
-                bannerId, "긴급 공지", "#123ABC", Language.ENG, true, "2025-04-01 12:00:00"
+                bannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00"
         );
 
         // when
@@ -598,9 +601,10 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("배너 정보"),
                                                 fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("배너 ID"),
-                                                fieldWithPath("payload.content").type(JsonFieldType.STRING).description("내용"),
-                                                fieldWithPath("payload.color_code").type(JsonFieldType.STRING).description("색상 코드"),
-                                                fieldWithPath("payload.language").type(JsonFieldType.STRING).description("언어"),
+                                                fieldWithPath("payload.content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("payload.content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("payload.text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
                                                 fieldWithPath("payload.is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
                                                 fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자")
                                         )
@@ -618,8 +622,8 @@ public class AdminControllerTest extends ControllerTestConfig {
         int page = 1;
 
         List<GetBannerResponse> banners = List.of(
-                new GetBannerResponse(1L, "내용1", "#FF5733", Language.KOR, true, "2025-04-01 12:00:00"),
-                new GetBannerResponse(2L, "내용2", "#123456", Language.ENG, false, "2025-04-01 12:00:00")
+                new GetBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00"),
+                new GetBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00")
         );
 
         PageInfo pageInfo = PageInfo.of(1, 20, 2, 1);
@@ -660,9 +664,10 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("페이로드 객체"),
                                                 fieldWithPath("payload.banners").type(JsonFieldType.ARRAY).description("배너 목록"),
                                                 fieldWithPath("payload.banners[].id").type(JsonFieldType.NUMBER).description("배너 ID"),
-                                                fieldWithPath("payload.banners[].content").type(JsonFieldType.STRING).description("내용"),
-                                                fieldWithPath("payload.banners[].color_code").type(JsonFieldType.STRING).description("색상 코드"),
-                                                fieldWithPath("payload.banners[].language").type(JsonFieldType.STRING).description("언어"),
+                                                fieldWithPath("payload.banners[].content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("payload.banners[].content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("payload.banners[].background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("payload.banners[].text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
                                                 fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
                                                 fieldWithPath("payload.banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
                                                 fieldWithPath("payload.page_info.page").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
@@ -684,8 +689,9 @@ public class AdminControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer temp.jwt.access.token";
         UpdateBannerRequest request = new UpdateBannerRequest(
                 "수정된 내용",
+                "modified content",
                 "#123456",
-                Language.ENG,
+                "#FFFFFF",
                 true
         );
         String requestContent = objectMapper.writeValueAsString(request);
@@ -710,9 +716,10 @@ public class AdminControllerTest extends ControllerTestConfig {
                                         .tag("Admin API")
                                         .description("띠배너를 수정한다.")
                                         .requestFields(
-                                                fieldWithPath("content").type(JsonFieldType.STRING).optional().description("배너 내용"),
-                                                fieldWithPath("color_code").type(JsonFieldType.STRING).optional().description("색상 코드"),
-                                                fieldWithPath("language").type(JsonFieldType.STRING).optional().description("언어"),
+                                                fieldWithPath("content_kor").type(JsonFieldType.STRING).optional().description("한국어 내용"),
+                                                fieldWithPath("content_eng").type(JsonFieldType.STRING).optional().description("영어 내용"),
+                                                fieldWithPath("background_color_code").type(JsonFieldType.STRING).optional().description("배경 색상 코드"),
+                                                fieldWithPath("text_color_code").type(JsonFieldType.STRING).optional().description("텍스트 색상 코드"),
                                                 fieldWithPath("is_activated").type(JsonFieldType.BOOLEAN).optional().description("활성화 여부")
                                         )
                                         .responseFields(

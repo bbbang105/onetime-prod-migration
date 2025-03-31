@@ -4,19 +4,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.Size;
-import side.onetime.domain.enums.Language;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UpdateBannerRequest(
 
-        @Size(max = 200, message = "내용은 최대 200자까지 가능합니다.")
-        String content,
+        @Size(max = 200, message = "한글 내용은 최대 200자까지 가능합니다.")
+        String contentKor,
 
-        @Size(max = 30, message = "색상 값은 최대 30자까지 가능합니다.")
-        String colorCode,
+        @Size(max = 200, message = "영문 내용은 최대 200자까지 가능합니다.")
+        String contentEng,
 
-        Language language,
+        @Size(max = 30, message = "배경 색상 값은 최대 30자까지 가능합니다.")
+        String backgroundColorCode,
+
+        @Size(max = 30, message = "텍스트 색상 값은 최대 30자까지 가능합니다.")
+        String textColorCode,
 
         Boolean isActivated
 ) {

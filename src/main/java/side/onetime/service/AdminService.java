@@ -358,9 +358,10 @@ public class AdminService {
         Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
 
-        if (request.content() != null) banner.updateContent(request.content());
-        if (request.colorCode() != null) banner.updateColorCode(request.colorCode());
-        if (request.language() != null) banner.updateLanguage(request.language());
+        if (request.contentKor() != null) banner.updateContentKor(request.contentKor());
+        if (request.contentEng() != null) banner.updateContentEng(request.contentEng());
+        if (request.backgroundColorCode() != null) banner.updateBackgroundColorCode(request.backgroundColorCode());
+        if (request.textColorCode() != null) banner.updateTextColorCode(request.textColorCode());
 
         if (Boolean.TRUE.equals(request.isActivated())) {
             bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()

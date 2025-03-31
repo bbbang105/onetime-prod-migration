@@ -5,7 +5,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import side.onetime.domain.enums.Language;
 import side.onetime.global.common.dao.BaseEntity;
 
 @Entity
@@ -18,15 +17,17 @@ public class Banner extends BaseEntity {
     @Column(name = "banners_id")
     private Long id;
 
-    @Column(name = "content", length = 200)
-    private String content;
+    @Column(name = "content_kor", nullable = false, length = 200)
+    private String contentKor;
 
-    @Column(name = "color_code", nullable = false, length = 30)
-    private String colorCode;
+    @Column(name = "content_eng", nullable = false, length = 200)
+    private String contentEng;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "language", nullable = false)
-    private Language language;
+    @Column(name = "background_color_code", nullable = false, length = 30)
+    private String backgroundColorCode;
+
+    @Column(name = "text_color_code", nullable = false, length = 30)
+    private String textColorCode;
 
     @Column(name = "is_activated", nullable = false)
     private Boolean isActivated;
@@ -35,24 +36,29 @@ public class Banner extends BaseEntity {
     private Boolean isDeleted;
 
     @Builder
-    public Banner(String content, String colorCode, Language language) {
-        this.content = content;
-        this.colorCode = colorCode;
-        this.language = language;
+    public Banner(String contentKor, String contentEng, String backgroundColorCode, String textColorCode) {
+        this.contentKor = contentKor;
+        this.contentEng = contentEng;
+        this.backgroundColorCode = backgroundColorCode;
+        this.textColorCode = textColorCode;
         this.isActivated = false;
         this.isDeleted = false;
     }
 
-    public void updateContent(String content) {
-        this.content = content;
+    public void updateContentKor(String contentKor) {
+        this.contentKor = contentKor;
     }
 
-    public void updateColorCode(String colorCode) {
-        this.colorCode = colorCode;
+    public void updateContentEng(String contentEng) {
+        this.contentEng = contentEng;
     }
 
-    public void updateLanguage(Language language) {
-        this.language = language;
+    public void updateBackgroundColorCode(String backgroundColorCode) {
+        this.backgroundColorCode = backgroundColorCode;
+    }
+
+    public void updateTextColorCode(String textColorCode) {
+        this.textColorCode = textColorCode;
     }
 
     public void updateIsActivated(Boolean isActivated) {
