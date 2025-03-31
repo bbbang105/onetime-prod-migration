@@ -213,19 +213,6 @@ public class AdminController {
     }
 
     /**
-     * 현재 활성화된 띠배너 조회 API.
-     *
-     * @param authorizationHeader 액세스 토큰
-     * @return 활성화된 배너 정보
-     */
-    @GetMapping("/banners/activated")
-    public ResponseEntity<ApiResponse<GetActivatedBannerResponse>> getActivatedBanner(
-            @RequestHeader("Authorization") String authorizationHeader) {
-        GetActivatedBannerResponse response = adminService.getActivatedBanner(authorizationHeader);
-        return ApiResponse.onSuccess(SuccessStatus._GET_ACTIVATED_BANNER, response);
-    }
-
-    /**
      * 띠배너 전체 조회 API.
      *
      * 삭제되지 않은 모든 배너를 조회합니다.
