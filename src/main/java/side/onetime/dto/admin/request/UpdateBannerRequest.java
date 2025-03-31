@@ -9,8 +9,6 @@ import side.onetime.domain.enums.Language;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record UpdateBannerRequest(
-        @Size(max = 50, message = "제목은 최대 50자까지 가능합니다.")
-        String title,
 
         @Size(max = 200, message = "내용은 최대 200자까지 가능합니다.")
         String content,

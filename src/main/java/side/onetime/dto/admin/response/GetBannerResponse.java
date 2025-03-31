@@ -12,7 +12,6 @@ import java.time.format.DateTimeFormatter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record GetBannerResponse(
         Long id,
-        String title,
         String content,
         String colorCode,
         Language language,
@@ -22,7 +21,6 @@ public record GetBannerResponse(
     public static GetBannerResponse from(Banner banner) {
         return new GetBannerResponse(
                 banner.getId(),
-                banner.getTitle(),
                 banner.getContent(),
                 banner.getColorCode(),
                 banner.getLanguage(),

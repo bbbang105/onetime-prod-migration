@@ -18,9 +18,6 @@ public class Banner extends BaseEntity {
     @Column(name = "banners_id")
     private Long id;
 
-    @Column(name = "title", length = 50)
-    private String title;
-
     @Column(name = "content", length = 200)
     private String content;
 
@@ -38,17 +35,12 @@ public class Banner extends BaseEntity {
     private Boolean isDeleted;
 
     @Builder
-    public Banner(String title, String content, String colorCode, Language language) {
-        this.title = title;
+    public Banner(String content, String colorCode, Language language) {
         this.content = content;
         this.colorCode = colorCode;
         this.language = language;
         this.isActivated = false;
         this.isDeleted = false;
-    }
-
-    public void updateTitle(String title) {
-        this.title = title;
     }
 
     public void updateContent(String content) {
