@@ -398,8 +398,20 @@ public class AdminControllerTest extends ControllerTestConfig {
 
         List<DashboardUser> users = List.of(
                 new DashboardUser(
-                        1L, "홍길동", "hong@example.com", "길동이", "KAKAO", "kakao_123",
-                        true, true, false, "23:00", "07:00", Language.KOR, 3
+                        1L,
+                        "홍길동",
+                        "hong@example.com",
+                        "길동이",
+                        "KAKAO",
+                        "kakao_123",
+                        true,
+                        true,
+                        false,
+                        "23:00",
+                        "07:00",
+                        Language.KOR,
+                        3,
+                        "2025-03-01 12:00:00"
                 )
         );
 
@@ -457,6 +469,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.users[].sleep_end_time").type(JsonFieldType.STRING).description("수면 종료 시간"),
                                                 fieldWithPath("payload.users[].language").type(JsonFieldType.STRING).description("선호 언어"),
                                                 fieldWithPath("payload.users[].participation_count").type(JsonFieldType.NUMBER).description("참여한 이벤트 수"),
+                                                fieldWithPath("payload.users[].created_date").type(JsonFieldType.STRING).description("생성일자"),
                                                 fieldWithPath("payload.page_info.page").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                                 fieldWithPath("payload.page_info.size").type(JsonFieldType.NUMBER).description("페이지당 항목 수"),
                                                 fieldWithPath("payload.page_info.total_elements").type(JsonFieldType.NUMBER).description("전체 항목 수"),
