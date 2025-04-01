@@ -41,7 +41,7 @@ public class BannerControllerTest extends ControllerTestConfig {
         // given
         Long bannerId = 1L;
         GetActivatedBannerResponse response = new GetActivatedBannerResponse(
-                bannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00"
+                bannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
         );
 
         // when
@@ -71,7 +71,8 @@ public class BannerControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
                                                 fieldWithPath("payload.text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
                                                 fieldWithPath("payload.is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
-                                                fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자")
+                                                fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.link_url").type(JsonFieldType.STRING).description("링크 URL")
                                         )
                                         .responseSchema(Schema.schema("GetActivatedBannerResponse"))
                                         .build()

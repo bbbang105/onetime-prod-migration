@@ -35,14 +35,18 @@ public class Banner extends BaseEntity {
     @Column(name = "is_deleted", nullable = false)
     private Boolean isDeleted;
 
+    @Column(name = "link_url", length = 200)
+    private String linkUrl;
+
     @Builder
-    public Banner(String contentKor, String contentEng, String backgroundColorCode, String textColorCode) {
+    public Banner(String contentKor, String contentEng, String backgroundColorCode, String textColorCode, String linkUrl) {
         this.contentKor = contentKor;
         this.contentEng = contentEng;
         this.backgroundColorCode = backgroundColorCode;
         this.textColorCode = textColorCode;
         this.isActivated = false;
         this.isDeleted = false;
+        this.linkUrl = linkUrl;
     }
 
     public void updateContentKor(String contentKor) {
@@ -63,6 +67,10 @@ public class Banner extends BaseEntity {
 
     public void updateIsActivated(Boolean isActivated) {
         this.isActivated = isActivated;
+    }
+
+    public void updateLinkUrl(String linkUrl) {
+        this.linkUrl = linkUrl;
     }
 
     public void markAsDeleted() {

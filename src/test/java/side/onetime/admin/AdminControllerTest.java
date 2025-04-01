@@ -490,7 +490,8 @@ public class AdminControllerTest extends ControllerTestConfig {
                 "최신 소식 안내",
                 "News",
                 "#FFFFFF",
-                "#FFFFFF"
+                "#FFFFFF",
+                "https://www.link.com"
         );
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -514,10 +515,11 @@ public class AdminControllerTest extends ControllerTestConfig {
                                         .tag("Admin API")
                                         .description("띠배너를 등록한다.")
                                         .requestFields(
-                                                fieldWithPath("content_kor").type(JsonFieldType.STRING).optional().description("한국어 내용"),
-                                                fieldWithPath("content_eng").type(JsonFieldType.STRING).optional().description("영어 내용"),
-                                                fieldWithPath("background_color_code").type(JsonFieldType.STRING).optional().description("배경 색상 코드"),
-                                                fieldWithPath("text_color_code").type(JsonFieldType.STRING).optional().description("텍스트 색상 코드")
+                                                fieldWithPath("content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
+                                                fieldWithPath("link_url").type(JsonFieldType.STRING).optional().description("링크 URL")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
@@ -538,7 +540,8 @@ public class AdminControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer test.jwt.token";
         Long bannerId = 1L;
         GetBannerResponse response = new GetBannerResponse(
-                bannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00"
+                bannerId,
+                "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
         );
 
         // when
@@ -572,7 +575,8 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
                                                 fieldWithPath("payload.text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
                                                 fieldWithPath("payload.is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
-                                                fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자")
+                                                fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.link_url").type(JsonFieldType.STRING).description("링크 URL")
                                         )
                                         .responseSchema(Schema.schema("GetBannerResponse"))
                                         .build()
@@ -588,8 +592,8 @@ public class AdminControllerTest extends ControllerTestConfig {
         int page = 1;
 
         List<GetBannerResponse> banners = List.of(
-                new GetBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00"),
-                new GetBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00")
+                new GetBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"),
+                new GetBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com")
         );
 
         PageInfo pageInfo = PageInfo.of(1, 20, 2, 1);
@@ -636,6 +640,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.banners[].text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
                                                 fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
                                                 fieldWithPath("payload.banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.banners[].link_url").type(JsonFieldType.STRING).description("링크 URL"),
                                                 fieldWithPath("payload.page_info.page").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                                 fieldWithPath("payload.page_info.size").type(JsonFieldType.NUMBER).description("페이지당 항목 수"),
                                                 fieldWithPath("payload.page_info.total_elements").type(JsonFieldType.NUMBER).description("전체 항목 수"),
@@ -658,7 +663,8 @@ public class AdminControllerTest extends ControllerTestConfig {
                 "modified content",
                 "#123456",
                 "#FFFFFF",
-                true
+                true,
+                "https://www.link.com"
         );
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -686,7 +692,8 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("content_eng").type(JsonFieldType.STRING).optional().description("영어 내용"),
                                                 fieldWithPath("background_color_code").type(JsonFieldType.STRING).optional().description("배경 색상 코드"),
                                                 fieldWithPath("text_color_code").type(JsonFieldType.STRING).optional().description("텍스트 색상 코드"),
-                                                fieldWithPath("is_activated").type(JsonFieldType.BOOLEAN).optional().description("활성화 여부")
+                                                fieldWithPath("is_activated").type(JsonFieldType.BOOLEAN).optional().description("활성화 여부"),
+                                                fieldWithPath("link_url").type(JsonFieldType.STRING).optional().description("링크 URL")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),

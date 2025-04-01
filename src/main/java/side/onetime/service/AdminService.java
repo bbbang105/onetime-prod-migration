@@ -360,6 +360,7 @@ public class AdminService {
         if (request.contentEng() != null) banner.updateContentEng(request.contentEng());
         if (request.backgroundColorCode() != null) banner.updateBackgroundColorCode(request.backgroundColorCode());
         if (request.textColorCode() != null) banner.updateTextColorCode(request.textColorCode());
+        if (request.linkUrl() != null) banner.updateLinkUrl(request.linkUrl());
 
         if (Boolean.TRUE.equals(request.isActivated())) {
             bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()

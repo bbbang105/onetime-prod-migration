@@ -1,13 +1,11 @@
 package side.onetime.dto.admin.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import side.onetime.domain.AdminUser;
 import side.onetime.domain.enums.AdminStatus;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record AdminUserDetailResponse(
         Long id,
         String name,
