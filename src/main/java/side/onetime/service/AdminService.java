@@ -306,7 +306,7 @@ public class AdminService {
      */
     @Transactional(readOnly = true)
     public GetActivatedBannerResponse getActivatedBanner() {
-        Banner banner = bannerRepository.findByIsActivatedTrue()
+        Banner banner = bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
                 .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_ACTIVATED_BANNER));
         return GetActivatedBannerResponse.from(banner);
     }
