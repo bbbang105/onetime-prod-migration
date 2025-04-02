@@ -22,6 +22,7 @@ import side.onetime.service.UserService;
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 public class UserController {
+
     private final UserService userService;
 
     /**

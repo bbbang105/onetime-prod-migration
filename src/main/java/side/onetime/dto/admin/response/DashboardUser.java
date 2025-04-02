@@ -1,13 +1,13 @@
-package side.onetime.dto.adminUser.response;
+package side.onetime.dto.admin.response;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import side.onetime.domain.User;
 import side.onetime.domain.enums.Language;
 
+import java.time.format.DateTimeFormatter;
+
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public record DashboardUser(
         Long id,
         String name,
@@ -21,7 +21,8 @@ public record DashboardUser(
         String sleepStartTime,
         String sleepEndTime,
         Language language,
-        int participationCount
+        int participationCount,
+        String createdDate
 ) {
     public static DashboardUser from(User user, int participationCount) {
         return new DashboardUser(
@@ -37,7 +38,8 @@ public record DashboardUser(
                 user.getSleepStartTime(),
                 user.getSleepEndTime(),
                 user.getLanguage(),
-                participationCount
+                participationCount,
+                user.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
         );
     }
 }

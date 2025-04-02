@@ -11,10 +11,10 @@ import org.springframework.stereotype.Component;
 import side.onetime.domain.AdminUser;
 import side.onetime.domain.User;
 import side.onetime.exception.CustomException;
-import side.onetime.exception.status.AdminUserErrorStatus;
+import side.onetime.exception.status.AdminErrorStatus;
 import side.onetime.exception.status.TokenErrorStatus;
 import side.onetime.exception.status.UserErrorStatus;
-import side.onetime.repository.AdminUserRepository;
+import side.onetime.repository.AdminRepository;
 import side.onetime.repository.UserRepository;
 
 import javax.crypto.SecretKey;
@@ -40,7 +40,7 @@ public class JwtUtil {
     private long REGISTER_TOKEN_EXPIRATION_TIME; // 레지스터 토큰 유효기간
 
     private final UserRepository userRepository;
-    private final AdminUserRepository adminUserRepository;
+    private final AdminRepository adminRepository;
 
     /**
      * JWT 서명 키를 생성 및 반환.
@@ -185,8 +185,8 @@ public class JwtUtil {
         String token = getTokenFromHeader(authorizationHeader);
         validateToken(token);
 
-        return adminUserRepository.findById(getClaimFromToken(token, "userId", Long.class))
-                .orElseThrow(() -> new CustomException(AdminUserErrorStatus._NOT_FOUND_ADMIN_USER));
+        return adminRepository.findById(getClaimFromToken(token, "userId", Long.class))
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_ADMIN_USER));
     }
 
     /**

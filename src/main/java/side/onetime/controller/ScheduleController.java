@@ -19,6 +19,7 @@ import java.util.List;
 @RequestMapping("/api/v1/schedules")
 @RequiredArgsConstructor
 public class ScheduleController {
+
     private final ScheduleService scheduleService;
 
     /**

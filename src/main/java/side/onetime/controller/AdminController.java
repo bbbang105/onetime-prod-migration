@@ -7,21 +7,20 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import side.onetime.dto.adminUser.request.LoginAdminUserRequest;
-import side.onetime.dto.adminUser.request.RegisterAdminUserRequest;
-import side.onetime.dto.adminUser.request.UpdateAdminUserStatusRequest;
-import side.onetime.dto.adminUser.response.*;
+import side.onetime.dto.admin.request.*;
+import side.onetime.dto.admin.response.*;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
-import side.onetime.service.AdminUserService;
+import side.onetime.service.AdminService;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/admin")
 @RequiredArgsConstructor
-public class AdminUserController {
-    private final AdminUserService adminUserService;
+public class AdminController {
+
+    private final AdminService adminService;
 
     /**
      * 관리자 계정 회원가입 API.
@@ -36,7 +35,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<SuccessStatus>> registerAdminUser(
             @Valid @RequestBody RegisterAdminUserRequest request) {
 
-        adminUserService.registerAdminUser(request);
+        adminService.registerAdminUser(request);
         return ApiResponse.onSuccess(SuccessStatus._REGISTER_ADMIN_USER);
     }
 
@@ -53,7 +52,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<LoginAdminUserResponse>> loginAdminUser(
             @Valid @RequestBody LoginAdminUserRequest request) {
 
-        LoginAdminUserResponse response = adminUserService.loginAdminUser(request);
+        LoginAdminUserResponse response = adminService.loginAdminUser(request);
         return ApiResponse.onSuccess(SuccessStatus._LOGIN_ADMIN_USER, response);
     }
 
@@ -70,7 +69,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<GetAdminUserProfileResponse>> getAdminUserProfile(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        GetAdminUserProfileResponse response = adminUserService.getAdminUserProfile(authorizationHeader);
+        GetAdminUserProfileResponse response = adminService.getAdminUserProfile(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_ADMIN_USER_PROFILE, response);
     }
 
@@ -89,7 +88,7 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<List<AdminUserDetailResponse>>> getAllAdminUserDetail(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        List<AdminUserDetailResponse> response = adminUserService.getAllAdminUserDetail(authorizationHeader);
+        List<AdminUserDetailResponse> response = adminService.getAllAdminUserDetail(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_ADMIN_USER_DETAIL, response);
     }
 
@@ -109,7 +108,7 @@ public class AdminUserController {
             @RequestHeader("Authorization") String authorizationHeader,
             @Valid @RequestBody UpdateAdminUserStatusRequest request) {
 
-        adminUserService.updateAdminUserStatus(authorizationHeader, request);
+        adminService.updateAdminUserStatus(authorizationHeader, request);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_ADMIN_USER_STATUS);
     }
 
@@ -126,58 +125,149 @@ public class AdminUserController {
     public ResponseEntity<ApiResponse<SuccessStatus>> withdrawAdminUser(
             @RequestHeader("Authorization") String authorizationHeader) {
 
-        adminUserService.withdrawAdminUser(authorizationHeader);
+        adminService.withdrawAdminUser(authorizationHeader);
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_ADMIN_USER);
     }
 
     /**
-     * 대시보드 이벤트 목록 조회 API
+     * 대시보드 이벤트 목록 조회 API.
      *
-     * 어드민 권한 사용자가 전체 이벤트를 최신순 또는 원하는 기준으로 조회할 수 있는 API입니다.
-     * 정렬 기준은 snake_case 형식의 필드명(keyword)으로 전달하며,
-     * 내부적으로 camelCase로 변환하여 처리합니다.
-     *
-     * 응답은 페이지 단위로 제공되며, 각 페이지는 최대 20개의 이벤트를 포함합니다.
+     * 정렬 기준으로는 created_date, end_time, participant_count 등이 가능하며,
+     * 응답은 최대 20개씩 페이지 단위로 제공됩니다.
      *
      * @param authorizationHeader Authorization 헤더 (Bearer 토큰)
      * @param page 조회할 페이지 번호 (1부터 시작)
-     * @param keyword 정렬 기준 필드명 (예: "created_date", "end_time" 등 - snake_case로 전달)
-     * @param sorting 정렬 방식 ("asc" 또는 "desc")
-     * @return 이벤트 목록 데이터 (페이지 단위)
+     * @param keyword 정렬 기준 필드명 (예: "created_date", "end_time", "participant_count")
+     * @param sorting 정렬 방향 ("asc" 또는 "desc")
+     * @return 이벤트 목록 및 페이지 정보가 포함된 응답 DTO
      */
     @GetMapping("/dashboard/events")
-    public ResponseEntity<ApiResponse<List<DashboardEvent>>> getAllDashboardEvents(
+    public ResponseEntity<ApiResponse<GetAllDashboardEventsResponse>> getAllDashboardEvents(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(value = "page", defaultValue = "1") @Min(1) int page,
             @RequestParam(value = "keyword", defaultValue = "created_date") String keyword,
             @RequestParam(value = "sorting", defaultValue = "desc") String sorting
     ) {
         Pageable pageable = PageRequest.of(page - 1, 20);
-        List<DashboardEvent> response = adminUserService.getAllDashboardEvents(authorizationHeader, pageable, keyword, sorting);
+        GetAllDashboardEventsResponse response = adminService.getAllDashboardEvents(authorizationHeader, pageable, keyword, sorting);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DASHBOARD_EVENTS, response);
     }
 
     /**
-     * 대시보드 사용자 목록 조회 API
+     * 대시보드 사용자 목록 조회 API.
      *
-     * 어드민 권한 사용자가 전체 사용자 정보를 조회할 수 있는 API입니다.
-     * 응답은 페이지 단위로 제공되며, 각 페이지는 최대 20명의 사용자를 포함합니다.
+     * 정렬 기준으로는 name, email, created_date, participation_count 등이 가능하며,
+     * 응답은 최대 20개씩 페이지 단위로 제공됩니다.
      *
      * @param authorizationHeader Authorization 헤더 (Bearer 토큰)
      * @param page 조회할 페이지 번호 (1부터 시작)
-     * @param keyword 정렬 기준 필드명 (ex. name, email, created_date 등)
-     * @param sorting 정렬 방향 (asc 또는 desc)
-     * @return 사용자 목록 데이터 (페이지 단위)
+     * @param keyword 정렬 기준 필드명 (예: "name", "email", "created_date", "participation_count")
+     * @param sorting 정렬 방향 ("asc" 또는 "desc")
+     * @return 사용자 목록 및 페이지 정보가 포함된 응답 DTO
      */
     @GetMapping("/dashboard/users")
-    public ResponseEntity<ApiResponse<List<DashboardUser>>> getAllDashboardUsers(
+    public ResponseEntity<ApiResponse<GetAllDashboardUsersResponse>> getAllDashboardUsers(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(value = "page", defaultValue = "1") @Min(1) int page,
             @RequestParam(value = "keyword", defaultValue = "created_date") String keyword,
             @RequestParam(value = "sorting", defaultValue = "desc") String sorting
     ) {
         Pageable pageable = PageRequest.of(page - 1, 20);
-        List<DashboardUser> response = adminUserService.getAllDashboardUsers(authorizationHeader, pageable, keyword, sorting);
+        GetAllDashboardUsersResponse response = adminService.getAllDashboardUsers(authorizationHeader, pageable, keyword, sorting);
         return ApiResponse.onSuccess(SuccessStatus._GET_ALL_DASHBOARD_USERS, response);
+    }
+
+    /**
+     * 띠배너 등록 API.
+     *
+     * 요청으로 전달된 정보를 바탕으로 새로운 띠배너를 등록합니다.
+     * 기본적으로 비활성화 상태이며 삭제되지 않은 상태로 생성됩니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param request 띠배너 등록 요청 정보
+     * @return 성공 응답 메시지
+     */
+    @PostMapping("/banners/register")
+    public ResponseEntity<ApiResponse<SuccessStatus>> registerBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @Valid @RequestBody RegisterBannerRequest request) {
+        adminService.registerBanner(authorizationHeader, request);
+        return ApiResponse.onSuccess(SuccessStatus._REGISTER_BANNER);
+    }
+
+    /**
+     * 띠배너 단건 조회 API.
+     *
+     * 삭제되지 않은 배너 중, ID에 해당하는 배너를 조회합니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param id 조회할 배너 ID
+     * @return 배너 응답 객체
+     */
+    @GetMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<GetBannerResponse>> getBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long id) {
+        GetBannerResponse response = adminService.getBanner(authorizationHeader, id);
+        return ApiResponse.onSuccess(SuccessStatus._GET_BANNER, response);
+    }
+
+    /**
+     * 띠배너 전체 조회 API.
+     *
+     * 삭제되지 않은 모든 배너를 조회합니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @return 배너 응답 객체 리스트
+     */
+    @GetMapping("/banners/all")
+    public ResponseEntity<ApiResponse<GetAllBannersResponse>> getAllBanners(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam(value = "page", defaultValue = "1") @Min(1) int page
+    ) {
+        Pageable pageable = PageRequest.of(page - 1, 20);
+        GetAllBannersResponse response = adminService.getAllBanners(authorizationHeader, pageable);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_BANNERS, response);
+    }
+
+    /**
+     * 띠배너 수정 API.
+     *
+     * 일부 필드만 수정이 가능한 PATCH 방식의 API입니다.
+     * 전달받은 요청에서 null이 아닌 필드만 수정되며,
+     * 삭제된 배너는 수정할 수 없습니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param id 수정할 배너 ID
+     * @param request 수정 요청 DTO
+     * @return 성공 응답 메시지
+     */
+    @PatchMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> updateBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateBannerRequest request
+    ) {
+        adminService.updateBanner(authorizationHeader, id, request);
+        return ApiResponse.onSuccess(SuccessStatus._UPDATE_BANNER);
+    }
+
+    /**
+     * 띠배너 삭제 API.
+     *
+     * 배너를 DB에서 실제로 삭제하지 않고, isDeleted 플래그만 true로 변경합니다.
+     * 해당 배너는 이후 조회되지 않으며 비활성화 상태로 간주됩니다.
+     *
+     * @param authorizationHeader 액세스 토큰
+     * @param id 삭제할 배너 ID
+     * @return 성공 응답 메시지
+     */
+    @DeleteMapping("/banners/{id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> deleteBanner(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @PathVariable Long id
+    ) {
+        adminService.deleteBanner(authorizationHeader, id);
+        return ApiResponse.onSuccess(SuccessStatus._DELETE_BANNER);
     }
 }

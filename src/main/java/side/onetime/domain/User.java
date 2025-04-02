@@ -44,10 +44,10 @@ public class User extends BaseEntity {
     @Column(name = "marketing_policy_agreement")
     private Boolean marketingPolicyAgreement;
 
-    @Column(name = "sleep_start_time")
+    @Column(name = "sleep_start_time", length = 10)
     private String sleepStartTime;
 
-    @Column(name = "sleep_end_time")
+    @Column(name = "sleep_end_time", length = 10)
     private String sleepEndTime;
 
     @Column(name = "language", nullable = false)

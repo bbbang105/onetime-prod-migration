@@ -22,7 +22,7 @@ public class FixedSchedule extends BaseEntity {
     @Column(name = "day", length = 10)
     private String day;
 
-    @Column(name = "time", nullable = false)
+    @Column(name = "time", nullable = false, length = 10)
     private String time;
 
     @OneToMany(mappedBy = "fixedSchedule",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
