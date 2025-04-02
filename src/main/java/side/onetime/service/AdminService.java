@@ -299,16 +299,16 @@ public class AdminService {
     /**
      * 활성화된 띠배너 조회 메서드.
      *
-     * 주어진 ID에 해당하며 현재 활성화 상태인 띠배너를 조회합니다.
-     * - 해당 배너가 존재하지 않을 경우 예외가 발생합니다.
+     * 현재 활성화 상태이며 삭제되지 않은 띠배너를 조회합니다.
+     * - 없을 경우 null을 반환합니다.
      *
-     * @return 활성화된 배너 응답 객체
+     * @return 활성화된 배너 응답 객체 또는 null
      */
     @Transactional(readOnly = true)
     public GetActivatedBannerResponse getActivatedBanner() {
-        Banner banner = bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
-                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_ACTIVATED_BANNER));
-        return GetActivatedBannerResponse.from(banner);
+        return bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
+                .map(GetActivatedBannerResponse::from)
+                .orElse(null);
     }
 
     /**
