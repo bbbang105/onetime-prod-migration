@@ -16,7 +16,7 @@ public record GetParticipantsResponse(
 ) {
     public static GetParticipantsResponse of(List<Member> members, List<User> users) {
         List<String> names = members.stream().map(Member::getName).collect(Collectors.toList());
-        names.addAll(users.stream().map(User::getNickname).collect(Collectors.toList()));
+        names.addAll(users.stream().map(User::getNickname).toList());
         return new GetParticipantsResponse(names);
     }
 }

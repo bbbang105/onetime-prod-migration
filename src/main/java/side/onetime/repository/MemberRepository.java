@@ -23,6 +23,5 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
             "WHERE m.event = :event AND m.name IN :names")
     List<Member> findAllWithSelectionsAndSchedulesByEventAndNames(@Param("event") Event event, @Param("names") List<String> names);
 
-    @Query("SELECT COUNT(m) FROM Member m WHERE m.event = :event")
-    int countByEvent(@Param("event") Event event);
+    List<Member> findAllByEventIdIn(List<Long> eventIds);
 }

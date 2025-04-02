@@ -53,6 +53,23 @@ public enum SuccessStatus implements BaseCode {
     // Fixed
     _GET_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 조회에 성공했습니다."),
     _UPDATE_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 수정에 성공했습니다."),
+    // Admin User
+    _REGISTER_ADMIN_USER(HttpStatus.CREATED, "201", "관리자 계정 등록에 성공했습니다."),
+    _LOGIN_ADMIN_USER(HttpStatus.OK, "200", "관리자 계정 로그인에 성공했습니다."),
+    _GET_ADMIN_USER_PROFILE(HttpStatus.OK, "200", "관리자 프로필 조회에 성공했습니다."),
+    _GET_ALL_ADMIN_USER_DETAIL(HttpStatus.OK, "200", "전체 관리자 정보 조회에 성공했습니다."),
+    _UPDATE_ADMIN_USER_STATUS(HttpStatus.OK, "200", "관리자 권한 수정에 성공했습니다."),
+    _WITHDRAW_ADMIN_USER(HttpStatus.OK, "200", "관리자 계정 탈퇴에 성공했습니다."),
+    // DashBoard
+    _GET_ALL_DASHBOARD_EVENTS(HttpStatus.OK, "200", "관리자 이벤트 대시보드 정보 조회에 성공했습니다."),
+    _GET_ALL_DASHBOARD_USERS(HttpStatus.OK, "200", "관리자 유저 대시보드 정보 조회에 성공했습니다."),
+    // Banner
+    _REGISTER_BANNER(HttpStatus.CREATED, "201", "띠배너 등록에 성공했습니다."),
+    _GET_BANNER(HttpStatus.OK, "200", "띠배너 단건 조회에 성공했습니다."),
+    _GET_ACTIVATED_BANNER(HttpStatus.OK, "200", "활성화된 띠배너 조회에 성공했습니다."),
+    _GET_ALL_BANNERS(HttpStatus.OK, "200", "띠배너 전체 조회에 성공했습니다."),
+    _UPDATE_BANNER(HttpStatus.OK, "200", "띠배너 수정에 성공했습니다."),
+    _DELETE_BANNER(HttpStatus.OK, "200", "띠배너 삭제에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;

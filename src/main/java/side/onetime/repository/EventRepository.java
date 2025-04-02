@@ -11,6 +11,8 @@ import java.util.UUID;
 
 public interface EventRepository extends JpaRepository<Event,Long>, EventRepositoryCustom {
     Optional<Event> findByEventId(UUID eventId);
+
     boolean existsByEventId(UUID eventId);
+
     List<Event> findByCreatedDateBefore(LocalDateTime twoWeeksAgo);
 }

@@ -27,10 +27,10 @@ public class Member extends BaseEntity {
     @Column(name = "members_uuid", columnDefinition = "BINARY(16)", unique = true)
     private UUID memberId;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "pin", nullable = false)
+    @Column(name = "pin", nullable = false, length = 4)
     private String pin;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

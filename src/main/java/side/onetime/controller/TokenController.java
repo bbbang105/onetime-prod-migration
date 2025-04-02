@@ -17,6 +17,7 @@ import side.onetime.service.TokenService;
 @RequestMapping("/api/v1/tokens")
 @RequiredArgsConstructor
 public class TokenController {
+
     private final TokenService tokenService;
 
     /**
