@@ -71,13 +71,10 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     private OAuth2UserInfo extractOAuth2UserInfo(OAuth2AuthenticationToken token, String provider) {
         switch (provider) {
             case "google":
-                log.info("구글 로그인 요청");
                 return new GoogleUserInfo(token.getPrincipal().getAttributes());
             case "kakao":
-                log.info("카카오 로그인 요청");
                 return new KakaoUserInfo(token.getPrincipal().getAttributes());
             case "naver":
-                log.info("네이버 로그인 요청");
                 return new NaverUserInfo((Map<String, Object>) token.getPrincipal().getAttributes().get("response"));
             default:
                 throw new IllegalArgumentException("지원하지 않는 OAuth2 제공자입니다.");
@@ -107,11 +104,6 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         } else {
             handleExistingUser(request, response, existUser);
         }
-
-        log.info("NAME : {}", name);
-        log.info("PROVIDER : {}", provider);
-        log.info("PROVIDER_ID : {}", providerId);
-        log.info("EMAIL : {}", email);
     }
 
     /**
@@ -129,7 +121,6 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
      * @throws IOException 인증 처리 중 발생할 수 있는 입출력 예외
      */
     private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name, String email) throws IOException {
-        log.info("신규 유저입니다.");
         String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email);
         String redirectUri = String.format(REGISTER_TOKEN_REDIRECT_URI, registerToken, URLEncoder.encode(name, StandardCharsets.UTF_8));
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
@@ -147,7 +138,6 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
      * @throws IOException 인증 처리 중 발생할 수 있는 입출력 예외
      */
     private void handleExistingUser(HttpServletRequest request, HttpServletResponse response, User user) throws IOException {
-        log.info("기존 유저입니다.");
         Long userId = user.getId();
 
         String accessToken = jwtUtil.generateAccessToken(userId,"USER");
