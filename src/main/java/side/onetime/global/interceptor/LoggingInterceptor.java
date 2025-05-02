@@ -28,6 +28,10 @@ public class LoggingInterceptor implements HandlerInterceptor {
 
         int status = response.getStatus();
 
-        log.info("✅ [{}] {} 요청 완료 - {}ms | status={}", request.getMethod(), request.getRequestURI(), duration, status);
+        if (status == 500) {
+            log.error("❌ [{}] {} 요청 실패 - {}ms | status=500", request.getMethod(), request.getRequestURI(), duration, ex);
+        } else {
+            log.info("✅ [{}] {} 요청 완료 - {}ms | status={}", request.getMethod(), request.getRequestURI(), duration, status);
+        }
     }
 }
