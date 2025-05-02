@@ -1,5 +1,6 @@
 package side.onetime.global.interceptor;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -25,18 +26,25 @@ public class LoggingInterceptor implements HandlerInterceptor {
             Map<String, String> pathVariables =
                     (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
             if (pathVariables != null && !pathVariables.isEmpty()) {
-                log.info("➡️ [{}] {} pathVars: {}", request.getMethod(), request.getRequestURI(), pathVariables);
+                log.info("📦  [{}] {} \npathVars : {}", request.getMethod(), request.getRequestURI(), pathVariables);
             }
         }
 
         if (request.getParameterNames().hasMoreElements()) {
-            log.info("➡️ [{}] {} queryParams: {}", request.getMethod(), request.getRequestURI(), getRequestParams(request));
+            log.info("📦️  [{}] {} \nqueryParams : {}", request.getMethod(), request.getRequestURI(), getRequestParams(request));
         }
 
         if (request instanceof CustomHttpRequestWrapper wrapper) {
             String body = new String(wrapper.getRequestBody());
             if (!body.isBlank()) {
-                log.info("📦 Body: {}", body);
+                try {
+                    ObjectMapper mapper = new ObjectMapper();
+                    Object json = mapper.readValue(body, Object.class);
+                    String prettyBody = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+                    log.info("📦 [{}] {} \nbody : {}", request.getMethod(), request.getRequestURI(), prettyBody);
+                } catch (Exception e) {
+                    log.info("📦 [{}] {} \nbody(raw) : {}", request.getMethod(), request.getRequestURI(), body);
+                }
             }
         }
 

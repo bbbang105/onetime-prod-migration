@@ -78,24 +78,36 @@ public class JwtFilter extends OncePerRequestFilter {
         String path = request.getServletPath();
         String method = request.getMethod();
 
+        // 공통 prefix
+        boolean isGet = method.equals("GET");
+        boolean isPost = method.equals("POST");
+
         return path.equals("/actuator/health") ||
+
+                // 로그인 없이 접근 가능한 공통 API
                 path.startsWith("/api/v1/admin") ||
                 path.startsWith("/api/v1/banners") ||
                 path.startsWith("/api/v1/members") ||
                 path.startsWith("/api/v1/tokens") ||
                 path.startsWith("/api/v1/urls") ||
-                (method.equals("POST") && path.equals("/api/v1/events")) ||
-                (method.equals("GET") && path.matches("/api/v1/events/[^/]+$")) ||
-                (method.equals("GET") && path.matches("/api/v1/events/[^/]+/participants")) ||
-                (method.equals("GET") && path.matches("/api/v1/events/[^/]+/most")) ||
-                (method.equals("GET") && path.matches("/api/v1/events/qr/[^/]+")) ||
-                (method.equals("POST") && path.equals("/api/v1/schedules/day")) ||
-                (method.equals("POST") && path.equals("/api/v1/schedules/date")) ||
-                (method.equals("GET") && path.matches("/api/v1/schedules/day/[^/]+$") && !path.endsWith("/user")) ||
-                (method.equals("GET") && path.matches("/api/v1/schedules/day/[^/]+/[^/]+$")) ||
-                (method.equals("GET") && path.equals("/api/v1/schedules/day/action-filtering")) ||
-                (method.equals("GET") && path.matches("/api/v1/schedules/date/[^/]+$") && !path.endsWith("/user")) ||
-                (method.equals("GET") && path.matches("/api/v1/schedules/date/[^/]+/[^/]+$")) ||
-                (method.equals("GET") && path.equals("/api/v1/schedules/date/action-filtering"));
+
+                // 이벤트 관련
+                (isPost && path.equals("/api/v1/events")) ||
+                (isGet && path.matches("/api/v1/events/[^/]+$")) ||
+                (isGet && path.matches("/api/v1/events/[^/]+/participants")) ||
+                (isGet && path.matches("/api/v1/events/[^/]+/most")) ||
+                (isGet && path.matches("/api/v1/events/qr/[^/]+")) ||
+
+                // 요일 스케줄 등록/조회 (비로그인)
+                (isPost && path.equals("/api/v1/schedules/day")) ||
+                (isGet && path.matches("/api/v1/schedules/day/[^/]+$") && !path.endsWith("/user")) ||
+                (isGet && path.matches("/api/v1/schedules/day/[^/]+/\\d+$")) ||
+                (isGet && path.equals("/api/v1/schedules/day/action-filtering")) ||
+
+                // 날짜 스케줄 등록/조회 (비로그인)
+                (isPost && path.equals("/api/v1/schedules/date")) ||
+                (isGet && path.matches("/api/v1/schedules/date/[^/]+$") && !path.endsWith("/user")) ||
+                (isGet && path.matches("/api/v1/schedules/date/[^/]+/\\d+$")) ||
+                (isGet && path.equals("/api/v1/schedules/date/action-filtering"));
     }
 }
