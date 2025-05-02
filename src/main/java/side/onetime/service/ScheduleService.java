@@ -317,15 +317,13 @@ public class ScheduleService {
      * 로그인 사용자의 개인 요일 스케줄을 반환합니다.
      *
      * @param eventId 조회할 이벤트 ID
-     * @param authorizationHeader 사용자 인증 토큰
+     * @param user 인증된 사용자
      * @return 개인 요일 스케줄 응답
      */
     @Transactional(readOnly = true)
-    public PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
+    public PerDaySchedulesResponse getUserDaySchedules(String eventId, User user) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
-
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         Map<String, List<Selection>> groupedSelectionsByDay = user.getSelections().stream()
                 .filter(selection -> selection.getSchedule().getEvent().equals(event))
@@ -442,15 +440,13 @@ public class ScheduleService {
      * 로그인 사용자의 개인 날짜 스케줄을 반환합니다.
      *
      * @param eventId 조회할 이벤트 ID
-     * @param authorizationHeader 사용자 인증 토큰
+     * @param user 인증된 사용자
      * @return 개인 날짜 스케줄 응답
      */
     @Transactional(readOnly = true)
-    public PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
+    public PerDateSchedulesResponse getUserDateSchedules(String eventId, User user) {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
-
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         Map<String, List<Selection>> groupedSelectionsByDate = user.getSelections().stream()
                 .filter(selection -> selection.getSchedule().getEvent().equals(event))
