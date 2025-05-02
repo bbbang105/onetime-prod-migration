@@ -4,7 +4,14 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.HandlerMapping;
+import side.onetime.global.wrapper.CustomHttpRequestWrapper;
+
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Component
@@ -14,10 +21,26 @@ public class LoggingInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        long now = System.currentTimeMillis();
-        request.setAttribute(START_TIME, now);
+        if (handler instanceof HandlerMethod) {
+            Map<String, String> pathVariables =
+                    (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
+            if (pathVariables != null && !pathVariables.isEmpty()) {
+                log.info("➡️ [{}] {} pathVars: {}", request.getMethod(), request.getRequestURI(), pathVariables);
+            }
+        }
 
-        log.info("➡️  [{}] {} 요청 시작", request.getMethod(), request.getRequestURI());
+        if (request.getParameterNames().hasMoreElements()) {
+            log.info("➡️ [{}] {} queryParams: {}", request.getMethod(), request.getRequestURI(), getRequestParams(request));
+        }
+
+        if (request instanceof CustomHttpRequestWrapper wrapper) {
+            String body = new String(wrapper.getRequestBody());
+            if (!body.isBlank()) {
+                log.info("📦 Body: {}", body);
+            }
+        }
+
+        request.setAttribute("startTime", System.currentTimeMillis());
         return true;
     }
 
@@ -29,9 +52,21 @@ public class LoggingInterceptor implements HandlerInterceptor {
         int status = response.getStatus();
 
         if (status == 500) {
-            log.error("❌ [{}] {} 요청 실패 - {}ms | status=500", request.getMethod(), request.getRequestURI(), duration, ex);
+            log.error("❌ [{}] {} request failed - {}ms | status=500", request.getMethod(), request.getRequestURI(), duration, ex);
         } else {
-            log.info("✅ [{}] {} 요청 완료 - {}ms | status={}", request.getMethod(), request.getRequestURI(), duration, status);
+            log.info("✅ [{}] {} request completed - {}ms | status={}", request.getMethod(), request.getRequestURI(), duration, status);
         }
+    }
+
+    private Map<String, String> getRequestParams(HttpServletRequest request) {
+        Map<String, String> paramMap = new HashMap<>();
+        Enumeration<String> parameterNames = request.getParameterNames();
+
+        while (parameterNames.hasMoreElements()) {
+            String paramName = parameterNames.nextElement();
+            paramMap.put(paramName, request.getParameter(paramName));
+        }
+
+        return paramMap;
     }
 }
