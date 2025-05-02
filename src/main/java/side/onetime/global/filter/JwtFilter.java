@@ -89,6 +89,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 (method.equals("GET") && path.matches("/api/v1/events/[^/]+/most")) ||
                 (method.equals("GET") && path.matches("/api/v1/events/qr/[^/]+")) ||
                 (method.equals("POST") && path.equals("/api/v1/schedules/day")) ||
-                (method.equals("POST") && path.equals("/api/v1/schedules/date"));
+                (method.equals("POST") && path.equals("/api/v1/schedules/date")) ||
+                (method.equals("GET") && path.matches("/api/v1/schedules/day/[^/]+$")) ||
+                (method.equals("GET") && path.matches("/api/v1/schedules/day/[^/]+/[^/]+$")) ||
+                (method.equals("GET") && path.equals("/api/v1/schedules/day/action-filtering")) ||
+                (method.equals("GET") && path.matches("/api/v1/schedules/date/[^/]+$")) ||
+                (method.equals("GET") && path.matches("/api/v1/schedules/date/[^/]+/[^/]+$")) ||
+                (method.equals("GET") && path.equals("/api/v1/schedules/date/action-filtering"));
     }
 }

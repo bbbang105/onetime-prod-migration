@@ -17,7 +17,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
         long now = System.currentTimeMillis();
         request.setAttribute(START_TIME, now);
 
-        log.info("➡️ [{}] {} 요청 시작", request.getMethod(), request.getRequestURI());
+        log.info("➡️  [{}] {} 요청 시작", request.getMethod(), request.getRequestURI());
         return true;
     }
 
