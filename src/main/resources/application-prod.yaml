@@ -1,5 +1,5 @@
 server:
-  port: 8090
+  port: ${SERVER_PORT}
 
 spring:
   datasource:
@@ -12,23 +12,23 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: false
+        use_sql_comments: false
     hibernate:
-      ddl-auto: update
-
+      ddl-auto: validate
     defer-datasource-initialization: true
     open-in-view: false
-    generate-ddl: true
-    show-sql: true
+    generate-ddl: false
+    show-sql: false
 
   sql:
     init:
-      mode: always
+      mode: never
 
   security:
     oauth2:
       client:
         registration:
-
           google:
             client-id: ${OAUTH_GOOGLE_CLIENT_ID}
             client-secret: ${OAUTH_GOOGLE_CLIENT_SECRET}
@@ -36,7 +36,6 @@ spring:
               - email
               - profile
             redirect-uri: ${OAUTH_GOOGLE_REDIRECT_URI}
-
           kakao:
             client-id: ${OAUTH_KAKAO_CLIENT_ID}
             client-secret: ${OAUTH_KAKAO_CLIENT_SECRET}
@@ -47,7 +46,6 @@ spring:
             redirect-uri: ${OAUTH_KAKAO_REDIRECT_URI}
             client-name: Kakao
             client-authentication-method: client_secret_post
-
           naver:
             client-id: ${OAUTH_NAVER_CLIENT_ID}
             client-secret: ${OAUTH_NAVER_CLIENT_SECRET}
@@ -56,15 +54,12 @@ spring:
             client-name: Naver
             authorization-grant-type: authorization_code
             redirect-uri: ${OAUTH_NAVER_REDIRECT_URI}
-
         provider:
-
           kakao:
             authorization-uri: https://kauth.kakao.com/oauth/authorize
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
-
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize
             token-uri: https://nid.naver.com/oauth2.0/token
@@ -123,3 +118,8 @@ management:
     web:
       exposure:
         include: health
+
+logging:
+  level:
+    org.hibernate.SQL: off
+    org.hibernate.type.descriptor.sql.BasicBinder: off
