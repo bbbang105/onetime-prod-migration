@@ -26,12 +26,12 @@ public class LoggingInterceptor implements HandlerInterceptor {
             Map<String, String> pathVariables =
                     (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
             if (pathVariables != null && !pathVariables.isEmpty()) {
-                log.info("📦  [{}] {} \npathVars : {}", request.getMethod(), request.getRequestURI(), pathVariables);
+                log.info("📦 [{}] {} \npathVars : {}", request.getMethod(), request.getRequestURI(), pathVariables);
             }
         }
 
         if (request.getParameterNames().hasMoreElements()) {
-            log.info("📦️  [{}] {} \nqueryParams : {}", request.getMethod(), request.getRequestURI(), getRequestParams(request));
+            log.info("📦️ [{}] {} \nqueryParams : {}", request.getMethod(), request.getRequestURI(), getRequestParams(request));
         }
 
         if (request instanceof CustomHttpRequestWrapper wrapper) {
