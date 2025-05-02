@@ -3,7 +3,6 @@ package side.onetime.user;
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
 import com.epages.restdocs.apispec.Schema;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -12,10 +11,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.ResultActions;
-import side.onetime.auth.dto.CustomUserDetails;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.UserController;
@@ -50,17 +46,6 @@ public class UserControllerTest extends ControllerTestConfig {
 
     @MockBean
     private CustomUserDetailsService customUserDetailsService;
-
-    private CustomUserDetails customUserDetails;
-
-    @BeforeEach
-    public void setupSecurityContext() {
-        User mockUser = User.builder().nickname("testUser").email("test@example.com").build();
-        customUserDetails = new CustomUserDetails(mockUser);
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(customUserDetails, null, customUserDetails.getAuthorities())
-        );
-    }
 
     @Test
     @DisplayName("유저 온보딩을 진행한다.")

@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.EventController;
+import side.onetime.domain.User;
 import side.onetime.domain.enums.Category;
 import side.onetime.domain.enums.EventStatus;
 import side.onetime.dto.event.request.CreateEventRequest;
@@ -304,7 +305,7 @@ public class EventControllerTest extends ControllerTestConfig {
                 )
         );
 
-        Mockito.when(eventService.getUserParticipatedEvents(anyString())).thenReturn(response);
+        Mockito.when(eventService.getUserParticipatedEvents(any(User.class))).thenReturn(response);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/events/user/all")
@@ -358,7 +359,7 @@ public class EventControllerTest extends ControllerTestConfig {
     public void removeUserCreatedEvent() throws Exception {
         // given
         String eventId = UUID.randomUUID().toString();
-        Mockito.doNothing().when(eventService).removeUserCreatedEvent(anyString(), anyString());
+        Mockito.doNothing().when(eventService).removeUserCreatedEvent(any(User.class), anyString());
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/v1/events/{event_id}", eventId)
@@ -409,7 +410,7 @@ public class EventControllerTest extends ControllerTestConfig {
         String requestContent = new ObjectMapper().writeValueAsString(request);
 
         Mockito.doNothing().when(eventService)
-                .modifyUserCreatedEvent(anyString(), anyString(), any(ModifyUserCreatedEventRequest.class));
+                .modifyUserCreatedEvent(any(User.class), anyString(), any(ModifyUserCreatedEventRequest.class));
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/events/{event_id}", eventId)
