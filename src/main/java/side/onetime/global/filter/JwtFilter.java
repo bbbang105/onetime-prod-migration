@@ -36,7 +36,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            // ✅ OPTIONS 요청일 경우 필터를 건너뛰고 바로 다음 필터 실행
             if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
                 filterChain.doFilter(request, response);
                 return;
@@ -69,7 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 특정 경로에 대해 JWT 검증을 생략합니다.
+     * 특정 경로에 대해 JWT Filter를 생략합니다.
      *
      * @param request HTTP 요청 객체
      * @return true일 경우 해당 요청에 대해 필터를 적용하지 않음
@@ -77,6 +76,19 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/api/v1/users/onboarding");
+        String method = request.getMethod();
+
+        return path.startsWith("/api/v1/admin") ||
+                path.startsWith("/api/v1/banners") ||
+                path.startsWith("/api/v1/members") ||
+                path.startsWith("/api/v1/tokens") ||
+                path.startsWith("/api/v1/urls") ||
+                (method.equals("POST") && path.equals("/api/v1/events")) ||
+                (method.equals("GET") && path.matches("/api/v1/events/[^/]+$")) ||
+                (method.equals("GET") && path.matches("/api/v1/events/[^/]+/participants")) ||
+                (method.equals("GET") && path.matches("/api/v1/events/[^/]+/most")) ||
+                (method.equals("GET") && path.matches("/api/v1/events/qr/[^/]+")) ||
+                (method.equals("POST") && path.equals("/api/v1/schedules/day")) ||
+                (method.equals("POST") && path.equals("/api/v1/schedules/date"));
     }
 }
