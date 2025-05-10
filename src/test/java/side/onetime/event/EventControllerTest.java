@@ -305,7 +305,7 @@ public class EventControllerTest extends ControllerTestConfig {
                 )
         );
 
-        Mockito.when(eventService.getUserParticipatedEvents(any(User.class))).thenReturn(response);
+        Mockito.when(eventService.getUserParticipatedEvents()).thenReturn(response);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/events/user/all")
@@ -359,7 +359,7 @@ public class EventControllerTest extends ControllerTestConfig {
     public void removeUserCreatedEvent() throws Exception {
         // given
         String eventId = UUID.randomUUID().toString();
-        Mockito.doNothing().when(eventService).removeUserCreatedEvent(any(User.class), anyString());
+        Mockito.doNothing().when(eventService).removeUserCreatedEvent(anyString());
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/v1/events/{event_id}", eventId)
@@ -410,7 +410,7 @@ public class EventControllerTest extends ControllerTestConfig {
         String requestContent = new ObjectMapper().writeValueAsString(request);
 
         Mockito.doNothing().when(eventService)
-                .modifyUserCreatedEvent(any(User.class), anyString(), any(ModifyUserCreatedEventRequest.class));
+                .modifyUserCreatedEvent(anyString(), any(ModifyUserCreatedEventRequest.class));
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/events/{event_id}", eventId)

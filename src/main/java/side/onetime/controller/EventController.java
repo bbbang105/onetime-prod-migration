@@ -104,14 +104,12 @@ public class EventController {
      *
      * 이 API는 인증된 유저가 참여한 모든 이벤트 목록을 조회합니다. 유저의 참여 상태, 이벤트 정보 등이 포함됩니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
      * @return 유저가 참여한 이벤트 목록
      */
     @GetMapping("/user/all")
-    public ResponseEntity<ApiResponse<List<GetUserParticipatedEventsResponse>>> getUserParticipatedEvents(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponse<List<GetUserParticipatedEventsResponse>>> getUserParticipatedEvents() {
 
-        List<GetUserParticipatedEventsResponse> getUserParticipatedEventsResponses = eventService.getUserParticipatedEvents(customUserDetails.user());
+        List<GetUserParticipatedEventsResponse> getUserParticipatedEventsResponses = eventService.getUserParticipatedEvents();
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_PARTICIPATED_EVENTS, getUserParticipatedEventsResponses);
     }
 
@@ -120,16 +118,14 @@ public class EventController {
      *
      * 이 API는 인증된 유저가 생성한 특정 이벤트를 삭제합니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
      * @param eventId 삭제할 이벤트의 ID
      * @return 삭제 성공 여부
      */
     @DeleteMapping("/{event_id}")
     public ResponseEntity<ApiResponse<SuccessStatus>> removeUserCreatedEvent(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable("event_id") String eventId) {
 
-        eventService.removeUserCreatedEvent(customUserDetails.user(), eventId);
+        eventService.removeUserCreatedEvent(eventId);
         return ApiResponse.onSuccess(SuccessStatus._REMOVE_USER_CREATED_EVENT);
     }
 
@@ -144,18 +140,16 @@ public class EventController {
      *
      * 요청 데이터에 따라 변경 사항을 반영하며, 필요에 따라 기존 스케줄 데이터를 삭제하거나 새로운 스케줄을 생성합니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
      * @param eventId 수정할 이벤트의 ID
      * @param modifyUserCreatedEventRequest 새로운 이벤트 정보가 담긴 요청 데이터 (제목, 시간, 범위 등)
      * @return 수정 성공 여부
      */
     @PatchMapping("/{event_id}")
     public ResponseEntity<ApiResponse<SuccessStatus>> modifyUserCreatedEvent(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @PathVariable("event_id") String eventId,
             @Valid @RequestBody ModifyUserCreatedEventRequest modifyUserCreatedEventRequest) {
 
-        eventService.modifyUserCreatedEvent(customUserDetails.user(), eventId, modifyUserCreatedEventRequest);
+        eventService.modifyUserCreatedEvent(eventId, modifyUserCreatedEventRequest);
         return ApiResponse.onSuccess(SuccessStatus._MODIFY_USER_CREATED_EVENT);
     }
 
