@@ -64,11 +64,9 @@ public class JwtUtil {
 
         switch (userType.toUpperCase()) {
             case "ADMIN" -> {
-                log.info("관리자용 액세스 토큰이 발행되었습니다.");
                 expirationMillis = ADMIN_USER_ACCESS_TOKEN_EXPIRATION_TIME;
             }
             case "USER" -> {
-                log.info("일반 유저용 액세스 토큰이 발행되었습니다.");
                 expirationMillis = ACCESS_TOKEN_EXPIRATION_TIME;
             }
             default -> {
@@ -96,8 +94,6 @@ public class JwtUtil {
      * @return 생성된 레지스터 토큰
      */
     public String generateRegisterToken(String provider, String providerId, String name, String email) {
-        log.info("레지스터 토큰이 발행되었습니다.");
-
         return Jwts.builder()
                 .claim("provider", provider)     // 클레임에 provider 추가
                 .claim("providerId", providerId) // 클레임에 providerId 추가
@@ -117,8 +113,6 @@ public class JwtUtil {
      * @return 생성된 리프레시 토큰
      */
     public String generateRefreshToken(Long userId) {
-        log.info("리프레쉬 토큰이 발행되었습니다.");
-
         return Jwts.builder()
                 .claim("userId", userId)
                 .claim("type", "REFRESH_TOKEN")
@@ -196,7 +190,6 @@ public class JwtUtil {
      */
     public void validateToken(String token) {
         try {
-            log.info("JWT를 검증합니다.");
             Jwts.parser()
                     .verifyWith(this.getSigningKey())
                     .build()

@@ -3,7 +3,9 @@ package side.onetime.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import side.onetime.auth.dto.CustomUserDetails;
 import side.onetime.dto.schedule.request.CreateDateScheduleRequest;
 import side.onetime.dto.schedule.request.CreateDayScheduleRequest;
 import side.onetime.dto.schedule.request.GetFilteredSchedulesRequest;
@@ -108,15 +110,13 @@ public class ScheduleController {
      * 인증된 사용자의 특정 이벤트에 대한 개인 요일 스케줄을 조회합니다.
      *
      * @param eventId 조회할 이벤트의 ID
-     * @param authorizationHeader 인증된 유저의 토큰
      * @return 사용자의 요일 스케줄
      */
     @GetMapping("/day/{event_id}/user")
     public ResponseEntity<ApiResponse<PerDaySchedulesResponse>> getUserDaySchedules(
-            @PathVariable("event_id") String eventId,
-            @RequestHeader(value = "Authorization") String authorizationHeader) {
+            @PathVariable("event_id") String eventId) {
 
-        PerDaySchedulesResponse perDaySchedulesResponse = scheduleService.getUserDaySchedules(eventId, authorizationHeader);
+        PerDaySchedulesResponse perDaySchedulesResponse = scheduleService.getUserDaySchedules(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_DAY_SCHEDULES, perDaySchedulesResponse);
     }
 
@@ -176,15 +176,13 @@ public class ScheduleController {
      * 인증된 사용자의 특정 이벤트에 대한 개인 날짜 스케줄을 조회합니다.
      *
      * @param eventId 조회할 이벤트의 ID
-     * @param authorizationHeader 인증된 유저의 토큰
      * @return 사용자의 날짜 스케줄
      */
     @GetMapping("/date/{event_id}/user")
     public ResponseEntity<ApiResponse<PerDateSchedulesResponse>> getUserDateSchedules(
-            @PathVariable("event_id") String eventId,
-            @RequestHeader(value = "Authorization") String authorizationHeader) {
+            @PathVariable("event_id") String eventId) {
 
-        PerDateSchedulesResponse perDateSchedulesResponse = scheduleService.getUserDateSchedules(eventId, authorizationHeader);
+        PerDateSchedulesResponse perDateSchedulesResponse = scheduleService.getUserDateSchedules(eventId);
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_DATE_SCHEDULES, perDateSchedulesResponse);
     }
 

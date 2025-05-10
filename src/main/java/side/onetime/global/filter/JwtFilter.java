@@ -1,4 +1,4 @@
-package side.onetime.global.config;
+package side.onetime.global.filter;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -36,7 +36,6 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
-            // ✅ OPTIONS 요청일 경우 필터를 건너뛰고 바로 다음 필터 실행
             if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
                 filterChain.doFilter(request, response);
                 return;
@@ -69,7 +68,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     /**
-     * 특정 경로에 대해 JWT 검증을 생략합니다.
+     * 특정 경로에 대해 JWT Filter를 생략합니다.
      *
      * @param request HTTP 요청 객체
      * @return true일 경우 해당 요청에 대해 필터를 적용하지 않음
@@ -77,6 +76,38 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getServletPath();
-        return path.startsWith("/api/v1/users/onboarding");
+        String method = request.getMethod();
+
+        // 공통 prefix
+        boolean isGet = method.equals("GET");
+        boolean isPost = method.equals("POST");
+
+        return path.equals("/actuator/health") ||
+
+                // 로그인 없이 접근 가능한 공통 API
+                path.startsWith("/api/v1/admin") ||
+                path.startsWith("/api/v1/banners") ||
+                path.startsWith("/api/v1/members") ||
+                path.startsWith("/api/v1/tokens") ||
+                path.startsWith("/api/v1/urls") ||
+
+                // 이벤트 관련
+                (isPost && path.equals("/api/v1/events")) ||
+                (isGet && path.matches("/api/v1/events/[^/]+$")) ||
+                (isGet && path.matches("/api/v1/events/[^/]+/participants")) ||
+                (isGet && path.matches("/api/v1/events/[^/]+/most")) ||
+                (isGet && path.matches("/api/v1/events/qr/[^/]+")) ||
+
+                // 요일 스케줄 등록/조회 (비로그인)
+                (isPost && path.equals("/api/v1/schedules/day")) ||
+                (isGet && path.matches("/api/v1/schedules/day/[^/]+$") && !path.endsWith("/user")) ||
+                (isGet && path.matches("/api/v1/schedules/day/[^/]+/\\d+$")) ||
+                (isGet && path.equals("/api/v1/schedules/day/action-filtering")) ||
+
+                // 날짜 스케줄 등록/조회 (비로그인)
+                (isPost && path.equals("/api/v1/schedules/date")) ||
+                (isGet && path.matches("/api/v1/schedules/date/[^/]+$") && !path.endsWith("/user")) ||
+                (isGet && path.matches("/api/v1/schedules/date/[^/]+/\\d+$")) ||
+                (isGet && path.equals("/api/v1/schedules/date/action-filtering"));
     }
 }

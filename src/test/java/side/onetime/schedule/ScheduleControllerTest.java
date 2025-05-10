@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.ScheduleController;
+import side.onetime.domain.User;
 import side.onetime.dto.schedule.request.CreateDateScheduleRequest;
 import side.onetime.dto.schedule.request.CreateDayScheduleRequest;
 import side.onetime.dto.schedule.request.GetFilteredSchedulesRequest;
@@ -29,8 +30,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
@@ -259,7 +259,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
         List<DaySchedule> daySchedules = List.of(new DaySchedule("수", List.of("13:00", "14:00")));
         PerDaySchedulesResponse response = PerDaySchedulesResponse.of("Test User", daySchedules);
 
-        Mockito.when(scheduleService.getUserDaySchedules(anyString(), anyString())).thenReturn(response);
+        Mockito.when(scheduleService.getUserDaySchedules(anyString())).thenReturn(response);
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -453,7 +453,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
         String authorizationHeader = "Bearer some_token";
         PerDateSchedulesResponse response = PerDateSchedulesResponse.of("userNickname", List.of(new DateSchedule("2024.12.01", List.of("09:00", "10:00"))));
 
-        Mockito.when(scheduleService.getUserDateSchedules(eventId, authorizationHeader)).thenReturn(response);
+        Mockito.when(scheduleService.getUserDateSchedules(anyString())).thenReturn(response);
 
         // when
         ResultActions resultActions = mockMvc.perform(

@@ -46,14 +46,12 @@ public class UserController {
      *
      * 로그인한 유저의 정보를 조회합니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
      * @return 유저의 정보를 포함한 응답 객체
      */
     @GetMapping("/profile")
-    public ResponseEntity<ApiResponse<GetUserProfileResponse>> getUserProfile(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponse<GetUserProfileResponse>> getUserProfile() {
 
-        GetUserProfileResponse getUserProfileResponse = userService.getUserProfile(customUserDetails.user());
+        GetUserProfileResponse getUserProfileResponse = userService.getUserProfile();
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_PROFILE, getUserProfileResponse);
     }
 
@@ -62,16 +60,14 @@ public class UserController {
      *
      * 유저의 정보를 수정하는 API입니다.
      *
-     * @param customUserDetails        인증된 사용자 정보
      * @param updateUserProfileRequest 수정할 닉네임 or 언어를 포함하는 요청 객체
      * @return 성공 상태 응답 객체
      */
     @PatchMapping("/profile/action-update")
     public ResponseEntity<ApiResponse<SuccessStatus>> updateUserProfile(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody UpdateUserProfileRequest updateUserProfileRequest) {
 
-        userService.updateUserProfile(customUserDetails.user(), updateUserProfileRequest);
+        userService.updateUserProfile(updateUserProfileRequest);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_PROFILE);
     }
 
@@ -80,14 +76,12 @@ public class UserController {
      *
      * 유저의 계정을 삭제하여 서비스에서 탈퇴하는 API입니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
      * @return 성공 상태 응답 객체
      */
     @PostMapping("/action-withdraw")
-    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawService(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawService() {
 
-        userService.withdrawService(customUserDetails.user());
+        userService.withdrawService();
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_SERVICE);
     }
 
@@ -96,14 +90,12 @@ public class UserController {
      *
      * 인증된 사용자의 필수 및 선택 약관 동의 상태를 조회합니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
      * @return 약관 동의 여부 응답 객체
      */
     @GetMapping("/policy")
-    public ResponseEntity<ApiResponse<GetUserPolicyAgreementResponse>> getUserPolicyAgreement(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponse<GetUserPolicyAgreementResponse>> getUserPolicyAgreement() {
 
-        GetUserPolicyAgreementResponse response = userService.getUserPolicyAgreement(customUserDetails.user());
+        GetUserPolicyAgreementResponse response = userService.getUserPolicyAgreement();
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_POLICY_AGREEMENT, response);
     }
 
@@ -113,16 +105,14 @@ public class UserController {
      * 사용자의 서비스 이용약관, 개인정보 수집 및 이용 동의, 마케팅 정보 수신 동의 상태를 업데이트합니다.
      * 모든 필드는 필수 값이며, 기존 동의 여부를 새로운 값으로 변경합니다.
      *
-     * @param customUserDetails 인증된 사용자 정보
      * @param request 약관 동의 여부 수정 요청 데이터 (필수 값)
      * @return 성공 상태 응답 객체
      */
     @PutMapping("/policy")
     public ResponseEntity<ApiResponse<SuccessStatus>> updateUserPolicyAgreement(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody UpdateUserPolicyAgreementRequest request) {
 
-        userService.updateUserPolicyAgreement(customUserDetails.user(), request);
+        userService.updateUserPolicyAgreement(request);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_POLICY_AGREEMENT);
     }
 
@@ -131,14 +121,12 @@ public class UserController {
      *
      * 로그인한 사용자의 수면 시작 시간과 종료 시간을 조회합니다.
      *
-     * @param customUserDetails 인증된 사용자 정보 (JWT 인증)
      * @return 유저의 수면 시작 시간 및 종료 시간을 포함한 응답 객체
      */
     @GetMapping("/sleep-time")
-    public ResponseEntity<ApiResponse<GetUserSleepTimeResponse>> getUserSleepTime(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<ApiResponse<GetUserSleepTimeResponse>> getUserSleepTime() {
 
-        GetUserSleepTimeResponse response = userService.getUserSleepTime(customUserDetails.user());
+        GetUserSleepTimeResponse response = userService.getUserSleepTime();
         return ApiResponse.onSuccess(SuccessStatus._GET_USER_SLEEP_TIME, response);
     }
 
@@ -147,16 +135,14 @@ public class UserController {
      *
      * 사용자의 수면 시작 시간과 종료 시간을 업데이트합니다.
      *
-     * @param customUserDetails 인증된 사용자 정보 (JWT 인증)
      * @param request 수면 시간 수정 요청 데이터 (필수 값)
      * @return 성공 상태 응답 객체
      */
     @PutMapping("/sleep-time")
     public ResponseEntity<ApiResponse<SuccessStatus>> updateUserSleepTime(
-            @AuthenticationPrincipal CustomUserDetails customUserDetails,
             @Valid @RequestBody UpdateUserSleepTimeRequest request) {
 
-        userService.updateUserSleepTime(customUserDetails.user(), request);
+        userService.updateUserSleepTime(request);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_SLEEP_TIME);
     }
 }

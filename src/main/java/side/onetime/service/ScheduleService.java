@@ -17,8 +17,10 @@ import side.onetime.exception.CustomException;
 import side.onetime.exception.status.EventErrorStatus;
 import side.onetime.exception.status.MemberErrorStatus;
 import side.onetime.exception.status.ScheduleErrorStatus;
+import side.onetime.exception.status.UserErrorStatus;
 import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
+import side.onetime.util.UserAuthorizationUtil;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,6 +35,7 @@ public class ScheduleService {
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
     private final EventService eventService;
+    private final UserRepository userRepository;
 
     /**
      * 요일 스케줄 등록 메서드 (비로그인).
@@ -317,15 +320,15 @@ public class ScheduleService {
      * 로그인 사용자의 개인 요일 스케줄을 반환합니다.
      *
      * @param eventId 조회할 이벤트 ID
-     * @param authorizationHeader 사용자 인증 토큰
      * @return 개인 요일 스케줄 응답
      */
     @Transactional(readOnly = true)
-    public PerDaySchedulesResponse getUserDaySchedules(String eventId, String authorizationHeader) {
+    public PerDaySchedulesResponse getUserDaySchedules(String eventId) {
+        User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
+                .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
+
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
-
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         Map<String, List<Selection>> groupedSelectionsByDay = user.getSelections().stream()
                 .filter(selection -> selection.getSchedule().getEvent().equals(event))
@@ -442,15 +445,15 @@ public class ScheduleService {
      * 로그인 사용자의 개인 날짜 스케줄을 반환합니다.
      *
      * @param eventId 조회할 이벤트 ID
-     * @param authorizationHeader 사용자 인증 토큰
      * @return 개인 날짜 스케줄 응답
      */
     @Transactional(readOnly = true)
-    public PerDateSchedulesResponse getUserDateSchedules(String eventId, String authorizationHeader) {
+    public PerDateSchedulesResponse getUserDateSchedules(String eventId) {
+        User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
+                .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        User user = jwtUtil.getUserFromHeader(authorizationHeader);
 
         Map<String, List<Selection>> groupedSelectionsByDate = user.getSelections().stream()
                 .filter(selection -> selection.getSchedule().getEvent().equals(event))
