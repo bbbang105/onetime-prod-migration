@@ -71,7 +71,7 @@ public class FixedControllerTest extends ControllerTestConfig {
 
         GetFixedScheduleResponse response = new GetFixedScheduleResponse(schedules);
 
-        Mockito.when(fixedScheduleService.getUserFixedSchedule(customUserDetails.user())).thenReturn(response);
+        Mockito.when(fixedScheduleService.getUserFixedSchedule()).thenReturn(response);
 
         ResultActions result = mockMvc.perform(
                 RestDocumentationRequestBuilders.get("/api/v1/fixed-schedules")

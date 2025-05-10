@@ -14,14 +14,9 @@ import side.onetime.exception.CustomException;
 import side.onetime.exception.status.EventErrorStatus;
 import side.onetime.exception.status.EventParticipationErrorStatus;
 import side.onetime.exception.status.ScheduleErrorStatus;
-import side.onetime.repository.EventParticipationRepository;
-import side.onetime.repository.EventRepository;
-import side.onetime.repository.ScheduleRepository;
-import side.onetime.repository.SelectionRepository;
-import side.onetime.util.DateUtil;
-import side.onetime.util.JwtUtil;
-import side.onetime.util.QrUtil;
-import side.onetime.util.S3Util;
+import side.onetime.exception.status.UserErrorStatus;
+import side.onetime.repository.*;
+import side.onetime.util.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class EventService {
     private static final int MAX_MOST_POSSIBLE_TIMES_SIZE = 6;
+    private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final EventParticipationRepository eventParticipationRepository;
     private final ScheduleRepository scheduleRepository;
@@ -432,11 +428,12 @@ public class EventService {
      * 유저 참여 이벤트 반환 메서드.
      * 인증된 유저가 참여한 모든 이벤트 목록을 조회하며, 각 이벤트에 대한 세부 정보를 반환합니다.
      *
-     * @param user 인증된 사용자 정보
      * @return 유저가 참여한 이벤트 목록
      */
     @Transactional(readOnly = true)
-    public List<GetUserParticipatedEventsResponse> getUserParticipatedEvents(User user) {
+    public List<GetUserParticipatedEventsResponse> getUserParticipatedEvents() {
+        User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
+                .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
 
         return eventParticipationRepository.findAllByUser(user).stream()
                 .sorted(Comparator.comparing(
@@ -457,11 +454,12 @@ public class EventService {
      * 유저가 생성한 이벤트 삭제 메서드.
      * 인증된 유저가 생성한 특정 이벤트를 삭제합니다.
      *
-     * @param user 인증된 사용자 정보
      * @param eventId 삭제할 이벤트의 ID
      */
     @Transactional
-    public void removeUserCreatedEvent(User user, String eventId) {
+    public void removeUserCreatedEvent(String eventId) {
+        User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
+                .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
         EventParticipation eventParticipation = verifyUserHasEventAccess(user, eventId);
         eventRepository.deleteEvent(eventParticipation.getEvent());
         s3Util.deleteFile(eventParticipation.getEvent().getQrFileName()); // QR 이미지 삭제
@@ -471,12 +469,13 @@ public class EventService {
      * 유저가 생성한 이벤트 수정 메서드.
      * 인증된 유저가 생성한 특정 이벤트를 수정합니다.
      *
-     * @param user 인증된 사용자 정보
      * @param eventId 수정할 이벤트의 ID
      * @param modifyUserCreatedEventRequest 새로운 이벤트 데이터
      */
     @Transactional
-    public void modifyUserCreatedEvent(User user, String eventId, ModifyUserCreatedEventRequest modifyUserCreatedEventRequest) {
+    public void modifyUserCreatedEvent(String eventId, ModifyUserCreatedEventRequest modifyUserCreatedEventRequest) {
+        User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
+                .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
         EventParticipation eventParticipation = verifyUserHasEventAccess(user, eventId);
         Event event = eventParticipation.getEvent();
 

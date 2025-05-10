@@ -15,7 +15,6 @@ import org.springframework.test.web.servlet.ResultActions;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.UserController;
-import side.onetime.domain.User;
 import side.onetime.domain.enums.Language;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
@@ -122,7 +121,7 @@ public class UserControllerTest extends ControllerTestConfig {
         String socialPlatform = "google";
         GetUserProfileResponse response = new GetUserProfileResponse(nickname, email, language, socialPlatform);
 
-        Mockito.when(userService.getUserProfile(any(User.class))).thenReturn(response);
+        Mockito.when(userService.getUserProfile()).thenReturn(response);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/users/profile")
@@ -169,7 +168,7 @@ public class UserControllerTest extends ControllerTestConfig {
                 "NewNickname",
                 Language.ENG
                 );
-        Mockito.doNothing().when(userService).updateUserProfile(any(User.class), any(UpdateUserProfileRequest.class));
+        Mockito.doNothing().when(userService).updateUserProfile(any(UpdateUserProfileRequest.class));
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
@@ -209,7 +208,7 @@ public class UserControllerTest extends ControllerTestConfig {
     @DisplayName("유저가 서비스를 탈퇴한다.")
     public void withdrawService() throws Exception {
         // given
-        Mockito.doNothing().when(userService).withdrawService(any(User.class));
+        Mockito.doNothing().when(userService).withdrawService();
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/users/action-withdraw")
@@ -243,7 +242,7 @@ public class UserControllerTest extends ControllerTestConfig {
     public void getUserPolicyAgreement() throws Exception {
         // given
         GetUserPolicyAgreementResponse response = new GetUserPolicyAgreementResponse(true, true, false);
-        Mockito.when(userService.getUserPolicyAgreement(any(User.class))).thenReturn(response);
+        Mockito.when(userService.getUserPolicyAgreement()).thenReturn(response);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(
@@ -287,7 +286,7 @@ public class UserControllerTest extends ControllerTestConfig {
     public void updateUserPolicyAgreement() throws Exception {
         // given
         UpdateUserPolicyAgreementRequest request = new UpdateUserPolicyAgreementRequest(true, true, false);
-        Mockito.doNothing().when(userService).updateUserPolicyAgreement(any(User.class), any(UpdateUserPolicyAgreementRequest.class));
+        Mockito.doNothing().when(userService).updateUserPolicyAgreement(any(UpdateUserPolicyAgreementRequest.class));
 
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -333,7 +332,7 @@ public class UserControllerTest extends ControllerTestConfig {
     public void getUserSleepTime() throws Exception {
         // given
         GetUserSleepTimeResponse response = new GetUserSleepTimeResponse("23:30", "07:00");
-        Mockito.when(userService.getUserSleepTime(any(User.class))).thenReturn(response);
+        Mockito.when(userService.getUserSleepTime()).thenReturn(response);
 
         // when
         ResultActions resultActions = this.mockMvc.perform(
@@ -375,7 +374,7 @@ public class UserControllerTest extends ControllerTestConfig {
     public void updateUserSleepTime() throws Exception {
         // given
         UpdateUserSleepTimeRequest request = new UpdateUserSleepTimeRequest("22:00", "06:30");
-        Mockito.doNothing().when(userService).updateUserSleepTime(any(User.class), any(UpdateUserSleepTimeRequest.class));
+        Mockito.doNothing().when(userService).updateUserSleepTime(any(UpdateUserSleepTimeRequest.class));
 
         String requestContent = objectMapper.writeValueAsString(request);
 
