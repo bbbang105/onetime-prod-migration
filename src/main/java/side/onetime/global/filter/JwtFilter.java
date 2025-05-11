@@ -34,21 +34,19 @@ public class JwtFilter extends OncePerRequestFilter {
      * @throws IOException      입출력 예외 발생 시
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try {
-            if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
-                filterChain.doFilter(request, response);
-                return;
-            }
-            String token = jwtUtil.getTokenFromHeader(request.getHeader("Authorization"));
-            jwtUtil.validateToken(token);
-            Long userId = jwtUtil.getClaimFromToken(token, "userId", Long.class);
-            setAuthentication(userId);
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
-        } catch (Exception e) {
-            log.error("JWT validation failed: " + e.getMessage());
-            SecurityContextHolder.clearContext();
+        if (request.getMethod().equalsIgnoreCase("OPTIONS")) {
+            filterChain.doFilter(request, response);
+            return;
         }
+
+        String token = jwtUtil.getTokenFromHeader(request.getHeader("Authorization"));
+        jwtUtil.validateToken(token);
+        Long userId = jwtUtil.getClaimFromToken(token, "userId", Long.class);
+        setAuthentication(userId);
+
         filterChain.doFilter(request, response);
     }
 
