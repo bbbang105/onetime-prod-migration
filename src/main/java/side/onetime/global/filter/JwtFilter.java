@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import side.onetime.auth.service.CustomUserDetailsService;
+import side.onetime.exception.CustomException;
 import side.onetime.util.JwtUtil;
 
 import java.io.IOException;
@@ -42,12 +43,18 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = jwtUtil.getTokenFromHeader(request.getHeader("Authorization"));
-        jwtUtil.validateToken(token);
-        Long userId = jwtUtil.getClaimFromToken(token, "userId", Long.class);
-        setAuthentication(userId);
+        try {
+            String authorizationHeader = request.getHeader("Authorization");
+            String token = jwtUtil.getTokenFromHeader(authorizationHeader);
+            jwtUtil.validateToken(token);
+            Long userId = jwtUtil.getClaimFromToken(token, "userId", Long.class);
+            setAuthentication(userId);
 
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+
+        } catch (CustomException e) {
+            writeErrorResponse(response, e);
+        }
     }
 
     /**
@@ -81,31 +88,55 @@ public class JwtFilter extends OncePerRequestFilter {
         boolean isPost = method.equals("POST");
 
         return path.equals("/actuator/health") ||
-
+                // 스웨거
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
                 // 로그인 없이 접근 가능한 공통 API
                 path.startsWith("/api/v1/admin") ||
                 path.startsWith("/api/v1/banners") ||
                 path.startsWith("/api/v1/members") ||
                 path.startsWith("/api/v1/tokens") ||
                 path.startsWith("/api/v1/urls") ||
-
                 // 이벤트 관련
                 (isPost && path.equals("/api/v1/events")) ||
                 (isGet && path.matches("/api/v1/events/[^/]+$")) ||
                 (isGet && path.matches("/api/v1/events/[^/]+/participants")) ||
                 (isGet && path.matches("/api/v1/events/[^/]+/most")) ||
                 (isGet && path.matches("/api/v1/events/qr/[^/]+")) ||
-
                 // 요일 스케줄 등록/조회 (비로그인)
                 (isPost && path.equals("/api/v1/schedules/day")) ||
                 (isGet && path.matches("/api/v1/schedules/day/[^/]+$") && !path.endsWith("/user")) ||
                 (isGet && path.matches("/api/v1/schedules/day/[^/]+/\\d+$")) ||
                 (isGet && path.equals("/api/v1/schedules/day/action-filtering")) ||
-
                 // 날짜 스케줄 등록/조회 (비로그인)
                 (isPost && path.equals("/api/v1/schedules/date")) ||
                 (isGet && path.matches("/api/v1/schedules/date/[^/]+$") && !path.endsWith("/user")) ||
                 (isGet && path.matches("/api/v1/schedules/date/[^/]+/\\d+$")) ||
                 (isGet && path.equals("/api/v1/schedules/date/action-filtering"));
+    }
+
+    /**
+     * JWT 검증 중 발생한 CustomException을 클라이언트에게 응답 형태로 반환합니다.
+     *
+     * @param response HTTP 응답 객체
+     * @param e        JWT 검증 중 발생한 CustomException
+     * @throws IOException 출력 스트림 처리 중 오류 발생 시
+     */
+    private void writeErrorResponse(HttpServletResponse response, CustomException e) throws IOException {
+        int status = e.getErrorCode().getReasonHttpStatus().getHttpStatus().value();
+        String code = e.getErrorCode().getReasonHttpStatus().getCode();
+        String message = e.getErrorCode().getReasonHttpStatus().getMessage();
+
+        response.setStatus(status);
+        response.setContentType("application/json;charset=UTF-8");
+
+        response.getWriter().write(
+                "{"
+                        + "\"is_success\": false,"
+                        + "\"code\": \"" + code + "\","
+                        + "\"message\": \"" + message + "\","
+                        + "\"payload\": null"
+                        + "}"
+        );
     }
 }
