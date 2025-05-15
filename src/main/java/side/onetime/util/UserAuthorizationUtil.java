@@ -3,6 +3,8 @@ package side.onetime.util;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import side.onetime.auth.dto.CustomUserDetails;
+import side.onetime.exception.CustomException;
+import side.onetime.exception.status.UserErrorStatus;
 
 public class UserAuthorizationUtil {
 
@@ -20,7 +22,11 @@ public class UserAuthorizationUtil {
      */
     public static Long getLoginUserId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        Object principal = authentication.getPrincipal();
+
+        if (!(principal instanceof CustomUserDetails userDetails)) {
+            throw new CustomException(UserErrorStatus._UNAUTHORIZED);
+        }
         return userDetails.getId();
     }
 }
