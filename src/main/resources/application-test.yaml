@@ -92,5 +92,10 @@ management:
 
 logging:
   level:
+    root: info
+    side.onetime.global.filter: debug
+    side.onetime.util: debug
+    side.onetime.exception: debug
     org.hibernate.SQL: off
     org.hibernate.type.descriptor.sql.BasicBinder: off
+

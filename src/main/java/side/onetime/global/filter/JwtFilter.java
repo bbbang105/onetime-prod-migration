@@ -53,6 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (CustomException e) {
+            log.error("❌ JWT 필터 예외 발생 - 요청 URI: {}, 메서드: {}", request.getRequestURI(), request.getMethod());
             writeErrorResponse(response, e);
         }
     }
@@ -127,9 +128,10 @@ public class JwtFilter extends OncePerRequestFilter {
         String code = e.getErrorCode().getReasonHttpStatus().getCode();
         String message = e.getErrorCode().getReasonHttpStatus().getMessage();
 
+        log.error("❌ JWT 예외 발생 - status: {}, code: {}, message: {}", status, code, message);
+
         response.setStatus(status);
         response.setContentType("application/json;charset=UTF-8");
-
         response.getWriter().write(
                 "{"
                         + "\"is_success\": false,"
