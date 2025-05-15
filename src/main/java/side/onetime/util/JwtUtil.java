@@ -129,6 +129,9 @@ public class JwtUtil {
      * @return 토큰 문자열
      */
     public String getTokenFromHeader(String authorizationHeader) {
+        if (authorizationHeader == null) {
+            throw new CustomException(TokenErrorStatus._NOT_FOUND_HEADER);
+        }
         return authorizationHeader.substring(7);
     }
 
