@@ -49,7 +49,6 @@ public class TokenService {
         String newRefreshToken = jwtUtil.generateRefreshToken(userId);
         refreshTokenRepository.save(new RefreshToken(userId, newRefreshToken));
 
-        log.info("토큰 재발행에 성공하였습니다.");
         return ReissueTokenResponse.of(newAccessToken, newRefreshToken);
     }
 }
