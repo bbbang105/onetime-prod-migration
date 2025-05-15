@@ -88,7 +88,7 @@ public class JwtFilter extends OncePerRequestFilter {
         boolean isGet = method.equals("GET");
         boolean isPost = method.equals("POST");
 
-        return path.equals("/actuator/health") ||
+        return path.equals("/actuator/health") || path.equals("/") ||
                 // 스웨거
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
