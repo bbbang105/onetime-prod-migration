@@ -53,6 +53,7 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (CustomException e) {
+            log.error("❌ JWT 필터 예외 발생 - 요청 URI: {}, 메서드: {}", request.getRequestURI(), request.getMethod());
             writeErrorResponse(response, e);
         }
     }
@@ -87,7 +88,7 @@ public class JwtFilter extends OncePerRequestFilter {
         boolean isGet = method.equals("GET");
         boolean isPost = method.equals("POST");
 
-        return path.equals("/actuator/health") ||
+        return path.equals("/actuator/health") || path.equals("/") ||
                 // 스웨거
                 path.startsWith("/swagger-ui") ||
                 path.startsWith("/v3/api-docs") ||
@@ -105,13 +106,13 @@ public class JwtFilter extends OncePerRequestFilter {
                 (isGet && path.matches("/api/v1/events/qr/[^/]+")) ||
                 // 요일 스케줄 등록/조회 (비로그인)
                 (isPost && path.equals("/api/v1/schedules/day")) ||
-                (isGet && path.matches("/api/v1/schedules/day/[^/]+$") && !path.endsWith("/user")) ||
-                (isGet && path.matches("/api/v1/schedules/day/[^/]+/\\d+$")) ||
+                (isGet && path.matches("/api/v1/schedules/day/[^/]+$")) ||
+                (isGet && path.matches("/api/v1/schedules/day/[^/]+/[^/]+$") && !path.endsWith("/user")) ||
                 (isGet && path.equals("/api/v1/schedules/day/action-filtering")) ||
                 // 날짜 스케줄 등록/조회 (비로그인)
                 (isPost && path.equals("/api/v1/schedules/date")) ||
-                (isGet && path.matches("/api/v1/schedules/date/[^/]+$") && !path.endsWith("/user")) ||
-                (isGet && path.matches("/api/v1/schedules/date/[^/]+/\\d+$")) ||
+                (isGet && path.matches("/api/v1/schedules/date/[^/]+$")) ||
+                (isGet && path.matches("/api/v1/schedules/date/[^/]+/[^/]+$") && !path.endsWith("/user")) ||
                 (isGet && path.equals("/api/v1/schedules/date/action-filtering"));
     }
 
@@ -127,9 +128,10 @@ public class JwtFilter extends OncePerRequestFilter {
         String code = e.getErrorCode().getReasonHttpStatus().getCode();
         String message = e.getErrorCode().getReasonHttpStatus().getMessage();
 
+        log.error("❌ JWT 예외 발생 - status: {}, code: {}, message: {}", status, code, message);
+
         response.setStatus(status);
         response.setContentType("application/json;charset=UTF-8");
-
         response.getWriter().write(
                 "{"
                         + "\"is_success\": false,"

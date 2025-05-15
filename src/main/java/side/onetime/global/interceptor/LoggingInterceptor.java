@@ -20,6 +20,16 @@ public class LoggingInterceptor implements HandlerInterceptor {
 
     private static final String START_TIME = "startTime";
 
+    /**
+     * 요청 전 처리 로직을 수행합니다.
+     * - URI 경로 변수, 쿼리 파라미터, 요청 본문(body)을 로그로 출력합니다.
+     * - 요청 시작 시간(startTime)을 request attribute에 저장합니다.
+     *
+     * @param request  HTTP 요청 객체
+     * @param response HTTP 응답 객체
+     * @param handler  핸들러 객체 (Controller 메서드)
+     * @return true일 경우 요청을 계속 진행
+     */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         if (handler instanceof HandlerMethod) {
@@ -52,6 +62,16 @@ public class LoggingInterceptor implements HandlerInterceptor {
         return true;
     }
 
+    /**
+     * 요청 완료 후 처리 로직을 수행합니다.
+     * - 요청 처리 시간과 HTTP 상태 코드를 포함한 로그를 출력합니다.
+     * - 에러 상태(4xx, 5xx)는 ❌ 로그로, 정상 응답은 ✅ 로그로 구분합니다.
+     *
+     * @param request  HTTP 요청 객체
+     * @param response HTTP 응답 객체
+     * @param handler  핸들러 객체 (Controller 메서드)
+     * @param ex       처리 중 발생한 예외 (없을 경우 null)
+     */
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
         Long start = (Long) request.getAttribute(START_TIME);
@@ -59,13 +79,19 @@ public class LoggingInterceptor implements HandlerInterceptor {
 
         int status = response.getStatus();
 
-        if (status == 500) {
-            log.error("❌ [{}] {} request failed - {}ms | status=500", request.getMethod(), request.getRequestURI(), duration, ex);
+        if (status >= 400) {
+            log.error("❌ [{}] {} request failed - {}ms | status={}", request.getMethod(), request.getRequestURI(), duration, status);
         } else {
             log.info("✅ [{}] {} request completed - {}ms | status={}", request.getMethod(), request.getRequestURI(), duration, status);
         }
     }
 
+    /**
+     * 요청 파라미터를 key-value 형태로 추출하여 Map으로 반환합니다.
+     *
+     * @param request HTTP 요청 객체
+     * @return 요청 파라미터 Map
+     */
     private Map<String, String> getRequestParams(HttpServletRequest request) {
         Map<String, String> paramMap = new HashMap<>();
         Enumeration<String> parameterNames = request.getParameterNames();
