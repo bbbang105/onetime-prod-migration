@@ -98,6 +98,8 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/api/v1/members") ||
                 path.startsWith("/api/v1/tokens") ||
                 path.startsWith("/api/v1/urls") ||
+                // 유저 관련
+                (isPost && path.equals("/api/v1/users/onboarding")) ||
                 // 이벤트 관련
                 (isPost && path.equals("/api/v1/events")) ||
                 (isGet && path.matches("/api/v1/events/[^/]+$")) ||
