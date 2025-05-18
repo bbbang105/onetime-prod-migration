@@ -46,7 +46,7 @@ if [ -z "$IS_GREEN" ]; then
   while true; do
     echo ">>> 2. green health check 중..."
     sleep 3
-    REQUEST=$(curl -s http://127.0.0.1:8092/actuator/health)
+    REQUEST=$(curl -s http://onetime-green:8090/actuator/health)
     if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
@@ -92,7 +92,7 @@ else
   while true; do
     echo ">>> 2. blue health check 중..."
     sleep 3
-    REQUEST=$(curl -s http://127.0.0.1:8091/actuator/health)
+    REQUEST=$(curl -s http://onetime-blue:8090/actuator/health)
     if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
