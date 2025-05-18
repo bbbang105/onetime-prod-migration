@@ -46,7 +46,7 @@ if [ -z "$IS_GREEN" ]; then
   while true; do
     echo ">>> 2. green health check 중..."
     sleep 3
-    REQUEST=$(sudo docker exec onetime-green curl -s http://localhost:8090/actuator/health)
+    REQUEST=$(sudo docker exec onetime-green wget -qO- http://localhost:8090/actuator/health)
     if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
@@ -92,7 +92,7 @@ else
   while true; do
     echo ">>> 2. blue health check 중..."
     sleep 3
-    REQUEST=$(sudo docker exec onetime-blue curl -s http://localhost:8090/actuator/health)
+    REQUEST=$(sudo docker exec onetime-blue wget -qO- http://localhost:8090/actuator/health)
     if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
