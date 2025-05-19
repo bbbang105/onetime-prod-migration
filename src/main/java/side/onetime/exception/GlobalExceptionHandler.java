@@ -149,11 +149,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     // 로그 기록 메서드
     private void logError(String message, Object errorDetails) {
-        // 예외 객체가 Throwable이면 stack trace 출력 없이 메시지만
-        if (errorDetails instanceof Throwable t) {
-            log.error("{}: {}", message, t.getMessage());
-        } else {
-            log.error("{}: {}", message, errorDetails);
-        }
+        log.error("{}: {}", message, errorDetails);
     }
 }
