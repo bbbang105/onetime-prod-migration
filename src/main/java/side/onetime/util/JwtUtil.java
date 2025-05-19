@@ -70,7 +70,6 @@ public class JwtUtil {
                 expirationMillis = ACCESS_TOKEN_EXPIRATION_TIME;
             }
             default -> {
-                log.warn("알 수 없는 타입의 액세스 토큰이 발행되었습니다. (userType: {})", userType);
                 throw new CustomException(TokenErrorStatus._INVALID_USER_TYPE);
             }
         }
@@ -153,7 +152,6 @@ public class JwtUtil {
                     .getPayload()
                     .get(key, clazz);
         } catch (JwtException | IllegalArgumentException e) {
-            log.error("토큰에서 '{}' claim 값을 추출하는 도중 에러가 발생했습니다: {}", key, e.getMessage());
             throw new CustomException(TokenErrorStatus._TOKEN_CLAIM_EXTRACTION_ERROR);
         }
     }
@@ -198,16 +196,12 @@ public class JwtUtil {
                     .build()
                     .parseSignedClaims(token);
         } catch (SecurityException | MalformedJwtException | SignatureException e) {
-            log.error("Invalid JWT signature, 유효하지 않은 JWT 서명 입니다.");
             throw new CustomException(TokenErrorStatus._TOKEN_SIGNATURE_INVALID);
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token, 만료된 JWT token 입니다.");
             throw new CustomException(TokenErrorStatus._TOKEN_EXPIRED);
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token, 지원되지 않는 JWT 토큰 입니다.");
             throw new CustomException(TokenErrorStatus._TOKEN_UNSUPPORTED);
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims is empty, 잘못된 JWT 토큰 입니다.");
             throw new CustomException(TokenErrorStatus._TOKEN_MALFORMED);
         }
     }
