@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.EventStatus;
-import side.onetime.dto.event.response.GetParticipantsResponse;
 import side.onetime.dto.schedule.request.CreateDateScheduleRequest;
 import side.onetime.dto.schedule.request.CreateDayScheduleRequest;
 import side.onetime.dto.schedule.request.GetFilteredSchedulesRequest;
@@ -23,6 +22,7 @@ import side.onetime.util.JwtUtil;
 import side.onetime.util.UserAuthorizationUtil;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +34,6 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
-    private final EventService eventService;
     private final UserRepository userRepository;
 
     /**
@@ -225,7 +224,7 @@ public class ScheduleService {
      *
      * 이벤트에 참여하는 모든 사용자(멤버와 유저)의 요일 스케줄을 반환합니다.
      *
-     * @param eventId 조회할 이벤트 ID
+     * @param eventId 조회할 이벤트 ID (UUID 문자열)
      * @return 요일별 스케줄 응답 리스트
      */
     @Transactional(readOnly = true)
@@ -233,54 +232,52 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        // 이벤트에 참여하는 모든 멤버
         List<Member> members = memberRepository.findAllByEvent(event);
 
-        // 이벤트에 참여하는 모든 참여자 목록
-        GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
-        List<String> participantNames = getParticipantsResponse.names();
-
-        // 이벤트에 참여하는 모든 유저 (CREATOR가 아닌 경우만 포함)
-        List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
-        List<User> users = eventParticipations.stream()
-                .filter(eventParticipation -> eventParticipation.getEventStatus() != EventStatus.CREATOR)
+        List<User> users = eventParticipationRepository.findAllByEvent(event).stream()
+                .filter(p -> p.getEventStatus() != EventStatus.CREATOR)
                 .map(EventParticipation::getUser)
                 .toList();
 
-        List<PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
+        List<PerDaySchedulesResponse> responses = new ArrayList<>();
 
-        // 멤버 스케줄 추가
         for (Member member : members) {
-            Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDay(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                    .map(entry -> DaySchedule.from(entry.getValue()))
-                    .collect(Collectors.toList());
-            perDaySchedulesResponses.add(PerDaySchedulesResponse.of(member.getName(), daySchedules));
+            List<Selection> selections = selectionRepository.findAllByMemberWithSchedule(member);
+            responses.add(toPerDaySchedules(member.getName(), selections,
+                    s -> s.getSchedule() != null && s.getSchedule().getDay() != null));
         }
 
-        // 유저 스케줄 추가
         for (User user : users) {
-            Map<String, List<Selection>> groupedSelectionsByDay = user.getSelections().stream()
-                    .filter(selection -> selection.getSchedule().getEvent().equals(event))
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDay(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                    .map(entry -> DaySchedule.from(entry.getValue()))
-                    .collect(Collectors.toList());
-            perDaySchedulesResponses.add(PerDaySchedulesResponse.of(user.getNickname(), daySchedules));
+            List<Selection> selections = selectionRepository.findAllByUserWithScheduleAndEvent(user);
+            responses.add(toPerDaySchedules(user.getNickname(), selections,
+                    s -> s.getSchedule().getDay() != null && s.getSchedule().getEvent().equals(event)));
         }
 
-        return perDaySchedulesResponses;
+        return responses;
+    }
+
+    /**
+     * 선택 스케줄 리스트를 요일별로 그룹화하여 PerDaySchedulesResponse로 변환합니다.
+     *
+     * @param name 응답에 포함될 이름 (닉네임 또는 멤버명)
+     * @param selections 선택 스케줄 목록
+     * @param filter 적용할 필터 조건
+     * @return PerDaySchedulesResponse 객체
+     */
+    private PerDaySchedulesResponse toPerDaySchedules(String name, List<Selection> selections, Predicate<Selection> filter) {
+        Map<String, List<Selection>> grouped = selections.stream()
+                .filter(filter)
+                .collect(Collectors.groupingBy(
+                        s -> s.getSchedule().getDay(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        List<DaySchedule> daySchedules = grouped.values().stream()
+                .map(DaySchedule::from)
+                .collect(Collectors.toList());
+
+        return PerDaySchedulesResponse.of(name, daySchedules);
     }
 
     /**
@@ -348,9 +345,10 @@ public class ScheduleService {
     /**
      * 전체 날짜 스케줄 반환 메서드.
      *
-     * 이벤트에 참여하는 모든 사용자(멤버와 유저)의 날짜 스케줄을 반환합니다.
+     * 특정 이벤트에 참여한 멤버와 유저의 선택 스케줄을 조회하고,
+     * 날짜별로 그룹화하여 응답 형태로 반환합니다.
      *
-     * @param eventId 조회할 이벤트 ID
+     * @param eventId 조회할 이벤트 ID (UUID 문자열)
      * @return 날짜별 스케줄 응답 리스트
      */
     @Transactional(readOnly = true)
@@ -358,54 +356,55 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        // 이벤트에 참여하는 모든 멤버
         List<Member> members = memberRepository.findAllByEvent(event);
 
-        // 이벤트에 참여하는 모든 참여자 목록
-        GetParticipantsResponse getParticipantsResponse = eventService.getParticipants(eventId);
-        List<String> participantNames = getParticipantsResponse.names();
-
-        // 이벤트에 참여하는 모든 유저 (CREATOR가 아닌 경우만 포함)
-        List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
-        List<User> users = eventParticipations.stream()
-                .filter(eventParticipation -> eventParticipation.getEventStatus() != EventStatus.CREATOR)
+        List<User> users = eventParticipationRepository.findAllByEvent(event).stream()
+                .filter(p -> p.getEventStatus() != EventStatus.CREATOR)
                 .map(EventParticipation::getUser)
                 .toList();
 
-        List<PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
+        List<PerDateSchedulesResponse> responses = new ArrayList<>();
 
-        // 멤버 스케줄 추가
         for (Member member : members) {
-            Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDate(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                    .map(entry -> DateSchedule.from(entry.getValue()))
-                    .collect(Collectors.toList());
-            perDateSchedulesResponses.add(PerDateSchedulesResponse.of(member.getName(), dateSchedules));
+            List<Selection> selections = selectionRepository.findAllByMemberWithSchedule(member);
+            responses.add(toPerDateSchedules(member.getName(), selections,
+                    s -> s.getSchedule() != null && s.getSchedule().getDate() != null));
         }
 
-        // 유저 스케줄 추가
         for (User user : users) {
-            Map<String, List<Selection>> groupedSelectionsByDate = user.getSelections().stream()
-                    .filter(selection -> selection.getSchedule().getEvent().equals(event))
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDate(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                    .map(entry -> DateSchedule.from(entry.getValue()))
-                    .collect(Collectors.toList());
-            perDateSchedulesResponses.add(PerDateSchedulesResponse.of(user.getNickname(), dateSchedules));
+            List<Selection> selections = selectionRepository.findAllByUserWithScheduleAndEvent(user);
+            responses.add(toPerDateSchedules(user.getNickname(), selections,
+                    s -> s.getSchedule().getDate() != null && s.getSchedule().getEvent().equals(event)));
         }
 
-        return perDateSchedulesResponses;
+        return responses;
+    }
+
+    /**
+     * 선택 스케줄 리스트를 날짜별로 그룹화하여 PerDateSchedulesResponse로 변환합니다.
+     *
+     * 필터 조건에 따라 스케줄을 선별하고,
+     * 같은 날짜의 스케줄을 하나의 DateSchedule로 묶어 응답 객체로 구성합니다.
+     *
+     * @param name 응답에 포함될 이름 (닉네임 또는 멤버명)
+     * @param selections 선택 스케줄 목록
+     * @param filter 적용할 필터 조건
+     * @return PerDateSchedulesResponse 객체
+     */
+    private PerDateSchedulesResponse toPerDateSchedules(String name, List<Selection> selections, Predicate<Selection> filter) {
+        Map<String, List<Selection>> grouped = selections.stream()
+                .filter(filter)
+                .collect(Collectors.groupingBy(
+                        s -> s.getSchedule().getDate(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        List<DateSchedule> dateSchedules = grouped.values().stream()
+                .map(DateSchedule::from)
+                .collect(Collectors.toList());
+
+        return PerDateSchedulesResponse.of(name, dateSchedules);
     }
 
     /**
