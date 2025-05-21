@@ -34,7 +34,6 @@ public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
-    private final EventService eventService;
     private final UserRepository userRepository;
 
     /**
