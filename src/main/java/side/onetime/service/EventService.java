@@ -281,42 +281,43 @@ public class EventService {
      * @return 스케줄과 참여자 이름의 매핑 데이터
      */
     private Map<Schedule, List<String>> buildScheduleToNamesMap(List<Selection> selections, Category category) {
-        // 요일 순서 정의 (일요일부터 토요일까지)
-        List<String> dayOrder = List.of("일", "월", "화", "수", "목", "금", "토");
+        Map<String, Integer> dayOrderIndex = Map.of(
+                "일", 0, "월", 1, "화", 2, "수", 3, "목", 4, "금", 5, "토", 6
+        );
 
-        // 스케줄을 그룹화하여 맵으로 변환
-        Map<Schedule, List<String>> scheduleToNamesMap = selections.stream()
-                .collect(Collectors.groupingBy(
-                        Selection::getSchedule,
-                        Collectors.mapping(selection -> {
-                            if (selection.getMember() != null) {
-                                return selection.getMember().getName();
-                            } else if (selection.getUser() != null) {
-                                return selection.getUser().getNickname();
-                            }
-                            return null;
-                        }, Collectors.toList())
-                ));
+        // Comparator 정의
+        Comparator<Schedule> scheduleComparator = (s1, s2) -> {
+            if (category == Category.DAY) {
+                int cmp = Integer.compare(
+                        dayOrderIndex.getOrDefault(s1.getDay(), 7),
+                        dayOrderIndex.getOrDefault(s2.getDay(), 7)
+                );
+                if (cmp != 0) return cmp;
+            } else {
+                int cmp = Comparator.nullsLast(String::compareTo)
+                        .compare(s1.getDate(), s2.getDate());
+                if (cmp != 0) return cmp;
+            }
+            return s1.getTime().compareTo(s2.getTime());
+        };
 
-        // 카테고리에 따라 정렬 기준을 다르게 설정
-        Comparator<Map.Entry<Schedule, List<String>>> comparator = category == Category.DAY
-                ? Comparator.comparing(
-                (Map.Entry<Schedule, List<String>> entry) -> entry.getKey().getDay(),
-                Comparator.comparingInt(dayOrder::indexOf) // 요일 순서대로 정렬
-        )
-                : Comparator.comparing((Map.Entry<Schedule, List<String>> entry) -> entry.getKey().getDate(), Comparator.nullsLast(Comparator.naturalOrder()));
+        // 정렬된 TreeMap 사용
+        Map<Schedule, List<String>> scheduleToNamesMap = new TreeMap<>(scheduleComparator);
 
-        // 같은 요일/날짜 내에서는 time 기준으로 정렬
-        comparator = comparator.thenComparing(entry -> entry.getKey().getTime());
+        for (Selection selection : selections) {
+            Schedule schedule = selection.getSchedule();
+            if (schedule == null) continue;
 
-        return scheduleToNamesMap.entrySet().stream()
-                .sorted(comparator)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ));
+            String name = selection.getMember() != null
+                    ? selection.getMember().getName()
+                    : (selection.getUser() != null ? selection.getUser().getNickname() : null);
+
+            if (name == null) continue;
+
+            scheduleToNamesMap.computeIfAbsent(schedule, k -> new ArrayList<>()).add(name);
+        }
+
+        return scheduleToNamesMap;
     }
 
     /**
