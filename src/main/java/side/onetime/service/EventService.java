@@ -212,10 +212,8 @@ public class EventService {
      */
     @Transactional(readOnly = true)
     public GetParticipantsResponse getParticipants(String eventId) {
-        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+        Event event = eventRepository.findByEventIdWithMembers(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
-
-        List<Member> members = event.getMembers();
 
         // 이벤트 참여 상태가 CREATOR가 아닌 유저만 필터링하여 가져오기
         List<User> users = eventParticipationRepository.findAllByEvent(event).stream()
@@ -223,7 +221,7 @@ public class EventService {
                 .map(EventParticipation::getUser)
                 .toList();
 
-        return GetParticipantsResponse.of(members, users);
+        return GetParticipantsResponse.of(event.getMembers(), users);
     }
 
     /**
