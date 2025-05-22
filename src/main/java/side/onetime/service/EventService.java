@@ -234,44 +234,40 @@ public class EventService {
      */
     @Transactional(readOnly = true)
     public List<GetMostPossibleTime> getMostPossibleTime(String eventId) {
-        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+        // 1. 이벤트 + 멤버 fetch join으로 조회
+        Event event = eventRepository.findByEventIdWithMembers(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        // 이벤트에 참여하는 모든 멤버
-        List<Member> members = event.getMembers();
-        List<String> allMembersName = members.stream()
+        // 2. 멤버 이름 리스트
+        List<String> memberNames = event.getMembers().stream()
                 .map(Member::getName)
                 .toList();
 
-        // 이벤트에 참여하는 모든 유저
-        List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
-
-        GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
-        List<String> participantNames = getParticipantsResponse.names();
-
-        // 유저 필터링: CREATOR가 아닌 경우에만 포함
-        List<String> allUserNicknames = eventParticipations.stream()
+        // 3. 참여자(user) 조회 (CREATOR 제외)
+        List<String> userNicknames = eventParticipationRepository.findAllByEvent(event).stream()
                 .filter(ep -> ep.getEventStatus() != EventStatus.CREATOR)
-                .map(EventParticipation::getUser)
-                .map(User::getNickname)
-                .filter(participantNames::contains)
+                .map(ep -> ep.getUser().getNickname())
                 .toList();
 
+        // 4. 전체 참여자 이름 통합
+        List<String> allParticipants = new ArrayList<>(memberNames);
+        allParticipants.addAll(userNicknames);
+
+        // 5. 선택 정보 가져오기
         List<Selection> selections = selectionRepository.findAllSelectionsByEvent(event);
 
-        // 스케줄과 선택된 참여자 이름 매핑
+        // 6. 스케줄 → 참여자 이름 리스트 매핑
         Map<Schedule, List<String>> scheduleToNamesMap = buildScheduleToNamesMap(selections, event.getCategory());
 
+        // 7. 가장 많은 인원 수 계산
         int mostPossibleCnt = scheduleToNamesMap.values().stream()
                 .mapToInt(List::size)
                 .max()
                 .orElse(0);
 
-        // 멤버와 유저 전체 이름 합치기
-        List<String> allParticipants = new ArrayList<>(allMembersName);
-        allParticipants.addAll(allUserNicknames);
-
-        List<GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
+        // 8. 최적 시간대 리스트 생성
+        List<GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(
+                scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
 
         return DateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
