@@ -486,26 +486,13 @@ public class EventService {
         EventParticipation eventParticipation = verifyUserHasEventAccess(user, eventId);
         Event event = eventParticipation.getEvent();
 
-        updateEventTitle(event, modifyUserCreatedEventRequest.title());
+        event.updateTitle(modifyUserCreatedEventRequest.title());
         updateEventRanges(event, event.getSchedules(), modifyUserCreatedEventRequest.ranges(), modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
 
         // 변경된 범위에 따른 새로운 스케줄 목록
         List<Schedule> newSchedules = scheduleRepository.findAllByEvent(event)
                 .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_ALL_SCHEDULES));
         updateEventTimes(event, newSchedules, modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
-    }
-
-    /**
-     * 이벤트 제목 업데이트 메서드.
-     * 이벤트의 제목을 새로운 제목으로 업데이트합니다.
-     *
-     * @param event 이벤트 객체
-     * @param newTitle 새로운 제목
-     */
-    private void updateEventTitle(Event event, String newTitle) {
-        if (newTitle != null) {
-            event.updateTitle(newTitle);
-        }
     }
 
     /**
