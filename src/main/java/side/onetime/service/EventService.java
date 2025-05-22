@@ -435,7 +435,7 @@ public class EventService {
         User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
 
-        List<EventParticipation> participations = eventParticipationRepository.findAllByUser(user);
+        List<EventParticipation> participations = eventParticipationRepository.findAllByUserWithEvent(user);
 
         // 캐시 맵 선언
         Map<String, GetParticipantsResponse> participantsCache = new HashMap<>();
