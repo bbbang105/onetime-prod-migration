@@ -212,10 +212,8 @@ public class EventService {
      */
     @Transactional(readOnly = true)
     public GetParticipantsResponse getParticipants(String eventId) {
-        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+        Event event = eventRepository.findByEventIdWithMembers(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
-
-        List<Member> members = event.getMembers();
 
         // 이벤트 참여 상태가 CREATOR가 아닌 유저만 필터링하여 가져오기
         List<User> users = eventParticipationRepository.findAllByEvent(event).stream()
@@ -223,7 +221,7 @@ public class EventService {
                 .map(EventParticipation::getUser)
                 .toList();
 
-        return GetParticipantsResponse.of(members, users);
+        return GetParticipantsResponse.of(event.getMembers(), users);
     }
 
     /**
@@ -236,44 +234,40 @@ public class EventService {
      */
     @Transactional(readOnly = true)
     public List<GetMostPossibleTime> getMostPossibleTime(String eventId) {
-        Event event = eventRepository.findByEventId(UUID.fromString(eventId))
+        // 1. 이벤트 + 멤버 fetch join으로 조회
+        Event event = eventRepository.findByEventIdWithMembers(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        // 이벤트에 참여하는 모든 멤버
-        List<Member> members = event.getMembers();
-        List<String> allMembersName = members.stream()
+        // 2. 멤버 이름 리스트
+        List<String> memberNames = event.getMembers().stream()
                 .map(Member::getName)
                 .toList();
 
-        // 이벤트에 참여하는 모든 유저
-        List<EventParticipation> eventParticipations = eventParticipationRepository.findAllByEvent(event);
-
-        GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
-        List<String> participantNames = getParticipantsResponse.names();
-
-        // 유저 필터링: CREATOR가 아닌 경우에만 포함
-        List<String> allUserNicknames = eventParticipations.stream()
+        // 3. 참여자(user) 조회 (CREATOR 제외)
+        List<String> userNicknames = eventParticipationRepository.findAllByEvent(event).stream()
                 .filter(ep -> ep.getEventStatus() != EventStatus.CREATOR)
-                .map(EventParticipation::getUser)
-                .map(User::getNickname)
-                .filter(participantNames::contains)
+                .map(ep -> ep.getUser().getNickname())
                 .toList();
 
+        // 4. 전체 참여자 이름 통합
+        List<String> allParticipants = new ArrayList<>(memberNames);
+        allParticipants.addAll(userNicknames);
+
+        // 5. 선택 정보 가져오기
         List<Selection> selections = selectionRepository.findAllSelectionsByEvent(event);
 
-        // 스케줄과 선택된 참여자 이름 매핑
+        // 6. 스케줄 → 참여자 이름 리스트 매핑
         Map<Schedule, List<String>> scheduleToNamesMap = buildScheduleToNamesMap(selections, event.getCategory());
 
+        // 7. 가장 많은 인원 수 계산
         int mostPossibleCnt = scheduleToNamesMap.values().stream()
                 .mapToInt(List::size)
                 .max()
                 .orElse(0);
 
-        // 멤버와 유저 전체 이름 합치기
-        List<String> allParticipants = new ArrayList<>(allMembersName);
-        allParticipants.addAll(allUserNicknames);
-
-        List<GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
+        // 8. 최적 시간대 리스트 생성
+        List<GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(
+                scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
 
         return DateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
@@ -287,42 +281,43 @@ public class EventService {
      * @return 스케줄과 참여자 이름의 매핑 데이터
      */
     private Map<Schedule, List<String>> buildScheduleToNamesMap(List<Selection> selections, Category category) {
-        // 요일 순서 정의 (일요일부터 토요일까지)
-        List<String> dayOrder = List.of("일", "월", "화", "수", "목", "금", "토");
+        Map<String, Integer> dayOrderIndex = Map.of(
+                "일", 0, "월", 1, "화", 2, "수", 3, "목", 4, "금", 5, "토", 6
+        );
 
-        // 스케줄을 그룹화하여 맵으로 변환
-        Map<Schedule, List<String>> scheduleToNamesMap = selections.stream()
-                .collect(Collectors.groupingBy(
-                        Selection::getSchedule,
-                        Collectors.mapping(selection -> {
-                            if (selection.getMember() != null) {
-                                return selection.getMember().getName();
-                            } else if (selection.getUser() != null) {
-                                return selection.getUser().getNickname();
-                            }
-                            return null;
-                        }, Collectors.toList())
-                ));
+        // Comparator 정의
+        Comparator<Schedule> scheduleComparator = (s1, s2) -> {
+            if (category == Category.DAY) {
+                int cmp = Integer.compare(
+                        dayOrderIndex.getOrDefault(s1.getDay(), 7),
+                        dayOrderIndex.getOrDefault(s2.getDay(), 7)
+                );
+                if (cmp != 0) return cmp;
+            } else {
+                int cmp = Comparator.nullsLast(String::compareTo)
+                        .compare(s1.getDate(), s2.getDate());
+                if (cmp != 0) return cmp;
+            }
+            return s1.getTime().compareTo(s2.getTime());
+        };
 
-        // 카테고리에 따라 정렬 기준을 다르게 설정
-        Comparator<Map.Entry<Schedule, List<String>>> comparator = category == Category.DAY
-                ? Comparator.comparing(
-                (Map.Entry<Schedule, List<String>> entry) -> entry.getKey().getDay(),
-                Comparator.comparingInt(dayOrder::indexOf) // 요일 순서대로 정렬
-        )
-                : Comparator.comparing((Map.Entry<Schedule, List<String>> entry) -> entry.getKey().getDate(), Comparator.nullsLast(Comparator.naturalOrder()));
+        // 정렬된 TreeMap 사용
+        Map<Schedule, List<String>> scheduleToNamesMap = new TreeMap<>(scheduleComparator);
 
-        // 같은 요일/날짜 내에서는 time 기준으로 정렬
-        comparator = comparator.thenComparing(entry -> entry.getKey().getTime());
+        for (Selection selection : selections) {
+            Schedule schedule = selection.getSchedule();
+            if (schedule == null) continue;
 
-        return scheduleToNamesMap.entrySet().stream()
-                .sorted(comparator)
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (existing, replacement) -> existing,
-                        LinkedHashMap::new
-                ));
+            String name = selection.getMember() != null
+                    ? selection.getMember().getName()
+                    : (selection.getUser() != null ? selection.getUser().getNickname() : null);
+
+            if (name == null) continue;
+
+            scheduleToNamesMap.computeIfAbsent(schedule, k -> new ArrayList<>()).add(name);
+        }
+
+        return scheduleToNamesMap;
     }
 
     /**
@@ -435,17 +430,30 @@ public class EventService {
         User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
 
-        return eventParticipationRepository.findAllByUser(user).stream()
-                .sorted(Comparator.comparing(
-                                (EventParticipation eventParticipation) -> eventParticipation.getEvent().getCreatedDate())
-                        .reversed()) // 최신순으로 정렬
-                .map(eventParticipation -> {
-                    Event event = eventParticipation.getEvent();
-                    String eventId = String.valueOf(event.getEventId());
-                    GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
-                    List<String> participantNames = getParticipantsResponse.names();
-                    List<GetMostPossibleTime> mostPossibleTimes = getMostPossibleTime(eventId);
-                    return GetUserParticipatedEventsResponse.of(event, eventParticipation, participantNames.size(), mostPossibleTimes);
+        List<EventParticipation> participations = eventParticipationRepository.findAllByUserWithEvent(user);
+
+        // 캐시 맵 선언
+        Map<String, GetParticipantsResponse> participantsCache = new HashMap<>();
+        Map<String, List<GetMostPossibleTime>> mostPossibleCache = new HashMap<>();
+
+        return participations.stream()
+                .sorted(Comparator.comparing((EventParticipation ep) -> ep.getEvent().getCreatedDate()).reversed())
+                .map(ep -> {
+                    Event event = ep.getEvent();
+                    String eventId = event.getEventId().toString();
+
+                    // 캐시 또는 메서드 실행
+                    GetParticipantsResponse participants = participantsCache.computeIfAbsent(
+                            eventId, this::getParticipants);
+                    List<GetMostPossibleTime> mostPossibleTimes = mostPossibleCache.computeIfAbsent(
+                            eventId, this::getMostPossibleTime);
+
+                    return GetUserParticipatedEventsResponse.of(
+                            event,
+                            ep,
+                            participants.names().size(),
+                            mostPossibleTimes
+                    );
                 })
                 .collect(Collectors.toList());
     }
@@ -479,26 +487,13 @@ public class EventService {
         EventParticipation eventParticipation = verifyUserHasEventAccess(user, eventId);
         Event event = eventParticipation.getEvent();
 
-        updateEventTitle(event, modifyUserCreatedEventRequest.title());
+        event.updateTitle(modifyUserCreatedEventRequest.title());
         updateEventRanges(event, event.getSchedules(), modifyUserCreatedEventRequest.ranges(), modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
 
         // 변경된 범위에 따른 새로운 스케줄 목록
         List<Schedule> newSchedules = scheduleRepository.findAllByEvent(event)
                 .orElseThrow(() -> new CustomException(ScheduleErrorStatus._NOT_FOUND_ALL_SCHEDULES));
         updateEventTimes(event, newSchedules, modifyUserCreatedEventRequest.startTime(), modifyUserCreatedEventRequest.endTime());
-    }
-
-    /**
-     * 이벤트 제목 업데이트 메서드.
-     * 이벤트의 제목을 새로운 제목으로 업데이트합니다.
-     *
-     * @param event 이벤트 객체
-     * @param newTitle 새로운 제목
-     */
-    private void updateEventTitle(Event event, String newTitle) {
-        if (newTitle != null) {
-            event.updateTitle(newTitle);
-        }
     }
 
     /**

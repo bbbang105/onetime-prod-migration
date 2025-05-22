@@ -245,7 +245,7 @@ public class AdminService {
 
         List<DashboardUser> dashboardUsers = users.stream()
                 .map(user -> {
-                    int participantCount = eventParticipationRepository.findAllByUser(user).size();
+                    int participantCount = eventParticipationRepository.findAllByUserWithEvent(user).size();
                     return DashboardUser.from(user, participantCount);
                 }).toList();
 

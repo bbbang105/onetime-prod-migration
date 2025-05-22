@@ -59,7 +59,9 @@ public class Event extends BaseEntity {
     }
 
     public void updateTitle(String title) {
-        this.title = title;
+        if (title != null) {
+            this.title = title;
+        }
     }
 
     public void updateStartTime(String startTime) {

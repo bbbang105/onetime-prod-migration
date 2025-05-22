@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -115,42 +116,35 @@ public class  DateUtil {
      */
     public static List<GetMostPossibleTime> sortMostPossibleTimes(List<GetMostPossibleTime> mostPossibleTimes, Category category) {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        Map<String, Integer> timePointOrder;
 
-        List<String> sortedList;
         if (category.equals(Category.DAY)) {
-            // 요일로 정렬
-            List<String> dayOrder = Arrays.asList("일", "월", "화", "수", "목", "금", "토");
-            Map<String, Integer> dayOrderMap = IntStream.range(0, dayOrder.size())
+            // 요일 기준 정렬
+            List<String> dayOrder = List.of("일", "월", "화", "수", "목", "금", "토");
+            timePointOrder = IntStream.range(0, dayOrder.size())
                     .boxed()
                     .collect(Collectors.toMap(dayOrder::get, i -> i));
-
-            sortedList = mostPossibleTimes.stream()
-                    .map(GetMostPossibleTime::timePoint)
-                    .filter(dayOrderMap::containsKey)
-                    .sorted(Comparator.comparingInt(dayOrderMap::get))
-                    .distinct()
-                    .toList();
         } else {
-            // 날짜로 정렬
-            sortedList = mostPossibleTimes.stream()
+            // 날짜 기준 정렬
+            AtomicInteger order = new AtomicInteger(0);
+            timePointOrder = mostPossibleTimes.stream()
                     .map(GetMostPossibleTime::timePoint)
-                    .filter(timePoint -> {
+                    .distinct()
+                    .filter(tp -> {
                         try {
-                            LocalDate.parse(timePoint, dateFormatter);
+                            LocalDate.parse(tp, dateFormatter);
                             return true;
                         } catch (DateTimeParseException e) {
                             return false;
                         }
                     })
-                    .sorted(Comparator.comparing(timePoint -> LocalDate.parse(timePoint, dateFormatter)))
-                    .distinct()
-                    .toList();
+                    .sorted(Comparator.comparing(tp -> LocalDate.parse(tp, dateFormatter)))
+                    .collect(Collectors.toMap(tp -> tp, tp -> order.getAndIncrement(), (a, b) -> a, LinkedHashMap::new));
         }
 
-        // 정렬된 리스트에 따라 `EventDto.GetMostPossibleTime` 객체 정렬
         return mostPossibleTimes.stream()
-                .filter(mostPossibleTime -> sortedList.contains(mostPossibleTime.timePoint()))
-                .sorted(Comparator.comparingInt(mostPossibleTime -> sortedList.indexOf(mostPossibleTime.timePoint())))
+                .filter(tp -> timePointOrder.containsKey(tp.timePoint()))
+                .sorted(Comparator.comparingInt(tp -> timePointOrder.get(tp.timePoint())))
                 .toList();
     }
 
