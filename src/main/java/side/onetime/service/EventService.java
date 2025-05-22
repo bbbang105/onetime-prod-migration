@@ -435,17 +435,30 @@ public class EventService {
         User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
 
-        return eventParticipationRepository.findAllByUser(user).stream()
-                .sorted(Comparator.comparing(
-                                (EventParticipation eventParticipation) -> eventParticipation.getEvent().getCreatedDate())
-                        .reversed()) // 최신순으로 정렬
-                .map(eventParticipation -> {
-                    Event event = eventParticipation.getEvent();
-                    String eventId = String.valueOf(event.getEventId());
-                    GetParticipantsResponse getParticipantsResponse = getParticipants(eventId);
-                    List<String> participantNames = getParticipantsResponse.names();
-                    List<GetMostPossibleTime> mostPossibleTimes = getMostPossibleTime(eventId);
-                    return GetUserParticipatedEventsResponse.of(event, eventParticipation, participantNames.size(), mostPossibleTimes);
+        List<EventParticipation> participations = eventParticipationRepository.findAllByUser(user);
+
+        // 캐시 맵 선언
+        Map<String, GetParticipantsResponse> participantsCache = new HashMap<>();
+        Map<String, List<GetMostPossibleTime>> mostPossibleCache = new HashMap<>();
+
+        return participations.stream()
+                .sorted(Comparator.comparing((EventParticipation ep) -> ep.getEvent().getCreatedDate()).reversed())
+                .map(ep -> {
+                    Event event = ep.getEvent();
+                    String eventId = event.getEventId().toString();
+
+                    // 캐시 또는 메서드 실행
+                    GetParticipantsResponse participants = participantsCache.computeIfAbsent(
+                            eventId, this::getParticipants);
+                    List<GetMostPossibleTime> mostPossibleTimes = mostPossibleCache.computeIfAbsent(
+                            eventId, this::getMostPossibleTime);
+
+                    return GetUserParticipatedEventsResponse.of(
+                            event,
+                            ep,
+                            participants.names().size(),
+                            mostPossibleTimes
+                    );
                 })
                 .collect(Collectors.toList());
     }
