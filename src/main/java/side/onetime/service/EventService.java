@@ -1,6 +1,7 @@
 package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +32,7 @@ public class EventService {
     private final EventParticipationRepository eventParticipationRepository;
     private final ScheduleRepository scheduleRepository;
     private final SelectionRepository selectionRepository;
+    private final ScheduleBatchRepository scheduleBatchRepository;
     private final JwtUtil jwtUtil;
     private final S3Util s3Util;
     private final QrUtil qrUtil;
@@ -43,9 +45,10 @@ public class EventService {
      */
     @Transactional
     public CreateEventResponse createEventForAnonymousUser(CreateEventRequest createEventRequest) {
-        Event event = saveEventWithQrCode(createEventRequest);
-        validateAndSaveSchedules(event, createEventRequest);
-        return CreateEventResponse.of(event);
+        Event savedEvent = eventRepository.save(createEventRequest.toEntity());
+        createAndAddQrCode(savedEvent);
+        validateAndSaveSchedules(savedEvent, createEventRequest);
+        return CreateEventResponse.of(savedEvent);
     }
 
     /**
@@ -58,34 +61,31 @@ public class EventService {
     @Transactional
     public CreateEventResponse createEventForAuthenticatedUser(CreateEventRequest createEventRequest, String authorizationHeader) {
         User user = jwtUtil.getUserFromHeader(authorizationHeader);
-        Event event = saveEventWithQrCode(createEventRequest);
+        Event savedEvent = eventRepository.save(createEventRequest.toEntity());
+        createAndAddQrCode(savedEvent);
 
         // 이벤트 참여 정보 저장
         EventParticipation eventParticipation = EventParticipation.builder()
                 .user(user)
-                .event(event)
+                .event(savedEvent)
                 .eventStatus(EventStatus.CREATOR)
                 .build();
         eventParticipationRepository.save(eventParticipation);
 
-        validateAndSaveSchedules(event, createEventRequest);
-        return CreateEventResponse.of(event);
+        validateAndSaveSchedules(savedEvent, createEventRequest);
+        return CreateEventResponse.of(savedEvent);
     }
 
     /**
      * 이벤트 저장 및 QR 코드 생성 후 저장하는 메서드.
      *
-     * @param createEventRequest 이벤트 생성 요청 데이터
-     * @return 저장된 이벤트 객체
+     * @param event 생성된 이벤트
      */
-    private Event saveEventWithQrCode(CreateEventRequest createEventRequest) {
-        Event event = createEventRequest.toEntity();
-
+    @Async
+    public void createAndAddQrCode(Event event) {
         // QR 코드 생성 및 업로드
         String qrFileName = generateAndUploadQrCode(event.getEventId());
         event.addQrFileName(qrFileName);
-
-        return eventRepository.save(event);
     }
 
     /**
@@ -144,7 +144,7 @@ public class EventService {
                                 .time(time)
                                 .build()))
                 .collect(Collectors.toList());
-        scheduleRepository.saveAll(schedules);
+        scheduleBatchRepository.insertAll(schedules);
     }
 
     /**
@@ -166,7 +166,7 @@ public class EventService {
                                 .time(time)
                                 .build()))
                 .collect(Collectors.toList());
-        scheduleRepository.saveAll(schedules);
+        scheduleBatchRepository.insertAll(schedules);
     }
 
     /**
@@ -605,7 +605,7 @@ public class EventService {
                                 .time(time)
                                 .build()))
                 .collect(Collectors.toList());
-        scheduleRepository.saveAll(newSchedules);
+        scheduleBatchRepository.insertAll(newSchedules);
     }
 
     /**
