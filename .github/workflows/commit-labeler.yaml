@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: write
+      issues: write
     steps:
       - uses: actions/github-script@v7
         with:
@@ -21,16 +21,16 @@ jobs:
 
             for (const c of commits.data) {
               const msg = c.commit.message.toLowerCase();
-              if (msg.startsWith("[feat]")) labels.add("feat");
-              if (msg.startsWith("[fix]")) labels.add("fix");
-              if (msg.startsWith("[docs]")) labels.add("docs");
-              if (msg.startsWith("[style]")) labels.add("style");
-              if (msg.startsWith("[refactor]")) labels.add("refactor");
-              if (msg.startsWith("[chore]")) labels.add("chore");
-              if (msg.startsWith("[hotfix]")) labels.add("hotfix");
-              if (msg.startsWith("[release]")) labels.add("release");
-              if (msg.startsWith("[rename]")) labels.add("rename");
-              if (msg.startsWith("[remove]")) labels.add("remove");
+                if (msg.includes("[feat]")) labels.add("🚀 feat");
+                if (msg.includes("[fix]")) labels.add("🚨 fix");
+                if (msg.includes("[docs]")) labels.add("📄 docs");
+                if (msg.includes("[style]")) labels.add("🌱 style");
+                if (msg.includes("[refactor]")) labels.add("🔄 refactor");
+                if (msg.includes("[chore]")) labels.add("⚒️ chore");
+                if (msg.includes("[hotfix]")) labels.add("🛟 hotfix");
+                if (msg.includes("[release]")) labels.add("💫 release");
+                if (msg.includes("[rename]")) labels.add("🎫 rename");
+                if (msg.includes("[remove]")) labels.add("✂️ remove");
             }
 
             if (labels.size > 0) {
