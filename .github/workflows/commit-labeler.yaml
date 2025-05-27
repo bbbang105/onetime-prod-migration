@@ -1,0 +1,43 @@
+name: "Commit Message Labeler"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  commit-labeler:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { owner, repo, number } = context.issue;
+            const commits = await github.rest.pulls.listCommits({ owner, repo, pull_number: number });
+            const labels = new Set();
+
+            for (const c of commits.data) {
+              const msg = c.commit.message.toLowerCase();
+              if (msg.startsWith("[feat]")) labels.add("feat");
+              if (msg.startsWith("[fix]")) labels.add("fix");
+              if (msg.startsWith("[docs]")) labels.add("docs");
+              if (msg.startsWith("[style]")) labels.add("style");
+              if (msg.startsWith("[refactor]")) labels.add("refactor");
+              if (msg.startsWith("[chore]")) labels.add("chore");
+              if (msg.startsWith("[hotfix]")) labels.add("hotfix");
+              if (msg.startsWith("[release]")) labels.add("release");
+              if (msg.startsWith("[rename]")) labels.add("rename");
+              if (msg.startsWith("[remove]")) labels.add("remove");
+            }
+
+            if (labels.size > 0) {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number: number,
+                labels: Array.from(labels),
+              });
+            }
