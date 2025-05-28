@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PERSONAL_TOKEN }}
           script: |
             const { owner, repo, number } = context.issue;
             const commits = await github.rest.pulls.listCommits({ owner, repo, pull_number: number });
