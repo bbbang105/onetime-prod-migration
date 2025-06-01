@@ -7,10 +7,12 @@ import lombok.Getter;
 public class RefreshToken {
     @Id
     private Long userId;
+    private String browserId;
     private String refreshToken;
 
-    public RefreshToken(Long userId, String refreshToken) {
+    public RefreshToken(Long userId, String browserId, String refreshToken) {
         this.userId = userId;
+        this.browserId = browserId;
         this.refreshToken = refreshToken;
     }
 }
