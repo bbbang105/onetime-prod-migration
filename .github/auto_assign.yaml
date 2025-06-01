@@ -1,2 +1,4 @@
-addReviewers: false
+addReviewers: true
 addAssignees: author
+reviewers:
+  - bbang105
