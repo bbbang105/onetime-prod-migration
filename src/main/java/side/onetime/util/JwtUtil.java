@@ -18,6 +18,10 @@ import side.onetime.repository.AdminRepository;
 import side.onetime.repository.UserRepository;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Date;
 
 @Slf4j
@@ -203,6 +207,25 @@ public class JwtUtil {
             throw new CustomException(TokenErrorStatus._TOKEN_UNSUPPORTED);
         } catch (IllegalArgumentException e) {
             throw new CustomException(TokenErrorStatus._TOKEN_MALFORMED);
+        }
+    }
+
+    /**
+     * User-Agent 해시 처리 메서드.
+     *
+     * 동일한 브라우저/디바이스를 식별하기 위해
+     * User-Agent 문자열을 SHA-256으로 해시 후 Base64로 인코딩합니다.
+     *
+     * @param userAgent 브라우저의 User-Agent 문자열
+     * @return 해시된 User-Agent (브라우저 ID로 활용)
+     */
+    public String hashUserAgent(String userAgent) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(userAgent.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 해싱 실패", e);
         }
     }
 }

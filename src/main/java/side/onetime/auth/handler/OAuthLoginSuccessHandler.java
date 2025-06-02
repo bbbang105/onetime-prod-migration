@@ -139,25 +139,13 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
      */
     private void handleExistingUser(HttpServletRequest request, HttpServletResponse response, User user) throws IOException {
         Long userId = user.getId();
+        String browserId = jwtUtil.hashUserAgent(request.getHeader("User-Agent"));
 
         String accessToken = jwtUtil.generateAccessToken(userId,"USER");
         String refreshToken = jwtUtil.generateRefreshToken(userId);
-        saveRefreshToken(userId, refreshToken);
+        refreshTokenRepository.save(new RefreshToken(userId, browserId, refreshToken));
 
         String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, "true", accessToken, refreshToken);
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
-    }
-
-    /**
-     * Refresh Token 저장 메서드.
-     *
-     * 사용자의 리프레쉬 토큰을 데이터베이스에 저장합니다.
-     *
-     * @param userId 사용자 ID
-     * @param refreshToken 리프레쉬 토큰 값
-     */
-    private void saveRefreshToken(Long userId, String refreshToken) {
-        RefreshToken newRefreshToken = new RefreshToken(userId, refreshToken);
-        refreshTokenRepository.save(newRefreshToken);
     }
 }

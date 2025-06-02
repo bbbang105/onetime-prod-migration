@@ -11,8 +11,6 @@ import side.onetime.exception.status.TokenErrorStatus;
 import side.onetime.repository.RefreshTokenRepository;
 import side.onetime.util.JwtUtil;
 
-import java.util.List;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -22,32 +20,31 @@ public class TokenService {
     private final JwtUtil jwtUtil;
 
     /**
-     * 액세스 및 리프레쉬 토큰 재발행 메서드.
+     * 리프레시 토큰을 이용한 토큰 재발행 메서드.
      *
-     * 주어진 리프레쉬 토큰을 검증하고, 새로운 액세스 토큰과 리프레쉬 토큰을 생성 및 반환합니다.
-     * 새로운 리프레쉬 토큰은 저장소에 저장되며, 기존 리프레쉬 토큰은 삭제됩니다.
+     * 주어진 리프레시 토큰의 유효성을 확인하고, 일치하는 브라우저 ID에 대해
+     * 새로운 액세스 토큰 및 리프레시 토큰을 발급합니다.
+     * 기존 토큰은 삭제되고 최신 토큰으로 갱신됩니다.
      *
-     * @param reissueTokenRequest 토큰 재발행 요청 데이터
-     * @return 새로운 액세스 토큰 및 리프레쉬 토큰을 포함한 응답 데이터
+     * @param reissueTokenRequest 클라이언트가 보낸 리프레시 토큰 요청 객체
+     * @param browserId 브라우저 식별을 위한 해시된 ID
+     * @return 새롭게 발급된 액세스 토큰 및 리프레시 토큰 응답 객체
+     * @throws CustomException 유효하지 않은 리프레시 토큰일 경우 예외 발생
      */
-    public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
+    public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest, String browserId) {
         String refreshToken = reissueTokenRequest.refreshToken();
 
         Long userId = jwtUtil.getClaimFromToken(refreshToken, "userId", Long.class);
-        List<String> existRefreshTokens = refreshTokenRepository.findByUserId(userId)
+        String existRefreshToken = refreshTokenRepository.findByUserIdAndBrowserId(userId, browserId)
                 .orElseThrow(() -> new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN));
 
-        if (!existRefreshTokens.contains(refreshToken)) {
-            // RefreshToken이 존재하지 않으면 예외 발생.
+        if (!existRefreshToken.equals(refreshToken)) {
             throw new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN);
         }
 
-        // 새로운 AccessToken 생성.
         String newAccessToken = jwtUtil.generateAccessToken(userId, "USER");
-
-        // 새로운 RefreshToken 생성 및 저장.
         String newRefreshToken = jwtUtil.generateRefreshToken(userId);
-        refreshTokenRepository.save(new RefreshToken(userId, newRefreshToken));
+        refreshTokenRepository.save(new RefreshToken(userId, browserId, newRefreshToken));
 
         return ReissueTokenResponse.of(newAccessToken, newRefreshToken);
     }
