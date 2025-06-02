@@ -18,8 +18,8 @@ public class CookieUtil {
      * @param refreshToken      리프레시 토큰
      * @param refreshTokenExpiry 리프레시 토큰 만료 시간 (밀리초)
      */
-    public static void setAuthCookies(HttpServletResponse response, String refreshToken, long refreshTokenExpiry) {
-        setCookie(response, "refreshToken", refreshToken, (int) refreshTokenExpiry / 1000);
+    public static void setAuthCookies(HttpServletResponse response, String refreshToken, long refreshTokenExpiry, String domain) {
+        setCookie(response, "refreshToken", refreshToken, (int) refreshTokenExpiry / 1000, domain);
     }
 
     /**
@@ -30,13 +30,14 @@ public class CookieUtil {
      * @param value    쿠키 값
      * @param maxAge   쿠키 만료 시간 (초)
      */
-    public static void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
+    public static void setCookie(HttpServletResponse response, String name, String value, int maxAge, String domain) {
         ResponseCookie cookie = ResponseCookie.from(name, value)
                 .path("/")
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
                 .maxAge(Duration.ofSeconds(maxAge))
+                .domain(domain)
                 .build();
 
         response.addHeader("Set-Cookie", cookie.toString());

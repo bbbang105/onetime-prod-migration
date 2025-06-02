@@ -99,3 +99,5 @@ logging:
     org.hibernate.SQL: off
     org.hibernate.type.descriptor.sql.BasicBinder: off
 
+cookie:
+  domain: ${COOKIE_DOMAIN}

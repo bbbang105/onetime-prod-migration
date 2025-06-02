@@ -51,7 +51,7 @@ public class UserControllerTest extends ControllerTestConfig {
     @DisplayName("유저 온보딩을 진행한다.")
     public void onboardUser() throws Exception {
         // given
-        AuthTokenResponse response = new AuthTokenResponse("sampleAccessToken", "sampleRefreshToken", 3600L, 604800L);
+        AuthTokenResponse response = new AuthTokenResponse("sampleAccessToken", "sampleRefreshToken", 3600L, 604800L, "example.com");
         Mockito.when(userService.onboardUser(any(OnboardUserRequest.class), anyString())).thenReturn(response);
         Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
 

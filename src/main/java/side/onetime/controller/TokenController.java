@@ -40,7 +40,7 @@ public class TokenController {
             HttpServletResponse response) {
 
         AuthTokenResponse authTokenResponse = tokenService.reissueToken(request, jwtUtil.hashUserAgent(userAgent));
-        CookieUtil.setAuthCookies(response, authTokenResponse.refreshToken(), authTokenResponse.refreshTokenExpiration());
+        CookieUtil.setAuthCookies(response, authTokenResponse.refreshToken(), authTokenResponse.refreshTokenExpiration(), authTokenResponse.domain());
         return ApiResponse.onSuccess(SuccessStatus._REISSUE_TOKENS, ReissueTokenResponse.of(authTokenResponse.accessToken()));
     }
 }

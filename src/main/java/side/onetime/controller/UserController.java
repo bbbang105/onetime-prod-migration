@@ -47,7 +47,7 @@ public class UserController {
             HttpServletResponse response) {
 
         AuthTokenResponse authTokenResponse = userService.onboardUser(onboardUserRequest, jwtUtil.hashUserAgent(userAgent));
-        CookieUtil.setAuthCookies(response, authTokenResponse.refreshToken(), authTokenResponse.refreshTokenExpiration());
+        CookieUtil.setAuthCookies(response, authTokenResponse.refreshToken(), authTokenResponse.refreshTokenExpiration(), authTokenResponse.domain());
         return ApiResponse.onSuccess(SuccessStatus._ONBOARD_USER, OnboardUserResponse.of(authTokenResponse.accessToken()));
     }
 

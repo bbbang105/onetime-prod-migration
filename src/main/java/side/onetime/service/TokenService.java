@@ -24,6 +24,9 @@ public class TokenService {
     @Value("${jwt.refresh-token.expiration-time}")
     private long refreshTokenExpiration;
 
+    @Value("${cookie.domain}")
+    private String cookieDomain;
+
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtUtil jwtUtil;
 
@@ -49,6 +52,6 @@ public class TokenService {
         String newRefreshToken = jwtUtil.generateRefreshToken(userId);
         refreshTokenRepository.save(new RefreshToken(userId, browserId, newRefreshToken));
 
-        return AuthTokenResponse.of(newAccessToken, newRefreshToken, accessTokenExpiration, refreshTokenExpiration);
+        return AuthTokenResponse.of(newAccessToken, newRefreshToken, accessTokenExpiration, refreshTokenExpiration, cookieDomain);
     }
 }

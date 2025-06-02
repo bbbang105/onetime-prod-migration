@@ -31,13 +31,16 @@ import java.util.Map;
 public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     @Value("${jwt.redirect.access}")
-    private String ACCESS_TOKEN_REDIRECT_URI;
+    private String accessTokenRedirectUri;
 
     @Value("${jwt.redirect.register}")
-    private String REGISTER_TOKEN_REDIRECT_URI;
+    private String registerTokenRedirectUri;
 
     @Value("${jwt.refresh-token.expiration-time}")
-    private long REFRESH_TOKEN_EXPIRATION_TIME;
+    private long refreshTokenExpirationTime;
+
+    @Value("${cookie.domain}")
+    private String cookieDomain;
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
@@ -126,7 +129,7 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
      */
     private void handleNewUser(HttpServletRequest request, HttpServletResponse response, String provider, String providerId, String name, String email) throws IOException {
         String registerToken = jwtUtil.generateRegisterToken(provider, providerId, name, email);
-        String redirectUri = String.format(REGISTER_TOKEN_REDIRECT_URI, registerToken, URLEncoder.encode(name, StandardCharsets.UTF_8));
+        String redirectUri = String.format(registerTokenRedirectUri, registerToken, URLEncoder.encode(name, StandardCharsets.UTF_8));
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 
@@ -148,9 +151,9 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
         String refreshToken = jwtUtil.generateRefreshToken(userId);
 
         refreshTokenRepository.save(new RefreshToken(userId, browserId, refreshToken));
-        CookieUtil.setAuthCookies(response, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+        CookieUtil.setAuthCookies(response, refreshToken, refreshTokenExpirationTime, cookieDomain);
 
-        String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, "true", accessToken);
+        String redirectUri = String.format(accessTokenRedirectUri, "true", accessToken);
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 }

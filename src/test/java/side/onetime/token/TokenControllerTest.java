@@ -49,7 +49,7 @@ public class TokenControllerTest extends ControllerTestConfig {
 
         Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
         Mockito.when(tokenService.reissueToken(any(HttpServletRequest.class), anyString()))
-                .thenReturn(AuthTokenResponse.of(newAccessToken, newRefreshToken, 3600L, 604800L));
+                .thenReturn(AuthTokenResponse.of(newAccessToken, newRefreshToken, 3600L, 604800L, "example.com"));
 
         // when
         ResultActions resultActions = mockMvc.perform(
