@@ -1,12 +1,13 @@
 package side.onetime.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import side.onetime.auth.dto.AuthTokenResponse;
+import side.onetime.auth.util.CookieUtil;
 import side.onetime.domain.RefreshToken;
-import side.onetime.dto.token.request.ReissueTokenRequest;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.TokenErrorStatus;
 import side.onetime.repository.RefreshTokenRepository;
@@ -29,18 +30,12 @@ public class TokenService {
     /**
      * 리프레시 토큰을 이용한 토큰 재발행 메서드.
      *
-     * 서버가 쿠키에서 추출한 리프레시 토큰을 기반으로 유효성을 검사하고,
-     * 해당 브라우저 ID에 대한 저장된 토큰과 일치하는 경우,
-     * 새로운 액세스 토큰과 리프레시 토큰을 발급합니다.
-     * 이후 기존 토큰은 삭제되고 최신 토큰으로 갱신됩니다.
-     *
-     * @param reissueTokenRequest 리프레시 토큰 요청 객체
      * @param browserId User-Agent 기반 해시 브라우저 식별자
-     * @return 새롭게 발급된 액세스 토큰 및 리프레시 토큰을 포함한 응답 객체
-     * @throws CustomException 토큰이 유효하지 않거나 존재하지 않을 경우 예외 발생
+     * @return 새로운 액세스/리프레시 토큰과 만료 시간을 담은 응답 객체
+     * @throws CustomException 유효하지 않거나 저장된 리프레시 토큰이 없을 경우
      */
-    public AuthTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest, String browserId) {
-        String refreshToken = reissueTokenRequest.refreshToken();
+    public AuthTokenResponse reissueToken(HttpServletRequest request, String browserId) {
+        String refreshToken = CookieUtil.getRefreshTokenFromCookies(request);
 
         Long userId = jwtUtil.getClaimFromToken(refreshToken, "userId", Long.class);
         String existRefreshToken = refreshTokenRepository.findByUserIdAndBrowserId(userId, browserId)

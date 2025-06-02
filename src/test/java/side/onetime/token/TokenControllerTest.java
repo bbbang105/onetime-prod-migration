@@ -2,7 +2,8 @@ package side.onetime.token;
 
 import com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper;
 import com.epages.restdocs.apispec.ResourceSnippetParameters;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,7 +17,6 @@ import side.onetime.auth.dto.AuthTokenResponse;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.TokenController;
-import side.onetime.dto.token.request.ReissueTokenRequest;
 import side.onetime.service.TokenService;
 import side.onetime.util.JwtUtil;
 
@@ -44,22 +44,18 @@ public class TokenControllerTest extends ControllerTestConfig {
     @DisplayName("액세스 토큰을 재발행한다.")
     public void reissueTokenSuccess() throws Exception {
         // given
-        String oldRefreshToken = "sampleOldRefreshToken";
         String newAccessToken = "newAccessToken";
-
-        ReissueTokenRequest request = new ReissueTokenRequest(oldRefreshToken);
-        String requestContent = new ObjectMapper().writeValueAsString(request);
+        String newRefreshToken = "newRefreshToken";
 
         Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
-        Mockito.when(tokenService.reissueToken(any(ReissueTokenRequest.class), anyString()))
-                .thenReturn(AuthTokenResponse.of(newAccessToken, "newRefreshToken", 3600L, 604800L));
+        Mockito.when(tokenService.reissueToken(any(HttpServletRequest.class), anyString()))
+                .thenReturn(AuthTokenResponse.of(newAccessToken, newRefreshToken, 3600L, 604800L));
 
         // when
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders.post("/api/v1/tokens/action-reissue")
                         .header("User-Agent", "Test-Browser")
-                        .content(requestContent)
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .cookie(new Cookie("refreshToken", "sampleOldRefreshToken"))
                         .accept(MediaType.APPLICATION_JSON)
         );
 
@@ -78,9 +74,6 @@ public class TokenControllerTest extends ControllerTestConfig {
                                 ResourceSnippetParameters.builder()
                                         .tag("Token API")
                                         .description("액세스 토큰을 재발행한다.")
-                                        .requestFields(
-                                                fieldWithPath("refresh_token").type(JsonFieldType.STRING).description("기존 리프레쉬 토큰")
-                                        )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
