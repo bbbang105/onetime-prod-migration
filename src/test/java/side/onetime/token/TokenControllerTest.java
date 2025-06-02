@@ -12,11 +12,11 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import side.onetime.auth.dto.AuthTokenResponse;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.TokenController;
 import side.onetime.dto.token.request.ReissueTokenRequest;
-import side.onetime.dto.token.response.ReissueTokenResponse;
 import side.onetime.service.TokenService;
 import side.onetime.util.JwtUtil;
 
@@ -30,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(TokenController.class)
 public class TokenControllerTest extends ControllerTestConfig {
+
     @MockBean
     private TokenService tokenService;
 
@@ -45,14 +46,13 @@ public class TokenControllerTest extends ControllerTestConfig {
         // given
         String oldRefreshToken = "sampleOldRefreshToken";
         String newAccessToken = "newAccessToken";
-        String newRefreshToken = "newRefreshToken";
-        ReissueTokenResponse response = ReissueTokenResponse.of(newAccessToken, newRefreshToken);
-
-        Mockito.when(tokenService.reissueToken(any(ReissueTokenRequest.class), anyString())).thenReturn(response);
-        Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
 
         ReissueTokenRequest request = new ReissueTokenRequest(oldRefreshToken);
         String requestContent = new ObjectMapper().writeValueAsString(request);
+
+        Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
+        Mockito.when(tokenService.reissueToken(any(ReissueTokenRequest.class), anyString()))
+                .thenReturn(AuthTokenResponse.of(newAccessToken, "newRefreshToken", 3600L, 604800L));
 
         // when
         ResultActions resultActions = mockMvc.perform(
@@ -70,9 +70,7 @@ public class TokenControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.code").value("201"))
                 .andExpect(jsonPath("$.message").value("토큰 재발행에 성공했습니다."))
                 .andExpect(jsonPath("$.payload.access_token").value(newAccessToken))
-                .andExpect(jsonPath("$.payload.refresh_token").value(newRefreshToken))
 
-                // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("token/reissue",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -87,8 +85,7 @@ public class TokenControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                                fieldWithPath("payload.access_token").type(JsonFieldType.STRING).description("새로운 액세스 토큰"),
-                                                fieldWithPath("payload.refresh_token").type(JsonFieldType.STRING).description("새로운 리프레쉬 토큰")
+                                                fieldWithPath("payload.access_token").type(JsonFieldType.STRING).description("새로운 액세스 토큰")
                                         )
                                         .build()
                         )

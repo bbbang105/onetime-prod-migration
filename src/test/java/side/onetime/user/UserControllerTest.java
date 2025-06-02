@@ -12,6 +12,7 @@ import org.springframework.http.MediaType;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.web.servlet.ResultActions;
+import side.onetime.auth.dto.AuthTokenResponse;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.UserController;
@@ -23,7 +24,6 @@ import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.GetUserSleepTimeResponse;
-import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.service.UserService;
 import side.onetime.util.JwtUtil;
 
@@ -51,7 +51,7 @@ public class UserControllerTest extends ControllerTestConfig {
     @DisplayName("유저 온보딩을 진행한다.")
     public void onboardUser() throws Exception {
         // given
-        OnboardUserResponse response = new OnboardUserResponse("sampleAccessToken", "sampleRefreshToken");
+        AuthTokenResponse response = new AuthTokenResponse("sampleAccessToken", "sampleRefreshToken", 3600L, 604800L);
         Mockito.when(userService.onboardUser(any(OnboardUserRequest.class), anyString())).thenReturn(response);
         Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
 
@@ -81,7 +81,6 @@ public class UserControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.code").value("201"))
                 .andExpect(jsonPath("$.message").value("유저 온보딩에 성공했습니다."))
                 .andExpect(jsonPath("$.payload.access_token").value("sampleAccessToken"))
-                .andExpect(jsonPath("$.payload.refresh_token").value("sampleRefreshToken"))
                 .andDo(MockMvcRestDocumentationWrapper.document("user/onboard",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
@@ -104,8 +103,7 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                                fieldWithPath("payload.access_token").type(JsonFieldType.STRING).description("액세스 토큰"),
-                                                fieldWithPath("payload.refresh_token").type(JsonFieldType.STRING).description("리프레쉬 토큰")
+                                                fieldWithPath("payload.access_token").type(JsonFieldType.STRING).description("액세스 토큰")
                                         )
                                         .requestSchema(Schema.schema("OnboardUserRequestSchema"))
                                         .responseSchema(Schema.schema("OnboardUserResponseSchema"))
