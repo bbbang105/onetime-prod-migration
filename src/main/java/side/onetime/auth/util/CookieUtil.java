@@ -3,8 +3,11 @@ package side.onetime.auth.util;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.TokenErrorStatus;
+
+import java.time.Duration;
 
 public class CookieUtil {
 
@@ -28,12 +31,15 @@ public class CookieUtil {
      * @param maxAge   쿠키 만료 시간 (초)
      */
     public static void setCookie(HttpServletResponse response, String name, String value, int maxAge) {
-        Cookie cookie = new Cookie(name, value);
-        cookie.setPath("/");
-        cookie.setHttpOnly(true);
-        cookie.setSecure(true);
-        cookie.setMaxAge(maxAge);
-        response.addCookie(cookie);
+        ResponseCookie cookie = ResponseCookie.from(name, value)
+                .path("/")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("None")
+                .maxAge(Duration.ofSeconds(maxAge))
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
     }
 
     /**
