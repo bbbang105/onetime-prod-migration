@@ -7,10 +7,9 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ReissueTokenResponse(
-        String accessToken,
-        String refreshToken
+        String accessToken
 ) {
-    public static ReissueTokenResponse of(String accessToken, String refreshToken) {
-        return new ReissueTokenResponse(accessToken, refreshToken);
+    public static ReissueTokenResponse of(String accessToken) {
+        return new ReissueTokenResponse(accessToken);
     }
 }

@@ -7,10 +7,9 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record OnboardUserResponse(
-        String accessToken,
-        String refreshToken
+        String accessToken
 ) {
-    public static OnboardUserResponse of(String accessToken, String refreshToken) {
-        return new OnboardUserResponse(accessToken, refreshToken);
+    public static OnboardUserResponse of(String accessToken) {
+        return new OnboardUserResponse(accessToken);
     }
 }
