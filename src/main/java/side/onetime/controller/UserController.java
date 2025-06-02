@@ -1,10 +1,13 @@
 package side.onetime.controller;
 
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import side.onetime.auth.dto.AuthTokenResponse;
+import side.onetime.auth.util.CookieUtil;
 import side.onetime.dto.user.request.OnboardUserRequest;
 import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
 import side.onetime.dto.user.request.UpdateUserProfileRequest;
@@ -29,18 +32,23 @@ public class UserController {
     /**
      * 유저 온보딩 API.
      *
-     * 제공된 레지스터 토큰을 검증한 후, 해당 정보를 기반으로 유저 데이터를 저장하고, 액세스 및 리프레쉬 토큰을 발급합니다.
+     * 제공된 레지스터 토큰을 검증한 후, 유저 정보를 저장하고,
+     * 액세스 토큰과 리프레시 토큰을 발급합니다.
      *
-     * @param onboardUserRequest 유저의 레지스터 토큰, 닉네임, 약관 동의 여부, 수면 시간 정보를 포함하는 요청 객체
-     * @return 발급된 액세스 토큰과 리프레쉬 토큰을 포함하는 응답 객체
+     * @param onboardUserRequest 유저의 레지스터 토큰, 닉네임, 약관 동의 여부, 수면 시간 정보가 포함된 요청 객체
+     * @param userAgent User-Agent 헤더
+     * @param response HTTP 응답 객체
+     * @return 발급된 액세스 토큰을 포함한 응답 객체
      */
     @PostMapping("/onboarding")
     public ResponseEntity<ApiResponse<OnboardUserResponse>> onboardUser(
             @Valid @RequestBody OnboardUserRequest onboardUserRequest,
-            @Parameter(hidden = true) @RequestHeader("User-Agent") String userAgent) {
+            @Parameter(hidden = true) @RequestHeader("User-Agent") String userAgent,
+            HttpServletResponse response) {
 
-        OnboardUserResponse onboardUserResponse = userService.onboardUser(onboardUserRequest, jwtUtil.hashUserAgent(userAgent));
-        return ApiResponse.onSuccess(SuccessStatus._ONBOARD_USER, onboardUserResponse);
+        AuthTokenResponse authTokenResponse = userService.onboardUser(onboardUserRequest, jwtUtil.hashUserAgent(userAgent));
+        CookieUtil.setAuthCookies(response, authTokenResponse.refreshToken(), authTokenResponse.refreshTokenExpiration());
+        return ApiResponse.onSuccess(SuccessStatus._ONBOARD_USER, OnboardUserResponse.of(authTokenResponse.accessToken()));
     }
 
     /**

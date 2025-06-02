@@ -1,8 +1,10 @@
 package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import side.onetime.auth.dto.AuthTokenResponse;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
 import side.onetime.dto.user.request.OnboardUserRequest;
@@ -12,7 +14,6 @@ import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.GetUserSleepTimeResponse;
-import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.exception.CustomException;
 import side.onetime.exception.status.UserErrorStatus;
 import side.onetime.repository.RefreshTokenRepository;
@@ -26,6 +27,12 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserService {
 
+    @Value("${jwt.access-token.expiration-time}")
+    private long accessTokenExpiration;
+
+    @Value("${jwt.refresh-token.expiration-time}")
+    private long refreshTokenExpiration;
+
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
@@ -33,15 +40,14 @@ public class UserService {
     /**
      * 유저 온보딩 처리 메서드.
      *
-     * 회원가입 이후 필수 정보를 설정하고 유저를 저장한 뒤, 액세스 토큰과 리프레쉬 토큰을 발급합니다.
-     * 리프레쉬 토큰은 브라우저 식별자(browserId)와 함께 Redis에 저장됩니다.
+     * 회원가입 이후 유저 정보를 저장하고, 액세스 토큰과 리프레시 토큰을 발급합니다.
      *
-     * @param request 유저의 레지스터 토큰, 닉네임, 약관 동의, 수면 시간 등 온보딩 정보가 포함된 요청 객체
+     * @param request 유저의 온보딩 정보가 포함된 요청 객체
      * @param browserId User-Agent 기반으로 생성된 브라우저 식별 ID
-     * @return 발급된 액세스 토큰과 리프레쉬 토큰을 포함한 응답 객체
+     * @return 발급된 액세스 토큰 정보
      */
     @Transactional
-    public OnboardUserResponse onboardUser(OnboardUserRequest request, String browserId) {
+    public AuthTokenResponse onboardUser(OnboardUserRequest request, String browserId) {
         User newUser = createUserFromRegisterToken(request);
         userRepository.save(newUser);
 
@@ -50,7 +56,7 @@ public class UserService {
         String refreshToken = jwtUtil.generateRefreshToken(userId);
         refreshTokenRepository.save(new RefreshToken(userId, browserId, refreshToken));
 
-        return OnboardUserResponse.of(accessToken, refreshToken);
+        return AuthTokenResponse.of(accessToken, refreshToken, accessTokenExpiration, refreshTokenExpiration);
     }
 
     /**
