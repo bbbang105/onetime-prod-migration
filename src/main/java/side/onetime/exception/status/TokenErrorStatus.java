@@ -17,6 +17,7 @@ public enum TokenErrorStatus implements BaseErrorCode {
     _TOKEN_CLAIM_EXTRACTION_ERROR(HttpStatus.UNAUTHORIZED, "TOKEN-006", "토큰에서 claim 값을 추출하던 도중 에러가 발생했습니다."),
     _INVALID_USER_TYPE(HttpStatus.BAD_REQUEST, "TOKEN-007", "알 수 없는 타입의 액세스 토큰이 발행되었습니다."),
     _NOT_FOUND_HEADER(HttpStatus.BAD_REQUEST, "TOKEN-008", "Authorization 헤더가 존재하지 않거나 형식이 잘못되었습니다."),
+    _MISSING_REFRESH_TOKEN_IN_COOKIE(HttpStatus.UNAUTHORIZED, "TOKEN-009", "쿠키에 리프레쉬 토큰이 존재하지 않습니다."),
     ;
 
     private final HttpStatus httpStatus;

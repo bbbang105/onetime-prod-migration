@@ -13,6 +13,7 @@ import side.onetime.auth.dto.GoogleUserInfo;
 import side.onetime.auth.dto.KakaoUserInfo;
 import side.onetime.auth.dto.NaverUserInfo;
 import side.onetime.auth.dto.OAuth2UserInfo;
+import side.onetime.auth.util.CookieUtil;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
 import side.onetime.repository.RefreshTokenRepository;
@@ -34,6 +35,9 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
 
     @Value("${jwt.redirect.register}")
     private String REGISTER_TOKEN_REDIRECT_URI;
+
+    @Value("${jwt.refresh-token.expiration-time}")
+    private long REFRESH_TOKEN_EXPIRATION_TIME;
 
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
@@ -140,12 +144,13 @@ public class OAuthLoginSuccessHandler extends SimpleUrlAuthenticationSuccessHand
     private void handleExistingUser(HttpServletRequest request, HttpServletResponse response, User user) throws IOException {
         Long userId = user.getId();
         String browserId = jwtUtil.hashUserAgent(request.getHeader("User-Agent"));
-
-        String accessToken = jwtUtil.generateAccessToken(userId,"USER");
+        String accessToken = jwtUtil.generateAccessToken(userId, "USER");
         String refreshToken = jwtUtil.generateRefreshToken(userId);
-        refreshTokenRepository.save(new RefreshToken(userId, browserId, refreshToken));
 
-        String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, "true", accessToken, refreshToken);
+        refreshTokenRepository.save(new RefreshToken(userId, browserId, refreshToken));
+        CookieUtil.setAuthCookies(response, refreshToken, REFRESH_TOKEN_EXPIRATION_TIME);
+
+        String redirectUri = String.format(ACCESS_TOKEN_REDIRECT_URI, "true", accessToken);
         getRedirectStrategy().sendRedirect(request, response, redirectUri);
     }
 }
