@@ -27,14 +27,14 @@ public class TokenService {
      * 기존 토큰은 삭제되고 최신 토큰으로 갱신됩니다.
      *
      * @param reissueTokenRequest 클라이언트가 보낸 리프레시 토큰 요청 객체
-     * @param browserId 브라우저 식별을 위한 해시된 ID
      * @return 새롭게 발급된 액세스 토큰 및 리프레시 토큰 응답 객체
      * @throws CustomException 유효하지 않은 리프레시 토큰일 경우 예외 발생
      */
-    public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest, String browserId) {
+    public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
         String refreshToken = reissueTokenRequest.refreshToken();
 
         Long userId = jwtUtil.getClaimFromToken(refreshToken, "userId", Long.class);
+        String browserId = jwtUtil.getClaimFromToken(refreshToken, "browserId", String.class);
         String existRefreshToken = refreshTokenRepository.findByUserIdAndBrowserId(userId, browserId)
                 .orElseThrow(() -> new CustomException(TokenErrorStatus._NOT_FOUND_REFRESH_TOKEN));
 
@@ -43,7 +43,7 @@ public class TokenService {
         }
 
         String newAccessToken = jwtUtil.generateAccessToken(userId, "USER");
-        String newRefreshToken = jwtUtil.generateRefreshToken(userId);
+        String newRefreshToken = jwtUtil.generateRefreshToken(userId, browserId);
         refreshTokenRepository.save(new RefreshToken(userId, browserId, newRefreshToken));
 
         return ReissueTokenResponse.of(newAccessToken, newRefreshToken);

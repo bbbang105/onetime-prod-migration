@@ -22,7 +22,6 @@ import side.onetime.util.JwtUtil;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,8 +47,8 @@ public class TokenControllerTest extends ControllerTestConfig {
         String newRefreshToken = "newRefreshToken";
         ReissueTokenResponse response = ReissueTokenResponse.of(newAccessToken, newRefreshToken);
 
-        Mockito.when(tokenService.reissueToken(any(ReissueTokenRequest.class), anyString())).thenReturn(response);
-        Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
+        Mockito.when(tokenService.reissueToken(any(ReissueTokenRequest.class)))
+                .thenReturn(response);
 
         ReissueTokenRequest request = new ReissueTokenRequest(oldRefreshToken);
         String requestContent = new ObjectMapper().writeValueAsString(request);
@@ -57,7 +56,6 @@ public class TokenControllerTest extends ControllerTestConfig {
         // when
         ResultActions resultActions = mockMvc.perform(
                 RestDocumentationRequestBuilders.post("/api/v1/tokens/action-reissue")
-                        .header("User-Agent", "Test-Browser")
                         .content(requestContent)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
