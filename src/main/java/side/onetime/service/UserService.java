@@ -37,17 +37,19 @@ public class UserService {
      * 리프레쉬 토큰은 브라우저 식별자(browserId)와 함께 Redis에 저장됩니다.
      *
      * @param request 유저의 레지스터 토큰, 닉네임, 약관 동의, 수면 시간 등 온보딩 정보가 포함된 요청 객체
-     * @param browserId User-Agent 기반으로 생성된 브라우저 식별 ID
      * @return 발급된 액세스 토큰과 리프레쉬 토큰을 포함한 응답 객체
      */
     @Transactional
-    public OnboardUserResponse onboardUser(OnboardUserRequest request, String browserId) {
-        User newUser = createUserFromRegisterToken(request);
+    public OnboardUserResponse onboardUser(OnboardUserRequest request) {
+        String registerToken = request.registerToken();
+        jwtUtil.validateToken(registerToken);
+        User newUser = createUserFromRegisterToken(request, registerToken);
         userRepository.save(newUser);
 
         Long userId = newUser.getId();
+        String browserId = jwtUtil.getClaimFromToken(registerToken, "browserId", String.class);
         String accessToken = jwtUtil.generateAccessToken(userId, "USER");
-        String refreshToken = jwtUtil.generateRefreshToken(userId);
+        String refreshToken = jwtUtil.generateRefreshToken(userId, browserId);
         refreshTokenRepository.save(new RefreshToken(userId, browserId, refreshToken));
 
         return OnboardUserResponse.of(accessToken, refreshToken);
@@ -62,16 +64,14 @@ public class UserService {
      * @param request 레지스터 토큰 및 기타 온보딩 정보를 포함한 요청 객체
      * @return 생성된 User 엔티티 객체
      */
-    private User createUserFromRegisterToken(OnboardUserRequest request) {
-        String token = request.registerToken();
-        jwtUtil.validateToken(token);
+    private User createUserFromRegisterToken(OnboardUserRequest request, String registerToken) {
 
         return User.builder()
-                .name(jwtUtil.getClaimFromToken(token, "name", String.class))
-                .email(jwtUtil.getClaimFromToken(token, "email", String.class))
+                .name(jwtUtil.getClaimFromToken(registerToken, "name", String.class))
+                .email(jwtUtil.getClaimFromToken(registerToken, "email", String.class))
                 .nickname(request.nickname())
-                .provider(jwtUtil.getClaimFromToken(token, "provider", String.class))
-                .providerId(jwtUtil.getClaimFromToken(token, "providerId", String.class))
+                .provider(jwtUtil.getClaimFromToken(registerToken, "provider", String.class))
+                .providerId(jwtUtil.getClaimFromToken(registerToken, "providerId", String.class))
                 .servicePolicyAgreement(request.servicePolicyAgreement())
                 .privacyPolicyAgreement(request.privacyPolicyAgreement())
                 .marketingPolicyAgreement(request.marketingPolicyAgreement())

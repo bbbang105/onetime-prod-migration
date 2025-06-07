@@ -65,6 +65,7 @@ jwt:
     expiration-time: ${REFRESH_TOKEN_EXPIRATION_TIME}
   register-token:
     expiration-time: ${REGISTER_TOKEN_EXPIRATION_TIME}
+  browser-id-salt: ${BROWSER_ID_SALT}
 
 scheduling:
   cron: ${CRON}

@@ -1,6 +1,5 @@
 package side.onetime.controller;
 
-import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +15,6 @@ import side.onetime.dto.user.response.OnboardUserResponse;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
 import side.onetime.service.UserService;
-import side.onetime.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -24,7 +22,6 @@ import side.onetime.util.JwtUtil;
 public class UserController {
 
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
     /**
      * 유저 온보딩 API.
@@ -36,10 +33,9 @@ public class UserController {
      */
     @PostMapping("/onboarding")
     public ResponseEntity<ApiResponse<OnboardUserResponse>> onboardUser(
-            @Valid @RequestBody OnboardUserRequest onboardUserRequest,
-            @Parameter(hidden = true) @RequestHeader("User-Agent") String userAgent) {
+            @Valid @RequestBody OnboardUserRequest onboardUserRequest) {
 
-        OnboardUserResponse onboardUserResponse = userService.onboardUser(onboardUserRequest, jwtUtil.hashUserAgent(userAgent));
+        OnboardUserResponse onboardUserResponse = userService.onboardUser(onboardUserRequest);
         return ApiResponse.onSuccess(SuccessStatus._ONBOARD_USER, onboardUserResponse);
     }
 

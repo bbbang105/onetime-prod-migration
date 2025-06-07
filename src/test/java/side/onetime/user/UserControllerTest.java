@@ -29,7 +29,6 @@ import side.onetime.util.JwtUtil;
 
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.springframework.restdocs.operation.preprocess.Preprocessors.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.fieldWithPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,8 +51,7 @@ public class UserControllerTest extends ControllerTestConfig {
     public void onboardUser() throws Exception {
         // given
         OnboardUserResponse response = new OnboardUserResponse("sampleAccessToken", "sampleRefreshToken");
-        Mockito.when(userService.onboardUser(any(OnboardUserRequest.class), anyString())).thenReturn(response);
-        Mockito.when(jwtUtil.hashUserAgent(anyString())).thenReturn("mockBrowserId");
+        Mockito.when(userService.onboardUser(any(OnboardUserRequest.class))).thenReturn(response);
 
         OnboardUserRequest request = new OnboardUserRequest(
                 "sampleRegisterToken",
@@ -69,7 +67,6 @@ public class UserControllerTest extends ControllerTestConfig {
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/users/onboarding")
-                .header("User-Agent", "Mozilla/5.0 (Test-Agent)")
                 .content(requestContent)
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON));
@@ -170,7 +167,7 @@ public class UserControllerTest extends ControllerTestConfig {
         UpdateUserProfileRequest request = new UpdateUserProfileRequest(
                 "NewNickname",
                 Language.ENG
-                );
+        );
         Mockito.doNothing().when(userService).updateUserProfile(any(UpdateUserProfileRequest.class));
         String requestContent = objectMapper.writeValueAsString(request);
 
