@@ -18,6 +18,7 @@ public class RefreshTokenRepository {
     private long REFRESH_TOKEN_EXPIRATION_TIME;
 
     private static final int REFRESH_TOKEN_LIMIT = 5;
+    private static final String COOLDOWN_PREFIX = "cooldown:reissue:";
 
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -52,5 +53,15 @@ public class RefreshTokenRepository {
                 .filter(t -> t.startsWith(browserId + ":"))
                 .findFirst()
                 .map(t -> t.substring(browserId.length() + 1));
+    }
+
+    public boolean isInCooldown(Long userId, String browserId) {
+        String key = COOLDOWN_PREFIX + userId + ":" + browserId;
+        return Boolean.TRUE.equals(redisTemplate.hasKey(key));
+    }
+
+    public void setCooldown(Long userId, String browserId, long millis) {
+        String key = COOLDOWN_PREFIX + userId + ":" + browserId;
+        redisTemplate.opsForValue().set(key, "1", millis, TimeUnit.MILLISECONDS);
     }
 }
