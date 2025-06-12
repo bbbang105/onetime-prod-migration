@@ -12,6 +12,8 @@ import side.onetime.global.lock.annotation.DistributedLock;
 import side.onetime.repository.RefreshTokenRepository;
 import side.onetime.util.JwtUtil;
 
+import java.util.concurrent.TimeUnit;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -32,7 +34,7 @@ public class TokenService {
      * @return 새 액세스/리프레시 토큰
      * @throws CustomException 리프레시 토큰이 없거나 일치하지 않을 경우
      */
-    @DistributedLock(prefix = "lock:reissue", key = "#reissueTokenRequest.refreshToken", waitTime = 0)
+    @DistributedLock(prefix = "lock:reissue", key = "#reissueTokenRequest.refreshToken", waitTime = 500, timeUnit = TimeUnit.MILLISECONDS)
     public ReissueTokenResponse reissueToken(ReissueTokenRequest reissueTokenRequest) {
         String refreshToken = reissueTokenRequest.refreshToken();
 
