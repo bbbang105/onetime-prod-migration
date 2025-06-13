@@ -5,7 +5,7 @@
 
 ## 🌐 System Architecture
 
-<img width="942" alt="25 05 19_fail2ban방화벽추가" src="https://github.com/user-attachments/assets/16bc4593-8102-4e57-b6e0-5180e31de4c9" />
+<img width="983" alt="250529_아키텍처" src="https://github.com/user-attachments/assets/9c95e15d-e763-40ba-ab46-d1eab5c9acb7" />
 
 ## 🔒 Rules
 
