@@ -40,6 +40,7 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
         // 유저가 생성한 이벤트 ID 리스트 조회
         List<Long> eventIds = queryFactory
                 .select(QEventParticipation.eventParticipation.event.id)
+                .distinct()
                 .from(QEventParticipation.eventParticipation)
                 .where(
                         QEventParticipation.eventParticipation.user.eq(user)
