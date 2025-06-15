@@ -69,13 +69,17 @@ public class UserRepositoryImpl implements UserRepositoryCustom {
                     .execute();
         }
 
-        // 유저 소유 Selection 및 FixedSelection 삭제
+        // 유저 소유 Selection, FixedSelection, eventParticipation 삭제
         queryFactory.delete(QSelection.selection)
                 .where(QSelection.selection.user.eq(user))
                 .execute();
 
         queryFactory.delete(QFixedSelection.fixedSelection)
                 .where(QFixedSelection.fixedSelection.user.eq(user))
+                .execute();
+
+        queryFactory.delete(QEventParticipation.eventParticipation)
+                .where(QEventParticipation.eventParticipation.user.eq(user))
                 .execute();
 
         // 최종적으로 유저 삭제
