@@ -119,7 +119,7 @@ public class UserService {
      *
      */
     @Transactional
-    public void withdrawService() {
+    public void withdrawUser() {
         User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
         userRepository.withdraw(user);

@@ -206,9 +206,9 @@ public class UserControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("유저가 서비스를 탈퇴한다.")
-    public void withdrawService() throws Exception {
+    public void withdrawUser() throws Exception {
         // given
-        Mockito.doNothing().when(userService).withdrawService();
+        Mockito.doNothing().when(userService).withdrawUser();
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/users/action-withdraw")

@@ -77,9 +77,9 @@ public class UserController {
      * @return 성공 상태 응답 객체
      */
     @PostMapping("/action-withdraw")
-    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawService() {
+    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawUser() {
 
-        userService.withdrawService();
+        userService.withdrawUser();
         return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_SERVICE);
     }
 
