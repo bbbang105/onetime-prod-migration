@@ -64,4 +64,9 @@ public class RefreshTokenRepository {
         String key = COOLDOWN_PREFIX + userId + ":" + browserId;
         redisTemplate.opsForValue().set(key, "1", millis, TimeUnit.MILLISECONDS);
     }
+
+    public void deleteAllByUserId(Long userId) {
+        String pattern = "refreshToken:" + userId;
+        redisTemplate.delete(pattern);
+    }
 }

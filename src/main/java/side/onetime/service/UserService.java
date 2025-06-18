@@ -123,6 +123,7 @@ public class UserService {
         User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
         userRepository.withdraw(user);
+        refreshTokenRepository.deleteAllByUserId(user.getId());
     }
 
     /**
