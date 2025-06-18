@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
-import side.onetime.dto.user.request.OnboardUserRequest;
-import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
-import side.onetime.dto.user.request.UpdateUserProfileRequest;
-import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
+import side.onetime.dto.user.request.*;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.GetUserSleepTimeResponse;
@@ -187,5 +184,20 @@ public class UserService {
         user.updateSleepStartTime(request.sleepStartTime());
         user.updateSleepEndTime(request.sleepEndTime());
         userRepository.save(user);
+    }
+
+    /**
+     * 유저 로그아웃 메서드.
+     *
+     * 로그아웃 시, 리프레쉬 토큰을 제거합니다.
+     *
+     * @param request 리프레쉬 토큰 요청 데이터
+     */
+    @Transactional
+    public void logoutUser(LogoutUserRequest request) {
+        String refreshToken = request.refreshToken();
+        Long userId = jwtUtil.getClaimFromToken(refreshToken, "userId", Long.class);
+        String browserId = jwtUtil.getClaimFromToken(refreshToken, "browserId", String.class);
+        refreshTokenRepository.deleteRefreshToken(userId, browserId);
     }
 }
