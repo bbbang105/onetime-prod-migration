@@ -22,7 +22,7 @@ public class RefreshTokenRepository {
 
     private final RedisTemplate<String, String> redisTemplate;
 
-    public void save(final RefreshToken refreshToken) {
+    public void save(RefreshToken refreshToken) {
         String key = "refreshToken:" + refreshToken.getUserId();
         String value = refreshToken.getBrowserId() + ":" + refreshToken.getRefreshToken();
 
@@ -43,7 +43,7 @@ public class RefreshTokenRepository {
         redisTemplate.expire(key, REFRESH_TOKEN_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
     }
 
-    public Optional<String> findByUserIdAndBrowserId(final Long userId, final String browserId) {
+    public Optional<String> findByUserIdAndBrowserId(Long userId, String browserId) {
         String key = "refreshToken:" + userId;
         List<String> tokens = redisTemplate.opsForList().range(key, 0, -1);
 
@@ -68,5 +68,21 @@ public class RefreshTokenRepository {
     public void deleteAllByUserId(Long userId) {
         String pattern = "refreshToken:" + userId;
         redisTemplate.delete(pattern);
+    }
+
+    public void deleteRefreshToken(Long userId, String browserId) {
+        String key = "refreshToken:" + userId;
+
+        List<String> tokens = redisTemplate.opsForList().range(key, 0, -1);
+        if (tokens == null || tokens.isEmpty()) return;
+
+        tokens.removeIf(token -> token.startsWith(browserId + ":"));
+
+        redisTemplate.delete(key);
+        for (String token : tokens) {
+            redisTemplate.opsForList().rightPush(key, token);
+        }
+
+        redisTemplate.expire(key, REFRESH_TOKEN_EXPIRATION_TIME, TimeUnit.MILLISECONDS);
     }
 }
