@@ -196,6 +196,7 @@ public class UserService {
     @Transactional
     public void logoutUser(LogoutUserRequest request) {
         String refreshToken = request.refreshToken();
+        jwtUtil.validateToken(refreshToken);
         Long userId = jwtUtil.getClaimFromToken(refreshToken, "userId", Long.class);
         String browserId = jwtUtil.getClaimFromToken(refreshToken, "browserId", String.class);
         refreshTokenRepository.deleteRefreshToken(userId, browserId);
