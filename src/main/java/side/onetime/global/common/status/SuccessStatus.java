@@ -45,11 +45,12 @@ public enum SuccessStatus implements BaseCode {
     _ONBOARD_USER(HttpStatus.CREATED, "201", "유저 온보딩에 성공했습니다."),
     _GET_USER_PROFILE(HttpStatus.OK, "200", "유저 정보 조회에 성공했습니다."),
     _UPDATE_USER_PROFILE(HttpStatus.OK, "200", "유저 정보 수정에 성공했습니다."),
-    _WITHDRAW_SERVICE(HttpStatus.OK, "200", "유저 서비스 탈퇴에 성공했습니다."),
+    _WITHDRAW_USER(HttpStatus.OK, "200", "유저 서비스 탈퇴에 성공했습니다."),
     _GET_USER_POLICY_AGREEMENT(HttpStatus.OK, "200", "유저 약관 동의 여부 조회에 성공했습니다."),
     _UPDATE_USER_POLICY_AGREEMENT(HttpStatus.OK, "200", "유저 약관 동의 여부 수정에 성공했습니다."),
     _GET_USER_SLEEP_TIME(HttpStatus.OK, "200", "유저 수면 시간 조회에 성공했습니다."),
     _UPDATE_USER_SLEEP_TIME(HttpStatus.OK, "200", "유저 수면 시간 수정에 성공했습니다."),
+    _LOGOUT_USER(HttpStatus.OK, "200", "유저 로그아웃에 성공했습니다."),
     // Fixed
     _GET_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 조회에 성공했습니다."),
     _UPDATE_USER_FIXED_SCHEDULE(HttpStatus.OK, "200", "유저 고정 스케줄 수정에 성공했습니다."),
