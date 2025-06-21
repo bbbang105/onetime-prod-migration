@@ -167,7 +167,7 @@ public class UserControllerTest extends ControllerTestConfig {
         UpdateUserProfileRequest request = new UpdateUserProfileRequest(
                 "NewNickname",
                 Language.ENG
-                );
+        );
         Mockito.doNothing().when(userService).updateUserProfile(any(UpdateUserProfileRequest.class));
         String requestContent = objectMapper.writeValueAsString(request);
 
@@ -206,9 +206,9 @@ public class UserControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("유저가 서비스를 탈퇴한다.")
-    public void withdrawService() throws Exception {
+    public void withdrawUser() throws Exception {
         // given
-        Mockito.doNothing().when(userService).withdrawService();
+        Mockito.doNothing().when(userService).withdrawUser();
 
         // when
         ResultActions resultActions = this.mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/users/action-withdraw")
@@ -409,6 +409,53 @@ public class UserControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
                                         .requestSchema(Schema.schema("UpdateUserSleepTimeRequestSchema"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("유저가 로그아웃한다.")
+    public void logoutUser() throws Exception {
+        // given
+        Mockito.doNothing().when(userService).logoutUser(any());
+
+        String requestContent = """
+        {
+            "refresh_token": "sampleRefreshToken"
+        }
+    """;
+
+        // when
+        ResultActions resultActions = this.mockMvc.perform(
+                RestDocumentationRequestBuilders.post("/api/v1/users/logout")
+                        .content(requestContent)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON)
+        );
+
+        // then
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("유저 로그아웃에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("user/logout",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("User API")
+                                        .description("유저가 로그아웃한다.")
+                                        .requestFields(
+                                                fieldWithPath("refresh_token").type(JsonFieldType.STRING).description("리프레쉬 토큰")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .requestSchema(Schema.schema("LogoutUserRequestSchema"))
                                         .build()
                         )
                 ));

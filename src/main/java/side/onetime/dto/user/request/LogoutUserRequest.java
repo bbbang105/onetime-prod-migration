@@ -1,4 +1,4 @@
-package side.onetime.dto.token.request;
+package side.onetime.dto.user.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record ReissueTokenRequest(
+public record LogoutUserRequest(
         @NotBlank(message = "리프레쉬 토큰은 필수 값입니다.")
         String refreshToken
 ) {

@@ -18,6 +18,10 @@ import side.onetime.repository.AdminRepository;
 import side.onetime.repository.UserRepository;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Date;
 
 @Slf4j
@@ -38,6 +42,9 @@ public class JwtUtil {
 
     @Value("${jwt.register-token.expiration-time}")
     private long REGISTER_TOKEN_EXPIRATION_TIME; // 레지스터 토큰 유효기간
+
+    @Value("${jwt.browser-id-salt}")
+    private String browserIdSalt;
 
     private final UserRepository userRepository;
     private final AdminRepository adminRepository;
@@ -92,12 +99,13 @@ public class JwtUtil {
      * @param email 사용자 이메일
      * @return 생성된 레지스터 토큰
      */
-    public String generateRegisterToken(String provider, String providerId, String name, String email) {
+    public String generateRegisterToken(String provider, String providerId, String name, String email, String browserId) {
         return Jwts.builder()
-                .claim("provider", provider)     // 클레임에 provider 추가
-                .claim("providerId", providerId) // 클레임에 providerId 추가
-                .claim("name", name)             // 클레임에 name 추가
-                .claim("email", email)           // 클레임에 email 추가
+                .claim("provider", provider)
+                .claim("providerId", providerId)
+                .claim("name", name)
+                .claim("email", email)
+                .claim("browserId", browserId)
                 .claim("type", "REGISTER_TOKEN")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REGISTER_TOKEN_EXPIRATION_TIME))
@@ -109,11 +117,13 @@ public class JwtUtil {
      * 리프레시 토큰 생성 메서드.
      *
      * @param userId 유저 ID
+     * @param browserId 브라우저 식별값 (User-Agent 기반 해시)
      * @return 생성된 리프레시 토큰
      */
-    public String generateRefreshToken(Long userId) {
+    public String generateRefreshToken(Long userId, String browserId) {
         return Jwts.builder()
                 .claim("userId", userId)
+                .claim("browserId", browserId)
                 .claim("type", "REFRESH_TOKEN")
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME))
@@ -203,6 +213,23 @@ public class JwtUtil {
             throw new CustomException(TokenErrorStatus._TOKEN_UNSUPPORTED);
         } catch (IllegalArgumentException e) {
             throw new CustomException(TokenErrorStatus._TOKEN_MALFORMED);
+        }
+    }
+
+    /**
+     * User-Agent + Salt 해시 처리 메서드.
+     *
+     * @param userAgent 브라우저의 User-Agent 문자열
+     * @return 해시된 브라우저 ID
+     */
+    public String hashUserAgent(String userAgent) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            String salted = userAgent + browserIdSalt;
+            byte[] hash = digest.digest(salted.getBytes(StandardCharsets.UTF_8));
+            return Base64.getUrlEncoder().encodeToString(hash);
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("SHA-256 해싱 실패", e);
         }
     }
 }

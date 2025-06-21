@@ -5,10 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import side.onetime.domain.RefreshToken;
 import side.onetime.domain.User;
-import side.onetime.dto.user.request.OnboardUserRequest;
-import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
-import side.onetime.dto.user.request.UpdateUserProfileRequest;
-import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
+import side.onetime.dto.user.request.*;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.GetUserSleepTimeResponse;
@@ -31,52 +28,54 @@ public class UserService {
     private final JwtUtil jwtUtil;
 
     /**
-     * 유저 온보딩 메서드.
+     * 유저 온보딩 처리 메서드.
      *
-     * 회원가입 이후, 유저의 필수 정보를 설정하고 온보딩을 완료합니다.
-     * 제공된 레지스터 토큰을 검증하여 유저 정보를 확인한 후, 닉네임, 약관 동의 여부, 수면 시간을 저장합니다.
-     * 저장된 유저 정보를 기반으로 새로운 액세스 토큰과 리프레쉬 토큰을 생성하고 반환합니다.
+     * 회원가입 이후 필수 정보를 설정하고 유저를 저장한 뒤, 액세스 토큰과 리프레쉬 토큰을 발급합니다.
+     * 리프레쉬 토큰은 브라우저 식별자(browserId)와 함께 Redis에 저장됩니다.
      *
-     * @param onboardUserRequest 유저의 레지스터 토큰, 닉네임, 약관 동의 여부, 수면 시간 정보를 포함하는 요청 객체
-     * @return 발급된 액세스 토큰과 리프레쉬 토큰을 포함하는 응답 객체
+     * @param request 유저의 레지스터 토큰, 닉네임, 약관 동의, 수면 시간 등 온보딩 정보가 포함된 요청 객체
+     * @return 발급된 액세스 토큰과 리프레쉬 토큰을 포함한 응답 객체
      */
     @Transactional
-    public OnboardUserResponse onboardUser(OnboardUserRequest onboardUserRequest) {
-        // 레지스터 토큰을 이용하여 사용자 정보 추출
-        String registerToken = onboardUserRequest.registerToken();
+    public OnboardUserResponse onboardUser(OnboardUserRequest request) {
+        String registerToken = request.registerToken();
         jwtUtil.validateToken(registerToken);
-
-        String provider = jwtUtil.getClaimFromToken(registerToken, "provider", String.class);
-        String providerId = jwtUtil.getClaimFromToken(registerToken, "providerId", String.class);
-        String name = jwtUtil.getClaimFromToken(registerToken, "name", String.class);
-        String email = jwtUtil.getClaimFromToken(registerToken, "email", String.class);
-
-        User newUser = User.builder()
-                .name(name)
-                .email(email)
-                .nickname(onboardUserRequest.nickname())
-                .provider(provider)
-                .providerId(providerId)
-                .servicePolicyAgreement(onboardUserRequest.servicePolicyAgreement())
-                .privacyPolicyAgreement(onboardUserRequest.privacyPolicyAgreement())
-                .marketingPolicyAgreement(onboardUserRequest.marketingPolicyAgreement())
-                .sleepStartTime(onboardUserRequest.sleepStartTime())
-                .sleepEndTime(onboardUserRequest.sleepEndTime())
-                .language(onboardUserRequest.language())
-                .build();
+        User newUser = createUserFromRegisterToken(request, registerToken);
         userRepository.save(newUser);
+
         Long userId = newUser.getId();
-
-        // 액세스 & 리프레쉬 토큰 발급
+        String browserId = jwtUtil.getClaimFromToken(registerToken, "browserId", String.class);
         String accessToken = jwtUtil.generateAccessToken(userId, "USER");
-        String refreshToken = jwtUtil.generateRefreshToken(userId);
+        String refreshToken = jwtUtil.generateRefreshToken(userId, browserId);
+        refreshTokenRepository.save(new RefreshToken(userId, browserId, refreshToken));
 
-        // 새로운 리프레쉬 토큰 Redis 저장
-        RefreshToken newRefreshToken = new RefreshToken(userId, refreshToken);
-        refreshTokenRepository.save(newRefreshToken);
-
-        // 액세스 토큰 반환
         return OnboardUserResponse.of(accessToken, refreshToken);
+    }
+
+    /**
+     * 레지스터 토큰을 기반으로 User 엔티티를 생성하는 메서드.
+     *
+     * JWT 레지스터 토큰의 유효성을 검증하고, 토큰에서 제공자 정보 및 유저 정보를 추출하여
+     * 닉네임, 약관 동의, 수면 정보 등을 포함한 새로운 User 객체를 빌드합니다.
+     *
+     * @param request 레지스터 토큰 및 기타 온보딩 정보를 포함한 요청 객체
+     * @return 생성된 User 엔티티 객체
+     */
+    private User createUserFromRegisterToken(OnboardUserRequest request, String registerToken) {
+
+        return User.builder()
+                .name(jwtUtil.getClaimFromToken(registerToken, "name", String.class))
+                .email(jwtUtil.getClaimFromToken(registerToken, "email", String.class))
+                .nickname(request.nickname())
+                .provider(jwtUtil.getClaimFromToken(registerToken, "provider", String.class))
+                .providerId(jwtUtil.getClaimFromToken(registerToken, "providerId", String.class))
+                .servicePolicyAgreement(request.servicePolicyAgreement())
+                .privacyPolicyAgreement(request.privacyPolicyAgreement())
+                .marketingPolicyAgreement(request.marketingPolicyAgreement())
+                .sleepStartTime(request.sleepStartTime())
+                .sleepEndTime(request.sleepEndTime())
+                .language(request.language())
+                .build();
     }
 
     /**
@@ -117,10 +116,11 @@ public class UserService {
      *
      */
     @Transactional
-    public void withdrawService() {
+    public void withdrawUser() {
         User user = userRepository.findById(UserAuthorizationUtil.getLoginUserId())
                 .orElseThrow(() -> new CustomException(UserErrorStatus._NOT_FOUND_USER));
         userRepository.withdraw(user);
+        refreshTokenRepository.deleteAllByUserId(user.getId());
     }
 
     /**
@@ -184,5 +184,21 @@ public class UserService {
         user.updateSleepStartTime(request.sleepStartTime());
         user.updateSleepEndTime(request.sleepEndTime());
         userRepository.save(user);
+    }
+
+    /**
+     * 유저 로그아웃 메서드.
+     *
+     * 로그아웃 시, 리프레쉬 토큰을 제거합니다.
+     *
+     * @param request 리프레쉬 토큰 요청 데이터
+     */
+    @Transactional
+    public void logoutUser(LogoutUserRequest request) {
+        String refreshToken = request.refreshToken();
+        jwtUtil.validateToken(refreshToken);
+        Long userId = jwtUtil.getClaimFromToken(refreshToken, "userId", Long.class);
+        String browserId = jwtUtil.getClaimFromToken(refreshToken, "browserId", String.class);
+        refreshTokenRepository.deleteRefreshToken(userId, browserId);
     }
 }

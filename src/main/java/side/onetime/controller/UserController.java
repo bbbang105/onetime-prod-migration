@@ -4,10 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import side.onetime.dto.user.request.OnboardUserRequest;
-import side.onetime.dto.user.request.UpdateUserPolicyAgreementRequest;
-import side.onetime.dto.user.request.UpdateUserProfileRequest;
-import side.onetime.dto.user.request.UpdateUserSleepTimeRequest;
+import side.onetime.dto.user.request.*;
 import side.onetime.dto.user.response.GetUserPolicyAgreementResponse;
 import side.onetime.dto.user.response.GetUserProfileResponse;
 import side.onetime.dto.user.response.GetUserSleepTimeResponse;
@@ -77,10 +74,10 @@ public class UserController {
      * @return 성공 상태 응답 객체
      */
     @PostMapping("/action-withdraw")
-    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawService() {
+    public ResponseEntity<ApiResponse<SuccessStatus>> withdrawUser() {
 
-        userService.withdrawService();
-        return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_SERVICE);
+        userService.withdrawUser();
+        return ApiResponse.onSuccess(SuccessStatus._WITHDRAW_USER);
     }
 
     /**
@@ -142,5 +139,21 @@ public class UserController {
 
         userService.updateUserSleepTime(request);
         return ApiResponse.onSuccess(SuccessStatus._UPDATE_USER_SLEEP_TIME);
+    }
+
+    /**
+     * 유저 로그아웃 API.
+     *
+     * 로그아웃 시, 유저의 리프레쉬 토큰을 제거합니다.
+     *
+     * @return 성공 상태 응답 객체
+     */
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<SuccessStatus>> logoutUser(
+            @Valid @RequestBody LogoutUserRequest logoutUserRequest
+    ) {
+
+        userService.logoutUser(logoutUserRequest);
+        return ApiResponse.onSuccess(SuccessStatus._LOGOUT_USER);
     }
 }
