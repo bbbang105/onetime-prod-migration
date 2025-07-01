@@ -138,13 +138,14 @@ public class  DateUtil {
                             return false;
                         }
                     })
-                    .sorted(Comparator.comparing(tp -> LocalDate.parse(tp, dateFormatter)))
+                    .sorted(Comparator.comparing((String tp) -> LocalDate.parse(tp, dateFormatter)).reversed())
                     .collect(Collectors.toMap(tp -> tp, tp -> order.getAndIncrement(), (a, b) -> a, LinkedHashMap::new));
         }
 
         return mostPossibleTimes.stream()
                 .filter(tp -> timePointOrder.containsKey(tp.timePoint()))
-                .sorted(Comparator.comparingInt(tp -> timePointOrder.get(tp.timePoint())))
+                .sorted(Comparator.comparing(GetMostPossibleTime::possibleCount, Comparator.reverseOrder())
+                        .thenComparingInt(tp -> timePointOrder.get(tp.timePoint())))
                 .toList();
     }
 
