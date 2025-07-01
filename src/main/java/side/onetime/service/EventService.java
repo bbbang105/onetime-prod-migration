@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class EventService {
-    private static final int MAX_MOST_POSSIBLE_TIMES_SIZE = 6;
+    private static final int MAX_MOST_POSSIBLE_TIMES_SIZE = 10;
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final EventParticipationRepository eventParticipationRepository;
@@ -346,7 +346,7 @@ public class EventService {
                 } else {
                     // 새로운 시간대를 추가하는 경우
                     if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
-                        // 6개를 찾았을 시 종료
+                        // 10개를 찾았을 시 종료
                         break;
                     }
                     List<String> impossibleNames = new ArrayList<>();
