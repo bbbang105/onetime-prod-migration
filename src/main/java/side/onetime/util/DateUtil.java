@@ -138,7 +138,7 @@ public class  DateUtil {
                             return false;
                         }
                     })
-                    .sorted(Comparator.comparing((String tp) -> LocalDate.parse(tp, dateFormatter)).reversed())
+                    .sorted(Comparator.comparing((String tp) -> LocalDate.parse(tp, dateFormatter)))
                     .collect(Collectors.toMap(tp -> tp, tp -> order.getAndIncrement(), (a, b) -> a, LinkedHashMap::new));
         }
 

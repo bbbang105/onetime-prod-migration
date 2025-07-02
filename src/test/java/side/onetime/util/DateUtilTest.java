@@ -12,7 +12,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class DateUtilTest {
 
     @Test
-    @DisplayName("날짜 기준으로 정렬된다. - 참여자수 내림차순, 날짜 최신순")
+    @DisplayName("날짜 기준으로 정렬된다. - 참여자수 내림차순, 날짜순")
     void sortMostPossibleTimesByDate() {
         // given
         List<GetMostPossibleTime> input = List.of(
@@ -26,8 +26,8 @@ class DateUtilTest {
         List<GetMostPossibleTime> result = DateUtil.sortMostPossibleTimes(input, Category.DATE);
 
         List<GetMostPossibleTime> expected = List.of(
-                createMostPossibleTime("2025.04.05", 5),
                 createMostPossibleTime("2025.02.22", 5),
+                createMostPossibleTime("2025.04.05", 5),
                 createMostPossibleTime("2025.02.22", 3),
                 createMostPossibleTime("2025.05.21", 2)
         );
