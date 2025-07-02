@@ -332,10 +332,6 @@ public class EventService {
         sortedEntries.sort((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()));
 
         for (Map.Entry<Schedule, List<String>> entry : sortedEntries) {
-            if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
-                break;
-            }
-
             Schedule schedule = entry.getKey();
             List<String> curNames = entry.getValue();
 
@@ -345,6 +341,10 @@ public class EventService {
                 mostPossibleTimes.set(mostPossibleTimes.size() - 1, previousTime); // 종료 시간을 더해 업데이트
             } else {
                 // 새로운 시간대를 추가하는 경우
+                if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
+                    // 10개를 찾았을 시 종료
+                    break;
+                }
                 List<String> impossibleNames = new ArrayList<>();
                 // 유저, 멤버 동명이인을 고려하기 위함
                 List<String> curNamesCopy = new ArrayList<>(curNames);
