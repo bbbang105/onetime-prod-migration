@@ -259,15 +259,9 @@ public class EventService {
         // 6. 스케줄 → 참여자 이름 리스트 매핑
         Map<Schedule, List<String>> scheduleToNamesMap = buildScheduleToNamesMap(selections, event.getCategory());
 
-        // 7. 가장 많은 인원 수 계산
-        int mostPossibleCnt = scheduleToNamesMap.values().stream()
-                .mapToInt(List::size)
-                .max()
-                .orElse(0);
-
-        // 8. 최적 시간대 리스트 생성
+        // 7. 최적 시간대 리스트 생성
         List<GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(
-                scheduleToNamesMap, mostPossibleCnt, allParticipants, event.getCategory());
+                scheduleToNamesMap, allParticipants, event.getCategory());
 
         return DateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
@@ -321,50 +315,51 @@ public class EventService {
     }
 
     /**
-     * 가장 많이 되는 시간대 리스트 생성 메서드.
-     * 참여 가능한 인원이 많은 시간대를 기반으로 시간대 리스트를 생성합니다.
+     * 참여 인원이 많은 순서대로 정렬된 시간대 리스트 생성 메서드.
+     * 참여 가능한 인원이 많은 시간대 순으로 시간대 리스트를 생성합니다.
      *
      * @param scheduleToNamesMap 스케줄과 참여자 이름 매핑 데이터
-     * @param mostPossibleCnt 가장 많은 참여자 수
      * @param allMembersName 이벤트 참여자의 전체 이름 목록
      * @param category 이벤트의 카테고리 (날짜 또는 요일)
-     * @return 가장 많이 되는 시간대 리스트
+     * @return 참여 인원이 많은 순서대로 정렬된 시간대 리스트
      */
-    private List<GetMostPossibleTime> buildMostPossibleTimes(Map<Schedule, List<String>> scheduleToNamesMap, int mostPossibleCnt, List<String> allMembersName, Category category) {
+    private List<GetMostPossibleTime> buildMostPossibleTimes(Map<Schedule, List<String>> scheduleToNamesMap, List<String> allMembersName, Category category) {
         List<GetMostPossibleTime> mostPossibleTimes = new ArrayList<>();
         GetMostPossibleTime previousTime = null;
 
-        for (Map.Entry<Schedule, List<String>> entry : scheduleToNamesMap.entrySet()) {
+        // 참여자 많은 순으로 정렬
+        List<Map.Entry<Schedule, List<String>>> sortedEntries = new ArrayList<>(scheduleToNamesMap.entrySet());
+        sortedEntries.sort((a, b) -> Integer.compare(b.getValue().size(), a.getValue().size()));
+
+        for (Map.Entry<Schedule, List<String>> entry : sortedEntries) {
+            if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
+                break;
+            }
+
             Schedule schedule = entry.getKey();
             List<String> curNames = entry.getValue();
 
-            if (curNames.size() == mostPossibleCnt) {
-                if (canMergeWithPrevious(previousTime, schedule, curNames, category)) {
-                    // 이전 시간대와 병합 가능한 경우
-                    previousTime = previousTime.updateEndTime(schedule.getTime());
-                    mostPossibleTimes.set(mostPossibleTimes.size() - 1, previousTime); // 종료 시간을 더해 업데이트
-                } else {
-                    // 새로운 시간대를 추가하는 경우
-                    if (mostPossibleTimes.size() == MAX_MOST_POSSIBLE_TIMES_SIZE) {
-                        // 10개를 찾았을 시 종료
-                        break;
+            if (canMergeWithPrevious(previousTime, schedule, curNames, category)) {
+                // 이전 시간대와 병합 가능한 경우
+                previousTime = previousTime.updateEndTime(schedule.getTime());
+                mostPossibleTimes.set(mostPossibleTimes.size() - 1, previousTime); // 종료 시간을 더해 업데이트
+            } else {
+                // 새로운 시간대를 추가하는 경우
+                List<String> impossibleNames = new ArrayList<>();
+                // 유저, 멤버 동명이인을 고려하기 위함
+                List<String> curNamesCopy = new ArrayList<>(curNames);
+                for (String name : allMembersName) {
+                    if (curNamesCopy.contains(name)) {
+                        curNamesCopy.remove(name);
+                    } else {
+                        impossibleNames.add(name);
                     }
-                    List<String> impossibleNames = new ArrayList<>();
-                    // 유저, 멤버 동명이인을 고려하기 위함
-                    List<String> curNamesCopy = new ArrayList<>(curNames);
-                    for (String name : allMembersName) {
-                        if (curNamesCopy.contains(name)) {
-                            curNamesCopy.remove(name);
-                        } else {
-                            impossibleNames.add(name);
-                        }
-                    }
-
-                    // 새로운 시간대를 추가
-                    GetMostPossibleTime newTime = createMostPossibleTime(schedule, curNames, impossibleNames, category);
-                    mostPossibleTimes.add(newTime);
-                    previousTime = newTime;
                 }
+
+                // 새로운 시간대를 추가
+                GetMostPossibleTime newTime = createMostPossibleTime(schedule, curNames, impossibleNames, category);
+                mostPossibleTimes.add(newTime);
+                previousTime = newTime;
             }
         }
         return mostPossibleTimes;
