@@ -184,7 +184,18 @@ public class EventControllerTest extends ControllerTestConfig {
     public void getParticipants() throws Exception {
         // given
         String eventId = UUID.randomUUID().toString();
-        GetParticipantsResponse response = new GetParticipantsResponse(List.of("Member1", "User1", "Member2", "User2"));
+
+        List<GetParticipantsResponse.Participant> memberList = List.of(
+                GetParticipantsResponse.Participant.of(1L, "Member1"),
+                GetParticipantsResponse.Participant.of(2L, "Member2")
+        );
+
+        List<GetParticipantsResponse.Participant> userList = List.of(
+                GetParticipantsResponse.Participant.of(101L, "User1"),
+                GetParticipantsResponse.Participant.of(102L, "User2")
+        );
+
+        GetParticipantsResponse response = new GetParticipantsResponse(memberList, userList);
 
         Mockito.when(eventService.getParticipants(anyString()))
                 .thenReturn(response);
@@ -199,10 +210,14 @@ public class EventControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("참여자 조회에 성공했습니다."))
-                .andExpect(jsonPath("$.payload.names[0]").value("Member1"))
-                .andExpect(jsonPath("$.payload.names[1]").value("User1"))
-                .andExpect(jsonPath("$.payload.names[2]").value("Member2"))
-                .andExpect(jsonPath("$.payload.names[3]").value("User2"))
+                .andExpect(jsonPath("$.payload.members[0].id").value(1))
+                .andExpect(jsonPath("$.payload.members[0].name").value("Member1"))
+                .andExpect(jsonPath("$.payload.members[1].id").value(2))
+                .andExpect(jsonPath("$.payload.members[1].name").value("Member2"))
+                .andExpect(jsonPath("$.payload.users[0].id").value(101))
+                .andExpect(jsonPath("$.payload.users[0].name").value("User1"))
+                .andExpect(jsonPath("$.payload.users[1].id").value(102))
+                .andExpect(jsonPath("$.payload.users[1].name").value("User2"))
 
                 // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("event/get-participants",
@@ -220,7 +235,12 @@ public class EventControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("응답 데이터"),
-                                                fieldWithPath("payload.names").type(JsonFieldType.ARRAY).description("참여자 이름 목록")
+                                                fieldWithPath("payload.members").type(JsonFieldType.ARRAY).description("멤버 목록"),
+                                                fieldWithPath("payload.members[].id").type(JsonFieldType.NUMBER).description("멤버 ID"),
+                                                fieldWithPath("payload.members[].name").type(JsonFieldType.STRING).description("멤버 이름"),
+                                                fieldWithPath("payload.users").type(JsonFieldType.ARRAY).description("유저 목록"),
+                                                fieldWithPath("payload.users[].id").type(JsonFieldType.NUMBER).description("유저 ID"),
+                                                fieldWithPath("payload.users[].name").type(JsonFieldType.STRING).description("유저 이름")
                                         )
                                         .responseSchema(Schema.schema("GetParticipantsResponseSchema"))
                                         .build()

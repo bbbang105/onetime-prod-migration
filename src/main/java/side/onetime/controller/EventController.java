@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import side.onetime.dto.event.request.CreateEventRequest;
 import side.onetime.dto.event.request.ModifyUserCreatedEventRequest;
 import side.onetime.dto.event.response.*;
+import side.onetime.dto.schedule.request.GetFilteredSchedulesRequest;
 import side.onetime.global.common.ApiResponse;
 import side.onetime.global.common.status.SuccessStatus;
 import side.onetime.service.EventService;
@@ -71,7 +72,7 @@ public class EventController {
      * 이 API는 특정 이벤트에 참여한 모든 참여자의 이름 목록을 조회합니다.
      *
      * @param eventId 참여자 목록을 조회할 이벤트의 ID
-     * @return 해당 이벤트에 참여한 참여자의 이름 목록
+     * @return 해당 이벤트에 참여한 멤버, 유저의 이름 및 ID 목록
      */
     @GetMapping("/{event_id}/participants")
     public ResponseEntity<ApiResponse<GetParticipantsResponse>> getParticipants(
