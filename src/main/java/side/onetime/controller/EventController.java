@@ -99,6 +99,24 @@ public class EventController {
     }
 
     /**
+     * 필터링한 사용자의 가능한 시간 조회 API.
+     *
+     * 이 API는 특정 이벤트에서 필터링한 사용자의 시간대를 조회하여, 가능 인원과 해당 시간대 정보를 제공합니다.
+     *
+     * @param eventId 조회할 이벤트의 ID
+     * @param getFilteredSchedulesRequest 필터링할 스케줄 요청 객체 (유저 ID 목록, 멤버 ID 목록)
+     * @return 필터링한 사용자의 시간대와 관련 세부 정보
+     */
+    @PostMapping("/{event_id}/filtering")
+    public ResponseEntity<ApiResponse<List<GetMostPossibleTime>>> getFilteredPossibleTimes(
+            @PathVariable("event_id") String eventId,
+            @RequestBody GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+
+        List<GetMostPossibleTime> getFilteredPossibleTimes = eventService.getFilteredPossibleTimes(eventId, getFilteredSchedulesRequest);
+        return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_POSSIBLE_TIME, getFilteredPossibleTimes);
+    }
+
+    /**
      * 유저 참여 이벤트 목록 조회 API.
      *
      * 이 API는 인증된 유저가 참여한 모든 이벤트 목록을 조회합니다. 유저의 참여 상태, 이벤트 정보 등이 포함됩니다.
