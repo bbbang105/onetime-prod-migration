@@ -186,17 +186,17 @@ public class EventControllerTest extends ControllerTestConfig {
         // given
         String eventId = UUID.randomUUID().toString();
 
-        List<GetParticipantsResponse.Participant> memberList = List.of(
+        List<GetParticipantsResponse.Participant> memberParticipants = List.of(
                 GetParticipantsResponse.Participant.of(1L, "Member1"),
                 GetParticipantsResponse.Participant.of(2L, "Member2")
         );
 
-        List<GetParticipantsResponse.Participant> userList = List.of(
+        List<GetParticipantsResponse.Participant> userParticipants = List.of(
                 GetParticipantsResponse.Participant.of(101L, "User1"),
                 GetParticipantsResponse.Participant.of(102L, "User2")
         );
 
-        GetParticipantsResponse response = new GetParticipantsResponse(memberList, userList);
+        GetParticipantsResponse response = new GetParticipantsResponse(memberParticipants, userParticipants);
 
         Mockito.when(eventService.getParticipants(anyString()))
                 .thenReturn(response);

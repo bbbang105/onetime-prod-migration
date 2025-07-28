@@ -19,14 +19,14 @@ public record GetParticipantsResponse(
     }
 
     public static GetParticipantsResponse of(List<Member> members, List<User> users) {
-        List<Participant> memberList = members.stream()
+        List<Participant> memberParticipants = members.stream()
                 .map(member -> Participant.of(member.getId(), member.getName()))
                 .toList();
 
-        List<Participant> userList = users.stream()
+        List<Participant> userParticipants = users.stream()
                 .map(user -> Participant.of(user.getId(), user.getNickname()))
                 .toList();
 
-        return new GetParticipantsResponse(memberList, userList);
+        return new GetParticipantsResponse(memberParticipants, userParticipants);
     }
 }
