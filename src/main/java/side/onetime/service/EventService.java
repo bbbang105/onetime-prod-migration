@@ -269,16 +269,16 @@ public class EventService {
     }
 
     /**
-     * 필터링한 사용자들의 가능한 시간대를 조회하는 메서드.
+     * 필터링한 참여자의 가장 많이 되는 시간을 조회하는 메서드.
      * 특정 이벤트에서 전달받은 멤버 및 유저 ID를 기준으로 선택 정보를 필터링하고, 가능한 시간대를 정리하여 반환합니다.
      *
      * @param eventId 조회할 이벤트의 ID
      * @param getFilteredSchedulesRequest 필터링할 스케줄 요청 객체 (유저 ID 목록, 멤버 ID 목록)
-     * @return 필터링된 사용자들의 가능한 시간대 정보 리스트
+     * @return 필터링된 참여자의 가능한 시간대 정보 리스트
      * @throws CustomException 이벤트를 찾을 수 없는 경우
      */
     @Transactional(readOnly = true)
-    public List<GetMostPossibleTime> getFilteredPossibleTimes(String eventId, GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
+    public List<GetMostPossibleTime> getFilteredMostPossibleTimes(String eventId, GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
         // 1. 이벤트 + 멤버 fetch join으로 조회
         Event event = eventRepository.findByEventIdWithMembers(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));

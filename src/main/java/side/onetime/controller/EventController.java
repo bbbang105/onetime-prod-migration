@@ -99,21 +99,21 @@ public class EventController {
     }
 
     /**
-     * 필터링한 사용자의 가능한 시간 조회 API.
+     * 필터링한 참여자의 가장 많이 되는 시간 조회 API.
      *
-     * 이 API는 특정 이벤트에서 필터링한 사용자의 시간대를 조회하여, 가능 인원과 해당 시간대 정보를 제공합니다.
+     * 이 API는 특정 이벤트에서 필터링한 참여자의 가장 많이 가능한 시간대를 조회하여, 가능 인원과 해당 시간대 정보를 제공합니다.
      *
      * @param eventId 조회할 이벤트의 ID
      * @param getFilteredSchedulesRequest 필터링할 스케줄 요청 객체 (유저 ID 목록, 멤버 ID 목록)
-     * @return 필터링한 사용자의 시간대와 관련 세부 정보
+     * @return 필터링한 참여자의 시간대와 관련 세부 정보
      */
-    @PostMapping("/{event_id}/filtering")
-    public ResponseEntity<ApiResponse<List<GetMostPossibleTime>>> getFilteredPossibleTimes(
+    @PostMapping("/{event_id}/most/filtering")
+    public ResponseEntity<ApiResponse<List<GetMostPossibleTime>>> getFilteredMostPossibleTimes(
             @PathVariable("event_id") String eventId,
             @RequestBody GetFilteredSchedulesRequest getFilteredSchedulesRequest) {
 
-        List<GetMostPossibleTime> getFilteredPossibleTimes = eventService.getFilteredPossibleTimes(eventId, getFilteredSchedulesRequest);
-        return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_POSSIBLE_TIME, getFilteredPossibleTimes);
+        List<GetMostPossibleTime> getFilteredMostPossibleTimes = eventService.getFilteredMostPossibleTimes(eventId, getFilteredSchedulesRequest);
+        return ApiResponse.onSuccess(SuccessStatus._GET_FILTERED_MOST_POSSIBLE_TIME, getFilteredMostPossibleTimes);
     }
 
     /**

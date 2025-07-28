@@ -309,8 +309,8 @@ public class EventControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("필터링한 사용자의 가능한 시간을 조회한다.")
-    public void getFilteredPossibleTimes() throws Exception {
+    @DisplayName("필터링한 참여자들의 가장 많이 되는 시간을 조회한다.")
+    public void getFilteredMostPossibleTimes() throws Exception {
         // given
         String eventId = UUID.randomUUID().toString();
 
@@ -324,12 +324,12 @@ public class EventControllerTest extends ControllerTestConfig {
                 new GetMostPossibleTime("2025.07.13", "11:00", "11:30", 3, List.of("User1", "User2", "Member3"), Collections.emptyList())
         );
 
-        Mockito.when(eventService.getFilteredPossibleTimes(anyString(), any(GetFilteredSchedulesRequest.class))).thenReturn(response);
+        Mockito.when(eventService.getFilteredMostPossibleTimes(anyString(), any(GetFilteredSchedulesRequest.class))).thenReturn(response);
 
         // when
         String requestContent = new ObjectMapper().writeValueAsString(request);
         ResultActions resultActions = mockMvc.perform(
-                RestDocumentationRequestBuilders.post("/api/v1/events/{event_id}/filtering", eventId)
+                RestDocumentationRequestBuilders.post("/api/v1/events/{event_id}/most/filtering", eventId)
                         .content(requestContent)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
@@ -340,7 +340,7 @@ public class EventControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("필터링한 인원의 시간 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("필터링한 참여자의 시간 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.payload[0].time_point").value("2025.07.13"))
                 .andExpect(jsonPath("$.payload[0].start_time").value("10:00"))
                 .andExpect(jsonPath("$.payload[0].end_time").value("10:30"))
@@ -350,13 +350,13 @@ public class EventControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.payload[0].possible_names[2]").value("Member3"))
 
                 // docs
-                .andDo(MockMvcRestDocumentationWrapper.document("event/get-filtered-possible-times",
+                .andDo(MockMvcRestDocumentationWrapper.document("event/get-filtered-most-possible-times",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Event API")
-                                        .description("필터링한 사용자의 가능한 시간을 조회한다.")
+                                        .description("필터링한 참여자들의 가장 많이 되는 시간을 조회한다.")
                                         .pathParameters(
                                                 parameterWithName("event_id").description("조회할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]")
                                         )
@@ -376,7 +376,7 @@ public class EventControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload[].possible_names").type(JsonFieldType.ARRAY).description("가능한 참여자 이름 목록"),
                                                 fieldWithPath("payload[].impossible_names").type(JsonFieldType.ARRAY).description("참여 불가능한 이름 목록")
                                         )
-                                        .responseSchema(Schema.schema("GetFilteredPossibleTimeResponseSchema"))
+                                        .responseSchema(Schema.schema("GetFilteredMostPossibleTimeResponseSchema"))
                                         .build()
                         )
                 ));
