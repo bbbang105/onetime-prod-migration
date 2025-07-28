@@ -114,12 +114,12 @@ public class JwtFilter extends OncePerRequestFilter {
                 (isPost && path.equals("/api/v1/schedules/day")) ||
                 (isGet && path.matches("/api/v1/schedules/day/[^/]+$")) ||
                 (isGet && path.matches("/api/v1/schedules/day/[^/]+/[^/]+$") && !path.endsWith("/user")) ||
-                (isPost && path.matches("/api/v1/schedules/date/[^/]+/filtering")) ||
+                (isPost && path.matches("/api/v1/schedules/day/[^/]+/filtering")) ||
                 // 날짜 스케줄 등록/조회 (비로그인)
                 (isPost && path.equals("/api/v1/schedules/date")) ||
                 (isGet && path.matches("/api/v1/schedules/date/[^/]+$")) ||
                 (isGet && path.matches("/api/v1/schedules/date/[^/]+/[^/]+$") && !path.endsWith("/user")) ||
-                (isPost && path.matches("/api/v1/schedules/day/[^/]+/filtering"));
+                (isPost && path.matches("/api/v1/schedules/date/[^/]+/filtering"));
     }
 
     /**
