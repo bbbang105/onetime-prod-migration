@@ -470,9 +470,9 @@ public class ScheduleService {
     }
 
     /**
-     * 사용자 필터링 요일 스케줄 반환 메서드.
+     * 참여자 필터링 요일 스케줄 반환 메서드.
      *
-     * 주어진 ID 필터에 해당하는 사용자의 요일 스케줄을 반환합니다.
+     * 주어진 ID 필터에 해당하는 참여자의 요일 스케줄을 반환합니다.
      *
      * @param getFilteredSchedulesRequest 필터링 요청 데이터
      * @return 필터링된 요일 스케줄 응답 리스트
@@ -522,9 +522,9 @@ public class ScheduleService {
     }
 
     /**
-     * 사용자 필터링 날짜 스케줄 반환 메서드.
+     * 참여자 필터링 날짜 스케줄 반환 메서드.
      *
-     * 주어진 ID 필터에 해당하는 멤버들의 날짜 스케줄을 반환합니다.
+     * 주어진 ID 필터에 해당하는 참여자의 날짜 스케줄을 반환합니다.
      *
      * @param getFilteredSchedulesRequest 필터링 요청 데이터
      * @return 필터링된 날짜 스케줄 응답 리스트

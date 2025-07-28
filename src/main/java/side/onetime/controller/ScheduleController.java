@@ -119,9 +119,9 @@ public class ScheduleController {
     }
 
     /**
-     * 개인 필터링 요일 스케줄 조회 API.
+     * 참여자 필터링 요일 스케줄 조회 API.
      *
-     * 사용자 ID로 필터링하여 특정 이벤트의 요일 스케줄을 조회합니다.
+     * 참여자 ID로 필터링하여 특정 이벤트의 요일 스케줄을 조회합니다.
      *
      * @param eventId 조회할 이벤트의 ID
      * @param getFilteredSchedulesRequest 필터링할 스케줄 요청 객체 (유저 ID 목록, 멤버 ID 목록)
@@ -187,9 +187,9 @@ public class ScheduleController {
     }
 
     /**
-     * 개인 필터링 날짜 스케줄 조회 API.
+     * 참여자 필터링 날짜 스케줄 조회 API.
      *
-     * 사용자 ID로 필터링하여 특정 이벤트의 날짜 스케줄을 조회합니다.
+     * 참여자 ID로 필터링하여 특정 이벤트의 날짜 스케줄을 조회합니다.
      *
      * @param eventId 조회할 이벤트의 ID
      * @param getFilteredSchedulesRequest 필터링할 스케줄 요청 객체 (유저 ID 목록, 멤버 ID 목록)

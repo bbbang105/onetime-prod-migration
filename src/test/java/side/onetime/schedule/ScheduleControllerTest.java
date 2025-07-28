@@ -301,7 +301,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("개인 필터링 요일 스케줄을 조회한다.")
+    @DisplayName("참여자 필터링 요일 스케줄을 조회한다.")
     public void getFilteredDaySchedules() throws Exception {
         // given
         String eventId = UUID.randomUUID().toString();
@@ -330,7 +330,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("개인 필터링 요일 스케줄 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("참여자 필터링 요일 스케줄 조회에 성공했습니다."))
 
                 // docs
                 .andDo(MockMvcRestDocumentationWrapper.document("schedule/get-filtered-day-schedules",
@@ -339,7 +339,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Schedule API")
-                                        .description("개인 필터링 요일 스케줄을 조회한다.")
+                                        .description("참여자 필터링 요일 스케줄을 조회한다.")
                                         .pathParameters(
                                                 parameterWithName("event_id").description("이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]")
                                         )
@@ -351,7 +351,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                                fieldWithPath("payload[].name").type(JsonFieldType.STRING).description("사용자 이름"),
+                                                fieldWithPath("payload[].name").type(JsonFieldType.STRING).description("참여자 이름"),
                                                 fieldWithPath("payload[].schedules[].time_point").type(JsonFieldType.STRING).description("요일"),
                                                 fieldWithPath("payload[].schedules[].times[]").type(JsonFieldType.ARRAY).description("스케줄 시간 목록")
                                         )
@@ -500,7 +500,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("개인 필터링 날짜 스케줄을 조회한다.")
+    @DisplayName("참여자 필터링 날짜 스케줄을 조회한다.")
     public void getFilteredDateSchedules() throws Exception {
         // given
         String eventId = "123e4567-e89b-12d3-a456-426614174000";
@@ -531,14 +531,14 @@ public class ScheduleControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("개인 필터링 날짜 스케줄 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("참여자 필터링 날짜 스케줄 조회에 성공했습니다."))
                 .andDo(MockMvcRestDocumentationWrapper.document("schedule/get-filtered-date",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Schedule API")
-                                        .description("개인 필터링 날짜 스케줄을 조회한다.")
+                                        .description("참여자 필터링 날짜 스케줄을 조회한다.")
                                         .pathParameters(
                                                 parameterWithName("event_id").description("이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]")
                                         )
@@ -550,7 +550,7 @@ public class ScheduleControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                                fieldWithPath("payload[].name").type(JsonFieldType.STRING).description("사용자 이름"),
+                                                fieldWithPath("payload[].name").type(JsonFieldType.STRING).description("참여자 이름"),
                                                 fieldWithPath("payload[].schedules[].time_point").type(JsonFieldType.STRING).description("날짜"),
                                                 fieldWithPath("payload[].schedules[].times[]").type(JsonFieldType.ARRAY).description("스케줄 시간 목록")
                                         )
