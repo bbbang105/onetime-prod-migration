@@ -108,7 +108,7 @@ public class JwtFilter extends OncePerRequestFilter {
                 (isGet && path.matches("/api/v1/events/[^/]+$")) ||
                 (isGet && path.matches("/api/v1/events/[^/]+/participants")) ||
                 (isGet && path.matches("/api/v1/events/[^/]+/most")) ||
-                (isPost && path.matches("/api/v1/events/[^/]+/filtering")) ||
+                (isPost && path.matches("/api/v1/events/[^/]+/most/filtering")) ||
                 (isGet && path.matches("/api/v1/events/qr/[^/]+")) ||
                 // 요일 스케줄 등록/조회 (비로그인)
                 (isPost && path.equals("/api/v1/schedules/day")) ||
