@@ -314,12 +314,9 @@ public class EventService {
         // 6. 스케줄 기준으로 참여자 이름 매핑 생성
         Map<Schedule, List<String>> scheduleToNamesMap = buildScheduleToNamesMap(allSelections, event.getCategory());
 
-        // 7. 전체 참여자가 모두 가능한 시간대만 필터링
-        Map<Schedule, List<String>> filteredScheduleToNamesMap = filterSchedulesWithAllParticipants(scheduleToNamesMap, allParticipants);
-
-        // 8. 필터링된 시간대로부터 최적 시간대 리스트 구성
+        // 7. 최적 시간대 리스트 구성
         List<GetMostPossibleTime> mostPossibleTimes = buildMostPossibleTimes(
-                filteredScheduleToNamesMap, allParticipants, event.getCategory());
+                scheduleToNamesMap, allParticipants, event.getCategory());
 
         return DateUtil.sortMostPossibleTimes(mostPossibleTimes, event.getCategory());
     }
