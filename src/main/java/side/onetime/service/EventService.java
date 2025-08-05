@@ -459,25 +459,6 @@ public class EventService {
     }
 
     /**
-     * 전체 참여자가 모두 가능한 스케줄만 필터링하는 메서드.
-     * 입력으로 주어진 스케줄-참여자 매핑에서, 모든 참여자가 포함된 스케줄만 남겨 반환합니다.
-     *
-     * @param scheduleToNamesMap 스케줄과 참여자 이름 매핑 데이터
-     * @param allParticipants 전체 참여자 이름 목록
-     * @return 전체 참여자가 모두 가능한 스케줄과 참여자 이름 매핑 데이터
-     */
-    private Map<Schedule, List<String>> filterSchedulesWithAllParticipants(Map<Schedule, List<String>> scheduleToNamesMap, List<String> allParticipants) {
-        return scheduleToNamesMap.entrySet().stream()
-                .filter(entry -> new HashSet<>(entry.getValue()).containsAll(allParticipants))
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (a, b) -> a,
-                        LinkedHashMap::new // buildScheduleToNamesMap()에서 정렬된 순서 유지
-                ));
-    }
-
-    /**
      * 날짜 포맷 여부 검증 메서드.
      * 주어진 문자열이 날짜 형식인지 확인합니다.
      *
