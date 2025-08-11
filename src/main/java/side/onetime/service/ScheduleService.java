@@ -248,9 +248,8 @@ public class ScheduleService {
         }
 
         for (User user : users) {
-            List<Selection> selections = selectionRepository.findAllByUserWithScheduleAndEvent(user);
-            responses.add(toPerDaySchedules(user.getNickname(), selections,
-                    s -> s.getSchedule().getDay() != null && s.getSchedule().getEvent().equals(event)));
+            List<Selection> selections = selectionRepository.findAllByUserAndEventWithScheduleAndEvent(user, event);
+            responses.add(toPerDaySchedules(user.getNickname(), selections, s -> s.getSchedule().getDay() != null));
         }
 
         return responses;
@@ -327,19 +326,8 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-        Map<String, List<Selection>> groupedSelectionsByDay = user.getSelections().stream()
-                .filter(selection -> selection.getSchedule().getEvent().equals(event))
-                .collect(Collectors.groupingBy(
-                        selection -> selection.getSchedule().getDay(),
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                .map(entry -> DaySchedule.from(entry.getValue()))
-                .collect(Collectors.toList());
-
-        return PerDaySchedulesResponse.of(user.getNickname(), daySchedules);
+        List<Selection> selections = selectionRepository.findAllByUserAndEventWithScheduleAndEvent(user, event);
+        return toPerDaySchedules(user.getNickname(), selections, s -> s.getSchedule().getDay() != null);
     }
 
     /**
@@ -372,9 +360,8 @@ public class ScheduleService {
         }
 
         for (User user : users) {
-            List<Selection> selections = selectionRepository.findAllByUserWithScheduleAndEvent(user);
-            responses.add(toPerDateSchedules(user.getNickname(), selections,
-                    s -> s.getSchedule().getDate() != null && s.getSchedule().getEvent().equals(event)));
+            List<Selection> selections = selectionRepository.findAllByUserAndEventWithScheduleAndEvent(user, event);
+            responses.add(toPerDateSchedules(user.getNickname(), selections, s -> s.getSchedule().getDate() != null));
         }
 
         return responses;
@@ -453,20 +440,8 @@ public class ScheduleService {
         Event event = eventRepository.findByEventId(UUID.fromString(eventId))
                 .orElseThrow(() -> new CustomException(EventErrorStatus._NOT_FOUND_EVENT));
 
-
-        Map<String, List<Selection>> groupedSelectionsByDate = user.getSelections().stream()
-                .filter(selection -> selection.getSchedule().getEvent().equals(event))
-                .collect(Collectors.groupingBy(
-                        selection -> selection.getSchedule().getDate(),
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                .map(entry -> DateSchedule.from(entry.getValue()))
-                .collect(Collectors.toList());
-
-        return PerDateSchedulesResponse.of(user.getNickname(), dateSchedules);
+        List<Selection> selections = selectionRepository.findAllByUserAndEventWithScheduleAndEvent(user, event);
+        return toPerDateSchedules(user.getNickname(), selections, s -> s.getSchedule().getDate() != null);
     }
 
     /**
