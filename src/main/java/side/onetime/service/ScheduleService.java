@@ -445,7 +445,7 @@ public class ScheduleService {
         }
 
         for (User user : users) {
-            perDaySchedulesResponses.add(toPerDaySchedules(user.getNickname(),user.getSelections(), s -> s.getSchedule().getDay() != null));
+            perDaySchedulesResponses.add(toPerDaySchedules(user.getNickname(), user.getSelections(), s -> s.getSchedule().getDay() != null));
         }
 
         return perDaySchedulesResponses;
