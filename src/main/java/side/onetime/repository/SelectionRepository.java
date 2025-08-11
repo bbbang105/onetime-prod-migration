@@ -37,16 +37,16 @@ public interface SelectionRepository extends JpaRepository<Selection, Long> {
     @Query("""
         SELECT s FROM Selection s
         JOIN FETCH s.schedule sc
-        JOIN FETCH sc.event
-        WHERE s.user = :user
+        JOIN FETCH sc.event e
+        WHERE e = :event AND (s.user.id IN :userIds OR s.member.id IN :memberIds)
     """)
-    List<Selection> findAllByUserWithScheduleAndEvent(@Param("user") User user);
+    List<Selection> findAllByUserIdsOrMemberIdsWithScheduleAndEvent(@Param("event") Event event, @Param("userIds") List<Long> userIds, @Param("memberIds") List<Long> memberIds);
 
     @Query("""
         SELECT s FROM Selection s
         JOIN FETCH s.schedule sc
         JOIN FETCH sc.event e
-        WHERE e = :event AND (s.user.id IN :userIds OR s.member.id IN :memberIds)
+        WHERE s.user = :user AND e = :event
     """)
-    List<Selection> findAllByUserIdsOrMemberIdsWithScheduleAndEvent(@Param("event") Event event, @Param("userIds") List<Long> userIds, @Param("memberIds") List<Long> memberIds);
+    List<Selection> findAllByUserAndEventWithScheduleAndEvent(@Param("user") User user, @Param("event") Event event);
 }
