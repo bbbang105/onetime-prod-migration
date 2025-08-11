@@ -243,8 +243,7 @@ public class ScheduleService {
 
         for (Member member : members) {
             List<Selection> selections = selectionRepository.findAllByMemberWithSchedule(member);
-            responses.add(toPerDaySchedules(member.getName(), selections,
-                    s -> s.getSchedule() != null && s.getSchedule().getDay() != null));
+            responses.add(toPerDaySchedules(member.getName(), selections, s -> s.getSchedule().getDay() != null));
         }
 
         for (User user : users) {
@@ -296,18 +295,8 @@ public class ScheduleService {
         Member member = memberRepository.findByMemberId(UUID.fromString(memberId))
                 .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
-        Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
-                .collect(Collectors.groupingBy(
-                        selection -> selection.getSchedule().getDay(),
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        List<DaySchedule> daySchedules = groupedSelectionsByDay.entrySet().stream()
-                .map(entry -> DaySchedule.from(entry.getValue()))
-                .collect(Collectors.toList());
-
-        return PerDaySchedulesResponse.of(member.getName(), daySchedules);
+        List<Selection> selections = selectionRepository.findAllByMemberWithSchedule(member);
+        return toPerDaySchedules(member.getName(), selections, s -> s.getSchedule().getDay() != null);
     }
 
     /**
@@ -355,8 +344,7 @@ public class ScheduleService {
 
         for (Member member : members) {
             List<Selection> selections = selectionRepository.findAllByMemberWithSchedule(member);
-            responses.add(toPerDateSchedules(member.getName(), selections,
-                    s -> s.getSchedule() != null && s.getSchedule().getDate() != null));
+            responses.add(toPerDateSchedules(member.getName(), selections, s -> s.getSchedule().getDate() != null));
         }
 
         for (User user : users) {
@@ -411,18 +399,8 @@ public class ScheduleService {
         Member member = memberRepository.findByMemberId(UUID.fromString(memberId))
                 .orElseThrow(() -> new CustomException(MemberErrorStatus._NOT_FOUND_MEMBER));
 
-        Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
-                .collect(Collectors.groupingBy(
-                        selection -> selection.getSchedule().getDate(),
-                        LinkedHashMap::new,
-                        Collectors.toList()
-                ));
-
-        List<DateSchedule> dateSchedules = groupedSelectionsByDate.entrySet().stream()
-                .map(entry -> DateSchedule.from(entry.getValue()))
-                .collect(Collectors.toList());
-
-        return PerDateSchedulesResponse.of(member.getName(), dateSchedules);
+        List<Selection> selections = selectionRepository.findAllByMemberWithSchedule(member);
+        return toPerDateSchedules(member.getName(), selections, s -> s.getSchedule().getDate() != null);
     }
 
     /**
