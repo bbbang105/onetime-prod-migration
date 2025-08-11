@@ -441,35 +441,12 @@ public class ScheduleService {
         List<PerDaySchedulesResponse> perDaySchedulesResponses = new ArrayList<>();
 
         for (Member member : members) {
-            Map<String, List<Selection>> groupedSelectionsByDay = member.getSelections().stream()
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDay(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DaySchedule> daySchedules = groupedSelectionsByDay.values().stream()
-                    .map(DaySchedule::from)
-                    .toList();
-
-            perDaySchedulesResponses.add(PerDaySchedulesResponse.of(member.getName(), daySchedules));
+            perDaySchedulesResponses.add(toPerDaySchedules(member.getName(), member.getSelections(), s -> s.getSchedule().getDay() != null));
         }
 
         for (User user : users) {
-            Map<String, List<Selection>> groupedSelectionsByDay = user.getSelections().stream()
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDay(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DaySchedule> daySchedules = groupedSelectionsByDay.values().stream()
-                    .map(DaySchedule::from)
-                    .toList();
-
-            perDaySchedulesResponses.add(PerDaySchedulesResponse.of(user.getNickname(), daySchedules));
+            perDaySchedulesResponses.add(toPerDaySchedules(user.getNickname(),user.getSelections(), s -> s.getSchedule().getDay() != null));
         }
-
 
         return perDaySchedulesResponses;
     }
@@ -493,32 +470,11 @@ public class ScheduleService {
         List<PerDateSchedulesResponse> perDateSchedulesResponses = new ArrayList<>();
 
         for (Member member : members) {
-            Map<String, List<Selection>> groupedSelectionsByDate = member.getSelections().stream()
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDate(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DateSchedule> dateSchedules = groupedSelectionsByDate.values().stream()
-                    .map(DateSchedule::from)
-                    .toList();
-            perDateSchedulesResponses.add(PerDateSchedulesResponse.of(member.getName(), dateSchedules));
+            perDateSchedulesResponses.add(toPerDateSchedules(member.getName(), member.getSelections(), s -> s.getSchedule().getDate() != null));
         }
 
         for (User user : users) {
-            Map<String, List<Selection>> groupedSelectionsByDate = user.getSelections().stream()
-                    .collect(Collectors.groupingBy(
-                            selection -> selection.getSchedule().getDate(),
-                            LinkedHashMap::new,
-                            Collectors.toList()
-                    ));
-
-            List<DateSchedule> dateSchedules = groupedSelectionsByDate.values().stream()
-                    .map(DateSchedule::from)
-                    .toList();
-
-            perDateSchedulesResponses.add(PerDateSchedulesResponse.of(user.getNickname(), dateSchedules));
+            perDateSchedulesResponses.add(toPerDateSchedules(user.getNickname(), user.getSelections(), s -> s.getSchedule().getDate() != null));
         }
 
         return perDateSchedulesResponses;
