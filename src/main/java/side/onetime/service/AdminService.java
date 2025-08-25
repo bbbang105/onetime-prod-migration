@@ -460,8 +460,10 @@ public class AdminService {
         }
 
         if (imageFile != null) {
-            String imageUrl = uploadBannerImage(imageFile);
-            banner.updateImageUrl(imageUrl);
+            deleteExistingBannerImage(banner.getImageUrl());
+
+            String newImageUrl = uploadBannerImage(imageFile);
+            banner.updateImageUrl(newImageUrl);
         }
     }
 
@@ -513,11 +515,7 @@ public class AdminService {
                 .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
 
         String imageUrl = banner.getImageUrl();
-
-        if (imageUrl != null && !imageUrl.isBlank()) {
-            String imageFileName = S3Util.extractFileName(imageUrl);
-            s3Util.deleteFile(imageFileName);
-        }
+        deleteExistingBannerImage(imageUrl);
 
         banner.markAsDeleted();
     }
@@ -553,6 +551,18 @@ public class AdminService {
             return s3Util.getPublicUrl(imageFileName);
         } catch (Exception e) {
             throw new CustomException(AdminErrorStatus._FAILED_UPLOAD_BANNER_IMAGE);
+        }
+    }
+
+    /**
+     * 기존 배너 이미지를 S3에서 삭제하는 메서드.
+     *
+     * @param imageUrl 삭제할 이미지 파일
+     */
+    private void deleteExistingBannerImage(String imageUrl) {
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            String imageFileName = S3Util.extractFileName(imageUrl);
+            s3Util.deleteFile(imageFileName);
         }
     }
 }
