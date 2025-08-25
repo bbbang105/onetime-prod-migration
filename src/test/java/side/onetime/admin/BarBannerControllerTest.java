@@ -13,7 +13,7 @@ import org.springframework.restdocs.payload.JsonFieldType;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.BannerController;
-import side.onetime.dto.admin.response.GetActivatedBannerResponse;
+import side.onetime.dto.admin.response.GetActivatedBarBannerResponse;
 import side.onetime.service.AdminService;
 import side.onetime.util.JwtUtil;
 
@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(BannerController.class)
-public class BannerControllerTest extends ControllerTestConfig {
+public class BarBannerControllerTest extends ControllerTestConfig {
 
     @MockBean
     private AdminService adminService;
@@ -37,23 +37,23 @@ public class BannerControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("활성화된 띠배너를 조회한다.")
-    public void getActivatedBanner() throws Exception {
+    public void getActivatedBarBanner() throws Exception {
         // given
-        Long bannerId = 1L;
-        GetActivatedBannerResponse response = new GetActivatedBannerResponse(
-                bannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
+        Long barBannerId = 1L;
+        GetActivatedBarBannerResponse response = new GetActivatedBarBannerResponse(
+                barBannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
         );
 
         // when
-        Mockito.when(adminService.getActivatedBanner()).thenReturn(response);
+        Mockito.when(adminService.getActivatedBarBanner()).thenReturn(response);
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/banners/activated"))
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/bar-banners/activated"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("활성화된 띠배너 조회에 성공했습니다."))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-get-activated",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-get-activated",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
@@ -74,7 +74,7 @@ public class BannerControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자"),
                                                 fieldWithPath("payload.link_url").type(JsonFieldType.STRING).description("링크 URL")
                                         )
-                                        .responseSchema(Schema.schema("GetActivatedBannerResponse"))
+                                        .responseSchema(Schema.schema("GetActivatedBarBannerResponse"))
                                         .build()
                         )
                 ));

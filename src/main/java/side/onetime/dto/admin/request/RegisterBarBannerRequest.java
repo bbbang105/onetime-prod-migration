@@ -3,9 +3,10 @@ package side.onetime.dto.admin.request;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import jakarta.validation.constraints.Size;
+import side.onetime.domain.BarBanner;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record UpdateBannerRequest(
+public record RegisterBarBannerRequest(
 
         @Size(max = 200, message = "한글 내용은 최대 200자까지 가능합니다.")
         String contentKor,
@@ -19,9 +20,17 @@ public record UpdateBannerRequest(
         @Size(max = 30, message = "텍스트 색상 값은 최대 30자까지 가능합니다.")
         String textColorCode,
 
-        Boolean isActivated,
-
         @Size(max = 200, message = "링크 URL은 최대 200자까지 가능합니다.")
         String linkUrl
 ) {
+
+        public BarBanner toEntity() {
+                return BarBanner.builder()
+                        .contentKor(contentKor)
+                        .contentEng(contentEng)
+                        .backgroundColorCode(backgroundColorCode)
+                        .textColorCode(textColorCode)
+                        .linkUrl(linkUrl)
+                        .build();
+        }
 }

@@ -187,12 +187,12 @@ public class AdminController {
      * @param request 띠배너 등록 요청 정보
      * @return 성공 응답 메시지
      */
-    @PostMapping("/banners/register")
-    public ResponseEntity<ApiResponse<SuccessStatus>> registerBanner(
+    @PostMapping("/bar-banners/register")
+    public ResponseEntity<ApiResponse<SuccessStatus>> registerBarBanner(
             @RequestHeader("Authorization") String authorizationHeader,
-            @Valid @RequestBody RegisterBannerRequest request) {
-        adminService.registerBanner(authorizationHeader, request);
-        return ApiResponse.onSuccess(SuccessStatus._REGISTER_BANNER);
+            @Valid @RequestBody RegisterBarBannerRequest request) {
+        adminService.registerBarBanner(authorizationHeader, request);
+        return ApiResponse.onSuccess(SuccessStatus._REGISTER_BAR_BANNER);
     }
 
     /**
@@ -204,12 +204,12 @@ public class AdminController {
      * @param id 조회할 배너 ID
      * @return 배너 응답 객체
      */
-    @GetMapping("/banners/{id}")
-    public ResponseEntity<ApiResponse<GetBannerResponse>> getBanner(
+    @GetMapping("/bar-banners/{id}")
+    public ResponseEntity<ApiResponse<GetBarBannerResponse>> getBarBanner(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Long id) {
-        GetBannerResponse response = adminService.getBanner(authorizationHeader, id);
-        return ApiResponse.onSuccess(SuccessStatus._GET_BANNER, response);
+        GetBarBannerResponse response = adminService.getBarBanner(authorizationHeader, id);
+        return ApiResponse.onSuccess(SuccessStatus._GET_BAR_BANNER, response);
     }
 
     /**
@@ -220,14 +220,14 @@ public class AdminController {
      * @param authorizationHeader 액세스 토큰
      * @return 배너 응답 객체 리스트
      */
-    @GetMapping("/banners/all")
-    public ResponseEntity<ApiResponse<GetAllBannersResponse>> getAllBanners(
+    @GetMapping("/bar-banners/all")
+    public ResponseEntity<ApiResponse<GetAllBarBannersResponse>> getAllBarBanners(
             @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam(value = "page", defaultValue = "1") @Min(1) int page
     ) {
         Pageable pageable = PageRequest.of(page - 1, 20);
-        GetAllBannersResponse response = adminService.getAllBanners(authorizationHeader, pageable);
-        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_BANNERS, response);
+        GetAllBarBannersResponse response = adminService.getAllBarBanners(authorizationHeader, pageable);
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_BAR_BANNERS, response);
     }
 
     /**
@@ -242,14 +242,14 @@ public class AdminController {
      * @param request 수정 요청 DTO
      * @return 성공 응답 메시지
      */
-    @PatchMapping("/banners/{id}")
-    public ResponseEntity<ApiResponse<SuccessStatus>> updateBanner(
+    @PatchMapping("/bar-banners/{id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> updateBarBanner(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Long id,
-            @Valid @RequestBody UpdateBannerRequest request
+            @Valid @RequestBody UpdateBarBannerRequest request
     ) {
-        adminService.updateBanner(authorizationHeader, id, request);
-        return ApiResponse.onSuccess(SuccessStatus._UPDATE_BANNER);
+        adminService.updateBarBanner(authorizationHeader, id, request);
+        return ApiResponse.onSuccess(SuccessStatus._UPDATE_BAR_BANNER);
     }
 
     /**
@@ -262,12 +262,12 @@ public class AdminController {
      * @param id 삭제할 배너 ID
      * @return 성공 응답 메시지
      */
-    @DeleteMapping("/banners/{id}")
-    public ResponseEntity<ApiResponse<SuccessStatus>> deleteBanner(
+    @DeleteMapping("/bar-banners/{id}")
+    public ResponseEntity<ApiResponse<SuccessStatus>> deleteBarBanner(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Long id
     ) {
-        adminService.deleteBanner(authorizationHeader, id);
-        return ApiResponse.onSuccess(SuccessStatus._DELETE_BANNER);
+        adminService.deleteBarBanner(authorizationHeader, id);
+        return ApiResponse.onSuccess(SuccessStatus._DELETE_BAR_BANNER);
     }
 }

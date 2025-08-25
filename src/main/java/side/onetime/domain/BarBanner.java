@@ -10,11 +10,11 @@ import side.onetime.global.common.dao.BaseEntity;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Table(name = "banners")
-public class Banner extends BaseEntity {
+@Table(name = "bar_banners")
+public class BarBanner extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "banners_id")
+    @Column(name = "bar_banners_id")
     private Long id;
 
     @Column(name = "content_kor", nullable = false, length = 200)
@@ -39,7 +39,7 @@ public class Banner extends BaseEntity {
     private String linkUrl;
 
     @Builder
-    public Banner(String contentKor, String contentEng, String backgroundColorCode, String textColorCode, String linkUrl) {
+    public BarBanner(String contentKor, String contentEng, String backgroundColorCode, String textColorCode, String linkUrl) {
         this.contentKor = contentKor;
         this.contentEng = contentEng;
         this.backgroundColorCode = backgroundColorCode;

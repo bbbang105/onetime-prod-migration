@@ -18,8 +18,8 @@ public enum AdminErrorStatus implements BaseErrorCode {
     // DashBoard
     _INVALID_SORT_KEYWORD(HttpStatus.BAD_REQUEST, "ADMIN-USER-006", "지원하지 않는 정렬 기준입니다."),
     // Banner
-    _NOT_FOUND_BANNER(HttpStatus.NOT_FOUND, "ADMIN-USER-007", "띠배너를 찾을 수 없습니다."),
-    _NOT_FOUND_ACTIVATED_BANNER(HttpStatus.NOT_FOUND, "ADMIN-USER-008", "활성화된 띠배너를 찾을 수 없습니다."),
+    _NOT_FOUND_BAR_BANNER(HttpStatus.NOT_FOUND, "ADMIN-USER-007", "띠배너를 찾을 수 없습니다."),
+    _NOT_FOUND_ACTIVATED_BAR_BANNER(HttpStatus.NOT_FOUND, "ADMIN-USER-008", "활성화된 띠배너를 찾을 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;

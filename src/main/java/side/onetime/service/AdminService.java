@@ -29,7 +29,7 @@ public class AdminService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
-    private final BannerRepository bannerRepository;
+    private final BarBannerRepository barBannerRepository;
     private final JwtUtil jwtUtil;
 
     /**
@@ -272,10 +272,10 @@ public class AdminService {
      * @param request 띠배너 등록 요청 객체
      */
     @Transactional
-    public void registerBanner(String authorizationHeader, RegisterBannerRequest request) {
+    public void registerBarBanner(String authorizationHeader, RegisterBarBannerRequest request) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        Banner newBanner = request.toEntity();
-        bannerRepository.save(newBanner);
+        BarBanner newBarBanner = request.toEntity();
+        barBannerRepository.save(newBarBanner);
     }
 
     /**
@@ -289,11 +289,11 @@ public class AdminService {
      * @return 배너 응답 객체
      */
     @Transactional(readOnly = true)
-    public GetBannerResponse getBanner(String authorizationHeader, Long id) {
+    public GetBarBannerResponse getBarBanner(String authorizationHeader, Long id) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
-        return GetBannerResponse.from(banner);
+        BarBanner barBanner = barBannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BAR_BANNER));
+        return GetBarBannerResponse.from(barBanner);
     }
 
     /**
@@ -305,9 +305,9 @@ public class AdminService {
      * @return 활성화된 배너 응답 객체 또는 null
      */
     @Transactional(readOnly = true)
-    public GetActivatedBannerResponse getActivatedBanner() {
-        return bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
-                .map(GetActivatedBannerResponse::from)
+    public GetActivatedBarBannerResponse getActivatedBarBanner() {
+        return barBannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
+                .map(GetActivatedBarBannerResponse::from)
                 .orElse(null);
     }
 
@@ -320,14 +320,14 @@ public class AdminService {
      * @return 배너 응답 객체 리스트
      */
     @Transactional(readOnly = true)
-    public GetAllBannersResponse getAllBanners(String authorizationHeader, Pageable pageable) {
+    public GetAllBarBannersResponse getAllBarBanners(String authorizationHeader, Pageable pageable) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
 
-        List<GetBannerResponse> banners =  bannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc(pageable).stream()
-                .map(GetBannerResponse::from)
+        List<GetBarBannerResponse> barBanners = barBannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc(pageable).stream()
+                .map(GetBarBannerResponse::from)
                 .toList();
 
-        int totalElements = (int) bannerRepository.count();
+        int totalElements = (int) barBannerRepository.count();
         int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
 
         PageInfo pageInfo = PageInfo.of(
@@ -337,7 +337,7 @@ public class AdminService {
                 totalPages
         );
 
-        return GetAllBannersResponse.of(banners, pageInfo);
+        return GetAllBarBannersResponse.of(barBanners, pageInfo);
     }
 
     /**
@@ -351,24 +351,24 @@ public class AdminService {
      * @param request 수정 요청 객체
      */
     @Transactional
-    public void updateBanner(String authorizationHeader, Long id, UpdateBannerRequest request) {
+    public void updateBarBanner(String authorizationHeader, Long id, UpdateBarBannerRequest request) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+        BarBanner barBanner = barBannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BAR_BANNER));
 
-        if (request.contentKor() != null) banner.updateContentKor(request.contentKor());
-        if (request.contentEng() != null) banner.updateContentEng(request.contentEng());
-        if (request.backgroundColorCode() != null) banner.updateBackgroundColorCode(request.backgroundColorCode());
-        if (request.textColorCode() != null) banner.updateTextColorCode(request.textColorCode());
-        if (request.linkUrl() != null) banner.updateLinkUrl(request.linkUrl());
+        if (request.contentKor() != null) barBanner.updateContentKor(request.contentKor());
+        if (request.contentEng() != null) barBanner.updateContentEng(request.contentEng());
+        if (request.backgroundColorCode() != null) barBanner.updateBackgroundColorCode(request.backgroundColorCode());
+        if (request.textColorCode() != null) barBanner.updateTextColorCode(request.textColorCode());
+        if (request.linkUrl() != null) barBanner.updateLinkUrl(request.linkUrl());
 
         if (Boolean.TRUE.equals(request.isActivated())) {
-            bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
+            barBannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
                     .filter(b -> !b.getId().equals(id))
                     .ifPresent(b -> b.updateIsActivated(false));
-            banner.updateIsActivated(true);
+            barBanner.updateIsActivated(true);
         } else if (Boolean.FALSE.equals(request.isActivated())) {
-            banner.updateIsActivated(false);
+            barBanner.updateIsActivated(false);
         }
     }
 
@@ -382,10 +382,10 @@ public class AdminService {
      * @param id 삭제할 배너 ID
      */
     @Transactional
-    public void deleteBanner(String authorizationHeader, Long id) {
+    public void deleteBarBanner(String authorizationHeader, Long id) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
-        banner.markAsDeleted();
+        BarBanner barBanner = barBannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BAR_BANNER));
+        barBanner.markAsDeleted();
     }
 }

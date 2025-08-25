@@ -6,13 +6,13 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import java.util.List;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record GetAllBannersResponse(
-        List<GetBannerResponse> banners,
+public record GetAllBarBannersResponse(
+        List<GetBarBannerResponse> barBanners,
         PageInfo pageInfo
 ) {
-    public static GetAllBannersResponse of(List<GetBannerResponse> banners, PageInfo pageInfo) {
-        return new GetAllBannersResponse(
-                banners,
+    public static GetAllBarBannersResponse of(List<GetBarBannerResponse> barBanners, PageInfo pageInfo) {
+        return new GetAllBarBannersResponse(
+                barBanners,
                 pageInfo
         );
     }

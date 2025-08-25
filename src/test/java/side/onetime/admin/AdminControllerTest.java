@@ -483,10 +483,10 @@ public class AdminControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("띠배너를 등록한다.")
-    public void registerBanner() throws Exception {
+    public void registerBarBanner() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
-        RegisterBannerRequest request = new RegisterBannerRequest(
+        RegisterBarBannerRequest request = new RegisterBarBannerRequest(
                 "최신 소식 안내",
                 "News",
                 "#FFFFFF",
@@ -496,10 +496,10 @@ public class AdminControllerTest extends ControllerTestConfig {
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
-        Mockito.doNothing().when(adminService).registerBanner(any(String.class), any(RegisterBannerRequest.class));
+        Mockito.doNothing().when(adminService).registerBarBanner(any(String.class), any(RegisterBarBannerRequest.class));
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/banners/register")
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/bar-banners/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", accessToken)
                         .content(requestContent))
@@ -507,7 +507,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("201"))
                 .andExpect(jsonPath("$.message").value("띠배너 등록에 성공했습니다."))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-register",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-register",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
@@ -526,7 +526,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
-                                        .requestSchema(Schema.schema("RegisterBannerRequest"))
+                                        .requestSchema(Schema.schema("RegisterBarBannerRequest"))
                                         .responseSchema(Schema.schema("CommonSuccessResponse"))
                                         .build()
                         )
@@ -535,26 +535,26 @@ public class AdminControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("띠배너를 단건 조회한다.")
-    public void getBanner() throws Exception {
+    public void getBarBanner() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
-        Long bannerId = 1L;
-        GetBannerResponse response = new GetBannerResponse(
-                bannerId,
+        Long barBannerId = 1L;
+        GetBarBannerResponse response = new GetBarBannerResponse(
+                barBannerId,
                 "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
         );
 
         // when
-        Mockito.when(adminService.getBanner(any(String.class), any(Long.class))).thenReturn(response);
+        Mockito.when(adminService.getBarBanner(any(String.class), any(Long.class))).thenReturn(response);
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/banners/{id}", bannerId)
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/bar-banners/{id}", barBannerId)
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("띠배너 단건 조회에 성공했습니다."))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-get-one",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-get-one",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
@@ -562,14 +562,14 @@ public class AdminControllerTest extends ControllerTestConfig {
                                         .tag("Admin API")
                                         .description("띠배너를 단건 조회한다.")
                                         .pathParameters(
-                                                parameterWithName("id").description("조회할 배너 ID")
+                                                parameterWithName("id").description("조회할 띠배너 ID")
                                         )
                                         .responseFields(
                                                 fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
-                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("배너 정보"),
-                                                fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("배너 ID"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("띠배너 정보"),
+                                                fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("띠배너 ID"),
                                                 fieldWithPath("payload.content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
                                                 fieldWithPath("payload.content_eng").type(JsonFieldType.STRING).description("영어 내용"),
                                                 fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
@@ -578,7 +578,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자"),
                                                 fieldWithPath("payload.link_url").type(JsonFieldType.STRING).description("링크 URL")
                                         )
-                                        .responseSchema(Schema.schema("GetBannerResponse"))
+                                        .responseSchema(Schema.schema("GetBarBannerResponse"))
                                         .build()
                         )
                 ));
@@ -586,38 +586,38 @@ public class AdminControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("띠배너를 전체 조회한다.")
-    public void getAllBanners() throws Exception {
+    public void getAllBarBanners() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
         int page = 1;
 
-        List<GetBannerResponse> banners = List.of(
-                new GetBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"),
-                new GetBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com")
+        List<GetBarBannerResponse> barBanners = List.of(
+                new GetBarBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"),
+                new GetBarBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com")
         );
 
         PageInfo pageInfo = PageInfo.of(1, 20, 2, 1);
-        GetAllBannersResponse response = GetAllBannersResponse.of(banners, pageInfo);
+        GetAllBarBannersResponse response = GetAllBarBannersResponse.of(barBanners, pageInfo);
 
         // when
-        Mockito.when(adminService.getAllBanners(any(String.class), any(Pageable.class)))
+        Mockito.when(adminService.getAllBarBanners(any(String.class), any(Pageable.class)))
                 .thenReturn(response);
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/banners/all")
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/bar-banners/all")
                         .header("Authorization", accessToken)
                         .param("page", String.valueOf(page)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("띠배너 전체 조회에 성공했습니다."))
-                .andExpect(jsonPath("$.payload.banners[0].id").value(1L))
-                .andExpect(jsonPath("$.payload.banners[1].id").value(2L))
+                .andExpect(jsonPath("$.payload.bar_banners[0].id").value(1L))
+                .andExpect(jsonPath("$.payload.bar_banners[1].id").value(2L))
                 .andExpect(jsonPath("$.payload.page_info.page").value(1))
                 .andExpect(jsonPath("$.payload.page_info.size").value(20))
                 .andExpect(jsonPath("$.payload.page_info.total_elements").value(2))
                 .andExpect(jsonPath("$.payload.page_info.total_pages").value(1))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-get-all",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-get-all",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
@@ -632,21 +632,21 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("페이로드 객체"),
-                                                fieldWithPath("payload.banners").type(JsonFieldType.ARRAY).description("배너 목록"),
-                                                fieldWithPath("payload.banners[].id").type(JsonFieldType.NUMBER).description("배너 ID"),
-                                                fieldWithPath("payload.banners[].content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
-                                                fieldWithPath("payload.banners[].content_eng").type(JsonFieldType.STRING).description("영어 내용"),
-                                                fieldWithPath("payload.banners[].background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
-                                                fieldWithPath("payload.banners[].text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
-                                                fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
-                                                fieldWithPath("payload.banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
-                                                fieldWithPath("payload.banners[].link_url").type(JsonFieldType.STRING).description("링크 URL"),
+                                                fieldWithPath("payload.bar_banners").type(JsonFieldType.ARRAY).description("띠배너 목록"),
+                                                fieldWithPath("payload.bar_banners[].id").type(JsonFieldType.NUMBER).description("띠배너 ID"),
+                                                fieldWithPath("payload.bar_banners[].content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("payload.bar_banners[].content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("payload.bar_banners[].background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("payload.bar_banners[].text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
+                                                fieldWithPath("payload.bar_banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
+                                                fieldWithPath("payload.bar_banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.bar_banners[].link_url").type(JsonFieldType.STRING).description("링크 URL"),
                                                 fieldWithPath("payload.page_info.page").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
                                                 fieldWithPath("payload.page_info.size").type(JsonFieldType.NUMBER).description("페이지당 항목 수"),
                                                 fieldWithPath("payload.page_info.total_elements").type(JsonFieldType.NUMBER).description("전체 항목 수"),
                                                 fieldWithPath("payload.page_info.total_pages").type(JsonFieldType.NUMBER).description("전체 페이지 수")
                                         )
-                                        .responseSchema(Schema.schema("GetAllBannersResponse"))
+                                        .responseSchema(Schema.schema("GetAllBarBannersResponse"))
                                         .build()
                         )
                 ));
@@ -654,11 +654,11 @@ public class AdminControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("띠배너를 수정한다.")
-    public void updateBanner() throws Exception {
+    public void updateBarBanner() throws Exception {
         // given
-        Long bannerId = 1L;
+        Long barBannerId = 1L;
         String accessToken = "Bearer temp.jwt.access.token";
-        UpdateBannerRequest request = new UpdateBannerRequest(
+        UpdateBarBannerRequest request = new UpdateBarBannerRequest(
                 "수정된 내용",
                 "modified content",
                 "#123456",
@@ -669,10 +669,10 @@ public class AdminControllerTest extends ControllerTestConfig {
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
-        Mockito.doNothing().when(adminService).updateBanner(any(String.class), eq(bannerId), any(UpdateBannerRequest.class));
+        Mockito.doNothing().when(adminService).updateBarBanner(any(String.class), eq(barBannerId), any(UpdateBarBannerRequest.class));
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/admin/banners/{id}", bannerId)
+        mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/admin/bar-banners/{id}", barBannerId)
                         .header("Authorization", accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestContent))
@@ -680,7 +680,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("띠배너 수정에 성공했습니다."))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-update",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-update",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
@@ -700,7 +700,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
-                                        .requestSchema(Schema.schema("UpdateBannerRequest"))
+                                        .requestSchema(Schema.schema("UpdateBarBannerRequest"))
                                         .responseSchema(Schema.schema("CommonSuccessResponse"))
                                         .build()
                         )
@@ -709,22 +709,22 @@ public class AdminControllerTest extends ControllerTestConfig {
 
     @Test
     @DisplayName("띠배너를 삭제한다.")
-    public void deleteBanner() throws Exception {
+    public void deleteBarBanner() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
-        Long bannerId = 1L;
+        Long barBannerId = 1L;
 
         // when
-        Mockito.doNothing().when(adminService).deleteBanner(any(String.class), eq(bannerId));
+        Mockito.doNothing().when(adminService).deleteBarBanner(any(String.class), eq(barBannerId));
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/v1/admin/banners/{id}", bannerId)
+        mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/v1/admin/bar-banners/{id}", barBannerId)
                         .header("Authorization", accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("띠배너 삭제에 성공했습니다."))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-delete",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-delete",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
