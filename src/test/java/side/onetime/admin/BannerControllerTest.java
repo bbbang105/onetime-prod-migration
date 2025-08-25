@@ -14,6 +14,8 @@ import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.BannerController;
 import side.onetime.dto.admin.response.GetActivatedBarBannerResponse;
+import side.onetime.dto.admin.response.GetBannerResponse;
+import side.onetime.dto.admin.response.GetBarBannerResponse;
 import side.onetime.service.AdminService;
 import side.onetime.util.JwtUtil;
 
@@ -24,7 +26,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(BannerController.class)
-public class BarBannerControllerTest extends ControllerTestConfig {
+public class BannerControllerTest extends ControllerTestConfig {
 
     @MockBean
     private AdminService adminService;
@@ -40,7 +42,7 @@ public class BarBannerControllerTest extends ControllerTestConfig {
     public void getActivatedBarBanner() throws Exception {
         // given
         Long barBannerId = 1L;
-        GetActivatedBarBannerResponse response = new GetActivatedBarBannerResponse(
+        GetBarBannerResponse response = new GetBarBannerResponse(
                 barBannerId, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
         );
 
@@ -65,7 +67,7 @@ public class BarBannerControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("배너 정보"),
-                                                fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("배너 ID"),
+                                                fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("띠배너 ID"),
                                                 fieldWithPath("payload.content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
                                                 fieldWithPath("payload.content_eng").type(JsonFieldType.STRING).description("영어 내용"),
                                                 fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
@@ -74,7 +76,7 @@ public class BarBannerControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자"),
                                                 fieldWithPath("payload.link_url").type(JsonFieldType.STRING).description("링크 URL")
                                         )
-                                        .responseSchema(Schema.schema("GetActivatedBarBannerResponse"))
+                                        .responseSchema(Schema.schema("GetBarBannerResponse"))
                                         .build()
                         )
                 ));

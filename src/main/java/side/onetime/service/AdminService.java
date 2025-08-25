@@ -363,9 +363,9 @@ public class AdminService {
      * @return 활성화된 띠배너 응답 객체 또는 null
      */
     @Transactional(readOnly = true)
-    public GetActivatedBarBannerResponse getActivatedBarBanner() {
+    public GetBarBannerResponse getActivatedBarBanner() {
         return barBannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
-                .map(GetActivatedBarBannerResponse::from)
+                .map(GetBarBannerResponse::from)
                 .orElse(null);
     }
 
