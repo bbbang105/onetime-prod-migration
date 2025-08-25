@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import side.onetime.domain.*;
 import side.onetime.domain.enums.AdminStatus;
 import side.onetime.domain.enums.EventStatus;
@@ -13,6 +14,7 @@ import side.onetime.exception.CustomException;
 import side.onetime.exception.status.AdminErrorStatus;
 import side.onetime.repository.*;
 import side.onetime.util.JwtUtil;
+import side.onetime.util.S3Util;
 
 import java.util.Comparator;
 import java.util.List;
@@ -29,8 +31,10 @@ public class AdminService {
     private final ScheduleRepository scheduleRepository;
     private final MemberRepository memberRepository;
     private final UserRepository userRepository;
+    private final BannerRepository bannerRepository;
     private final BarBannerRepository barBannerRepository;
     private final JwtUtil jwtUtil;
+    private final S3Util s3Util;
 
     /**
      * 관리자 계정 등록 메서드.
@@ -263,6 +267,27 @@ public class AdminService {
     }
 
     /**
+     * 배너 등록 메서드.
+     *
+     * 요청 정보를 바탕으로 배너를 등록합니다.
+     * 기본적으로 비활성화 및 삭제되지 않은 상태로 저장됩니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param request 배너 등록 요청 객체
+     * @param imageFile 배너 등록 이미지 객체
+     */
+    @Transactional
+    public void registerBanner(String authorizationHeader, RegisterBannerRequest request, MultipartFile imageFile) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner newBanner = request.toEntity();
+
+        String imageUrl = uploadBannerImage(imageFile);
+        newBanner.updateImageUrl(imageUrl);
+
+        bannerRepository.save(newBanner);
+    }
+
+    /**
      * 띠배너 등록 메서드.
      *
      * 요청 정보를 바탕으로 배너를 등록합니다.
@@ -279,7 +304,7 @@ public class AdminService {
     }
 
     /**
-     * 단일 띠배너 조회 메서드.
+     * 단일 배너 조회 메서드.
      *
      * 삭제되지 않은 상태의 배너를 ID 기준으로 조회합니다.
      * 해당 배너가 존재하지 않을 경우 예외가 발생합니다.
@@ -287,6 +312,24 @@ public class AdminService {
      * @param authorizationHeader 요청자의 액세스 토큰
      * @param id 조회할 배너 ID
      * @return 배너 응답 객체
+     */
+    @Transactional(readOnly = true)
+    public GetBannerResponse getBanner(String authorizationHeader, Long id) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+        return GetBannerResponse.from(banner);
+    }
+
+    /**
+     * 단일 띠배너 조회 메서드.
+     *
+     * 삭제되지 않은 상태의 배너를 ID 기준으로 조회합니다.
+     * 해당 띠배너가 존재하지 않을 경우 예외가 발생합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param id 조회할 띠배너 ID
+     * @return 띠배너 응답 객체
      */
     @Transactional(readOnly = true)
     public GetBarBannerResponse getBarBanner(String authorizationHeader, Long id) {
@@ -297,12 +340,27 @@ public class AdminService {
     }
 
     /**
+     * 활성화된 배너 조회 메서드.
+     *
+     * 현재 활성화 상태이며 삭제되지 않은 배너를 조회합니다.
+     * - 없을 경우 null을 반환합니다.
+     *
+     * @return 활성화된 배너 응답 객체 또는 null
+     */
+    @Transactional(readOnly = true)
+    public GetBannerResponse getActivatedBanner() {
+        return bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
+                .map(GetBannerResponse::from)
+                .orElse(null);
+    }
+
+    /**
      * 활성화된 띠배너 조회 메서드.
      *
      * 현재 활성화 상태이며 삭제되지 않은 띠배너를 조회합니다.
      * - 없을 경우 null을 반환합니다.
      *
-     * @return 활성화된 배너 응답 객체 또는 null
+     * @return 활성화된 띠배너 응답 객체 또는 null
      */
     @Transactional(readOnly = true)
     public GetActivatedBarBannerResponse getActivatedBarBanner() {
@@ -312,12 +370,41 @@ public class AdminService {
     }
 
     /**
-     * 전체 띠배너 조회 메서드.
+     * 전체 배너 조회 메서드.
      *
      * 삭제되지 않은 모든 배너를 조회하여 응답 객체로 반환합니다.
      *
      * @param authorizationHeader 요청자의 액세스 토큰
      * @return 배너 응답 객체 리스트
+     */
+    @Transactional(readOnly = true)
+    public GetAllBannersResponse getAllBanners(String authorizationHeader, Pageable pageable) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+
+        List<GetBannerResponse> banners = bannerRepository.findAllByIsDeletedFalseOrderByCreatedDateDesc(pageable).stream()
+                .map(GetBannerResponse::from)
+                .toList();
+
+        int totalElements = (int) bannerRepository.count();
+        int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
+
+        PageInfo pageInfo = PageInfo.of(
+                pageable.getPageNumber() + 1,
+                pageable.getPageSize(),
+                totalElements,
+                totalPages
+        );
+
+        return GetAllBannersResponse.of(banners, pageInfo);
+    }
+
+    /**
+     * 전체 띠배너 조회 메서드.
+     *
+     * 삭제되지 않은 모든 띠배너를 조회하여 응답 객체로 반환합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @return 띠배너 응답 객체 리스트
      */
     @Transactional(readOnly = true)
     public GetAllBarBannersResponse getAllBarBanners(String authorizationHeader, Pageable pageable) {
@@ -341,13 +428,51 @@ public class AdminService {
     }
 
     /**
-     * 띠배너 수정 메서드.
+     * 배너 수정 메서드.
      *
      * 삭제되지 않은 배너를 ID 기준으로 조회합니다.
      * 요청 객체에서 null이 아닌 필드만 선택적으로 수정합니다.
      *
      * @param authorizationHeader 요청자의 액세스 토큰
      * @param id 수정할 배너 ID
+     * @param request 수정 요청 객체
+     * @param imageFile 배너 수정 이미지 객체
+     */
+    @Transactional
+    public void updateBanner(String authorizationHeader, Long id, UpdateBannerRequest request, MultipartFile imageFile) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+
+        if (request.organization() != null) banner.updateOrganization(request.organization());
+        if (request.title() != null) banner.updateTitle(request.title());
+        if (request.subTitle() != null) banner.updateSubTitle(request.subTitle());
+        if (request.colorCode() != null) banner.updateColorCode(request.colorCode());
+        if (request.linkUrl() != null) banner.updateLinkUrl(request.linkUrl());
+
+        if (Boolean.TRUE.equals(request.isActivated())) {
+            bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
+                    .filter(b -> !b.getId().equals(id))
+                    .ifPresent(b -> b.updateIsActivated(false));
+            banner.updateIsActivated(true);
+        } else if (Boolean.FALSE.equals(request.isActivated())) {
+            banner.updateIsActivated(false);
+        }
+
+        if (imageFile != null) {
+            String imageUrl = uploadBannerImage(imageFile);
+            banner.updateImageUrl(imageUrl);
+        }
+    }
+
+    /**
+     * 띠배너 수정 메서드.
+     *
+     * 삭제되지 않은 띠배너를 ID 기준으로 조회합니다.
+     * 요청 객체에서 null이 아닌 필드만 선택적으로 수정합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param id 수정할 띠배너 ID
      * @param request 수정 요청 객체
      */
     @Transactional
@@ -373,13 +498,38 @@ public class AdminService {
     }
 
     /**
-     * 띠배너 삭제 메서드 (논리 삭제).
+     * 배너 삭제 메서드 (논리 삭제).
      *
      * 삭제되지 않은 배너를 ID 기준으로 조회합니다.
-     * 해당 배너의 삭제 상태를 true로 변경합니다.
+     * 해당 배너의 삭제 상태를 true로 변경하고 S3에 저장된 이미지를 삭제합니다.
      *
      * @param authorizationHeader 요청자의 액세스 토큰
      * @param id 삭제할 배너 ID
+     */
+    @Transactional
+    public void deleteBanner(String authorizationHeader, Long id) {
+        jwtUtil.getAdminUserFromHeader(authorizationHeader);
+        Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+
+        String imageUrl = banner.getImageUrl();
+
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            String imageFileName = S3Util.extractFileName(imageUrl);
+            s3Util.deleteFile(imageFileName);
+        }
+
+        banner.markAsDeleted();
+    }
+
+    /**
+     * 띠배너 삭제 메서드 (논리 삭제).
+     *
+     * 삭제되지 않은 띠배너를 ID 기준으로 조회합니다.
+     * 해당 배너의 삭제 상태를 true로 변경합니다.
+     *
+     * @param authorizationHeader 요청자의 액세스 토큰
+     * @param id 삭제할 띠배너 ID
      */
     @Transactional
     public void deleteBarBanner(String authorizationHeader, Long id) {
@@ -387,5 +537,22 @@ public class AdminService {
         BarBanner barBanner = barBannerRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BAR_BANNER));
         barBanner.markAsDeleted();
+    }
+
+    /**
+     * S3에 배너 이미지를 업로드하는 메서드.
+     * 주어진 이벤트 ID를 기반으로 QR 코드를 생성한 후, S3에 업로드합니다.
+     *
+     * @param imageFile 업로드할 이미지 파일
+     * @return S3에 업로드된 이미지 Public URL
+     * @throws CustomException S3 업로드 실패 시 발생
+     */
+    private String uploadBannerImage(MultipartFile imageFile) {
+        try {
+            String imageFileName = s3Util.uploadImage("banner", imageFile);
+            return s3Util.getPublicUrl(imageFileName);
+        } catch (Exception e) {
+            throw new CustomException(AdminErrorStatus._FAILED_UPLOAD_BANNER_IMAGE);
+        }
     }
 }

@@ -20,6 +20,8 @@ public enum AdminErrorStatus implements BaseErrorCode {
     // Banner
     _NOT_FOUND_BAR_BANNER(HttpStatus.NOT_FOUND, "ADMIN-USER-007", "띠배너를 찾을 수 없습니다."),
     _NOT_FOUND_ACTIVATED_BAR_BANNER(HttpStatus.NOT_FOUND, "ADMIN-USER-008", "활성화된 띠배너를 찾을 수 없습니다."),
+    _NOT_FOUND_BANNER(HttpStatus.NOT_FOUND, "ADMIN-USER-009", "배너를 찾을 수 없습니다."),
+    _FAILED_UPLOAD_BANNER_IMAGE(HttpStatus.INTERNAL_SERVER_ERROR, "ADMIN-USER-010", "배너 이미지 업로드 하는 과정에서 문제가 발생했습니다."),
     ;
 
     private final HttpStatus httpStatus;

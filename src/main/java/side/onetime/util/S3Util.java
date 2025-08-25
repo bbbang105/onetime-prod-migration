@@ -61,6 +61,17 @@ public class S3Util {
     }
 
     /**
+     * S3 퍼블릭 URL에서 파일 이름을 추출하는 메서드.
+     *
+     * @param fileUrl S3 퍼블릭 URL
+     * @return S3에 저장된 파일 이름
+     */
+    public static String extractFileName(String fileUrl) {
+        int index = fileUrl.indexOf(".amazonaws.com/");
+        return fileUrl.substring(index + ".amazonaws.com/".length());
+    }
+
+    /**
      * S3에서 파일 삭제 메서드.
      * 주어진 파일 이름에 해당하는 S3 파일을 삭제합니다.
      *
