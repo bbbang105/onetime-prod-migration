@@ -1,4 +1,4 @@
-name: 🚀 Build & Deploy workflow on test environment
+name: 🚀 Build & Deploy workflow on dev environment
 
 on:
   pull_request:
@@ -28,7 +28,7 @@ jobs:
 
   deploy:
     needs: build
-    environment: test # GitHub Actions의 test 환경 Secrets 사용
+    environment: dev # GitHub Actions의 dev 환경 Secrets 사용
     runs-on: ubuntu-latest
     steps:
       # 1. GitHub 리포지토리에서 코드 체크아웃
@@ -43,14 +43,16 @@ jobs:
 
       # 3. 현재 타임스탬프 생성
       - name: 🕒 타임스탬프 생성
-        run: echo "TIMESTAMP=$(date +'%Y%m%d%H%M%S')" >> $GITHUB_ENV
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+          echo "DEPLOY_ENV=dev" >> .env
 
-      # 4. Test 환경의 .env 파일 생성
+      # 4. dev 환경의 .env 파일 생성
       - name: ⚙️ .env 파일 복원
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
 
-      # 5. Test 환경의 docker-compose.yaml 생성
+      # 5. dev 환경의 docker-compose.yaml 생성
       - name: 🐋 docker-compose.yaml 복원
         run: |
           echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yaml
@@ -80,5 +82,5 @@ jobs:
         run: |
           aws deploy create-deployment \
             --application-name ${{ secrets.CODEDEPLOY_APP_NAME }} \
-            --deployment-group-name ${{ secrets.CODEDEPLOY_TEST_GROUP }} \
-            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},key=test/build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip,bundleType=zip
+            --deployment-group-name ${{ secrets.CODEDEPLOY_DEV_GROUP }} \
+            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},key=dev/build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip,bundleType=zip

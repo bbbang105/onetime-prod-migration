@@ -21,8 +21,9 @@ NGINX_CONF="/home/ubuntu/nginx/nginx.conf"
 
 DOCKER_COMPOSE_FILE="/home/ubuntu/docker-compose.yaml"
 
-MESSAGE_SUCCESS="⏰ OneTime 배포가 성공적으로 수행되었습니다!"
-MESSAGE_FAILURE="🚨 OneTime 배포 과정에서 오류가 발생했습니다. 빠른 확인바랍니다."
+DEPLOY_GROUP=${DEPLOY_ENV:-"unknown"}
+MESSAGE_SUCCESS="⏰ [${DEPLOY_GROUP}] OneTime 배포가 성공적으로 수행되었습니다!"
+MESSAGE_FAILURE="🚨 [${DEPLOY_GROUP}] OneTime 배포 과정에서 오류가 발생했습니다. 빠른 확인바랍니다. (담당자: @anxi01 @hsh111366)"
 
 send_discord_message() {
   local message=$1
