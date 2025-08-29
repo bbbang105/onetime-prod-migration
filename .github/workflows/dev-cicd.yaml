@@ -45,7 +45,6 @@ jobs:
       - name: 🕒 타임스탬프 생성
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
-          echo "DEPLOY_ENV=dev" >> .env
 
       # 4. dev 환경의 .env 파일 생성
       - name: ⚙️ .env 파일 복원

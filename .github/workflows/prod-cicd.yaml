@@ -52,7 +52,6 @@ jobs:
       - name: ⚙️ .env 파일 복원
         run: |
           echo "${{ secrets.ENV_FILE }}" > .env
-          echo "DEPLOY_ENV=prod" >> .env
 
       # 5. Production 환경의 docker-compose.yaml 생성
       - name: 🐋 docker-compose.yaml 복원
