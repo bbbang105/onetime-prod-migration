@@ -43,7 +43,7 @@ if [ -z "$IS_GREEN" ]; then
   while true; do
     echo ">>> 2. green health check 중..."
     sleep 3
-    REQUEST=$(sudo docker exec onetime-green wget -qO- http://localhost:8090/actuator/health)
+    REQUEST=$(sudo docker exec green wget -qO- http://localhost:8090/actuator/health)
     if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
@@ -57,7 +57,7 @@ if [ -z "$IS_GREEN" ]; then
 
   echo ">>> 3. nginx 라우팅 변경 및 reload"
   sudo cp "$GREEN_NGINX_CONF" "$NGINX_CONF"
-  sudo docker exec onetime-nginx nginx -s reload || {
+  sudo docker exec nginx nginx -s reload || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
@@ -81,7 +81,7 @@ else
   while true; do
     echo ">>> 2. blue health check 중..."
     sleep 3
-    REQUEST=$(sudo docker exec onetime-blue wget -qO- http://localhost:8090/actuator/health)
+    REQUEST=$(sudo docker exec blue wget -qO- http://localhost:8090/actuator/health)
     if [[ "$REQUEST" == *"UP"* ]]; then
       echo "⏰ health check success!!!"
       break
@@ -95,7 +95,7 @@ else
 
   echo ">>> 3. nginx 라우팅 변경 및 reload"
   sudo cp "$BLUE_NGINX_CONF" "$NGINX_CONF"
-  sudo docker exec onetime-nginx nginx -s reload || {
+  sudo docker exec nginx nginx -s reload || {
     send_discord_message "$MESSAGE_FAILURE"
     exit 1
   }
