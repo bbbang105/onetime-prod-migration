@@ -111,15 +111,6 @@ springdoc:
 qr:
   event-base-url: ${QR_EVENT_BASE_URL}
 
-management:
-  endpoint:
-    health:
-      show-details: never
-  endpoints:
-    web:
-      exposure:
-        include: health
-
 logging:
   level:
     root: info
@@ -128,4 +119,3 @@ logging:
     side.onetime.exception: debug
     org.hibernate.SQL: off
     org.hibernate.type.descriptor.sql.BasicBinder: off
-
