@@ -91,7 +91,7 @@ management:
       exposure:
         include: health
   metrics:
-    binders:
+    enable:
       process.cpu: false
       system.cpu: false
 
