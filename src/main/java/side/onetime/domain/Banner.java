@@ -83,5 +83,6 @@ public class Banner extends BaseEntity {
 
     public void markAsDeleted() {
         this.isDeleted = true;
+        this.isActivated = false;
     }
 }
