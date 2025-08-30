@@ -90,6 +90,10 @@ management:
     web:
       exposure:
         include: health
+  metrics:
+    binders:
+      process.cpu: false
+      system.cpu: false
 
 logging:
   level:

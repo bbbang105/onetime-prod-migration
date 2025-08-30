@@ -1,4 +1,5 @@
-FROM amazoncorretto:17-al2-slim
+# 경량 Alpine 이미지를 기반으로 애플리케이션 실행
+FROM openjdk:17-jdk-alpine
 
 WORKDIR /app
 

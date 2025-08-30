@@ -111,6 +111,19 @@ springdoc:
 qr:
   event-base-url: ${QR_EVENT_BASE_URL}
 
+management:
+  endpoint:
+    health:
+      show-details: never
+  endpoints:
+    web:
+      exposure:
+        include: health
+  metrics:
+    binders:
+      process.cpu: false
+      system.cpu: false
+
 logging:
   level:
     root: info
