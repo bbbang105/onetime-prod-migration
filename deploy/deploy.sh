@@ -21,8 +21,10 @@ NGINX_CONF="/home/ubuntu/nginx/nginx.conf"
 
 DOCKER_COMPOSE_FILE="/home/ubuntu/docker-compose.yaml"
 
+HEALTH_CHECK_ENDPOINT="/"
+
 MESSAGE_SUCCESS="⏰ [${DEPLOY_GROUP}] OneTime 배포가 성공적으로 수행되었습니다!"
-MESSAGE_FAILURE="🚨 [${DEPLOY_GROUP}] OneTime 배포 과정에서 오류가 발생했습니다. 빠른 확인바랍니다."
+MESSAGE_FAILURE="🚨 [${DEPLOY_GROUP}] OneTime 배포 과정에서 오류가 발생했습니다. 빠른 확인바랍니다. ${DISCORD_MENTION_SM} ${DISCORD_MENTION_HSH}"
 
 send_discord_message() {
   local message=$1
@@ -43,9 +45,9 @@ if [ -z "$IS_GREEN" ]; then
   while true; do
     echo ">>> 2. green health check 중..."
     sleep 3
-    REQUEST=$(sudo docker exec green wget -qO- http://localhost:8090/actuator/health)
-    if [[ "$REQUEST" == *"UP"* ]]; then
-      echo "⏰ health check success!!!"
+    STATUS_CODE=$(sudo docker exec green curl -s -o /dev/null -w "%{http_code}" http://localhost:8090${HEALTH_CHECK_ENDPOINT})
+    if [ "$STATUS_CODE" -eq 200 ]; then
+      echo "⏰ health check success (Status Code: $STATUS_CODE)"
       break
     fi
     if [ $SECONDS -ge 120 ]; then
@@ -81,9 +83,9 @@ else
   while true; do
     echo ">>> 2. blue health check 중..."
     sleep 3
-    REQUEST=$(sudo docker exec blue wget -qO- http://localhost:8090/actuator/health)
-    if [[ "$REQUEST" == *"UP"* ]]; then
-      echo "⏰ health check success!!!"
+    STATUS_CODE=$(sudo docker exec blue curl -s -o /dev/null -w "%{http_code}" http://localhost:8090${HEALTH_CHECK_ENDPOINT})
+    if [ "$STATUS_CODE" -eq 200 ]; then
+      echo "⏰ health check success (Status Code: $STATUS_CODE)"
       break
     fi
     if [ $SECONDS -ge 120 ]; then
