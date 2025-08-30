@@ -385,7 +385,7 @@ public class AdminService {
                 .map(GetBannerResponse::from)
                 .toList();
 
-        int totalElements = (int) bannerRepository.count();
+        int totalElements = (int) bannerRepository.countByIsDeletedFalse();
         int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
 
         PageInfo pageInfo = PageInfo.of(
@@ -414,7 +414,7 @@ public class AdminService {
                 .map(GetBarBannerResponse::from)
                 .toList();
 
-        int totalElements = (int) barBannerRepository.count();
+        int totalElements = (int) barBannerRepository.countByIsDeletedFalse();
         int totalPages = (int) Math.ceil((double) totalElements / pageable.getPageSize());
 
         PageInfo pageInfo = PageInfo.of(

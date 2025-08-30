@@ -14,4 +14,6 @@ public interface BarBannerRepository extends JpaRepository<BarBanner, Long> {
     List<BarBanner> findAllByIsDeletedFalseOrderByCreatedDateDesc(Pageable pageable);
 
     Optional<BarBanner> findByIsActivatedTrueAndIsDeletedFalse();
+
+    long countByIsDeletedFalse();
 }
