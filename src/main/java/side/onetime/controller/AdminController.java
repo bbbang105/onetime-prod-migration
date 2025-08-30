@@ -300,7 +300,7 @@ public class AdminController {
      * @param imageFile 배너 수정 이미지 객체
      * @return 성공 응답 메시지
      */
-    @PatchMapping("/banners/{id}")
+    @PatchMapping(value = "/banners/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ApiResponse<SuccessStatus>> updateBanner(
             @RequestHeader("Authorization") String authorizationHeader,
             @PathVariable Long id,
