@@ -96,8 +96,6 @@ public class JwtFilter extends OncePerRequestFilter {
                 path.startsWith("/v3/api-docs") ||
                 // 로그인 없이 접근 가능한 공통 API
                 path.startsWith("/api/v1/admin") ||
-                path.startsWith("/api/v1/banners") ||
-                path.startsWith("/api/v1/bar-banners") ||
                 path.startsWith("/api/v1/members") ||
                 path.startsWith("/api/v1/tokens") ||
                 path.startsWith("/api/v1/urls") ||
