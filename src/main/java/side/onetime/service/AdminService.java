@@ -449,15 +449,7 @@ public class AdminService {
         if (request.subTitle() != null) banner.updateSubTitle(request.subTitle());
         if (request.colorCode() != null) banner.updateColorCode(request.colorCode());
         if (request.linkUrl() != null) banner.updateLinkUrl(request.linkUrl());
-
-        if (Boolean.TRUE.equals(request.isActivated())) {
-            bannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
-                    .filter(b -> !b.getId().equals(id))
-                    .ifPresent(b -> b.updateIsActivated(false));
-            banner.updateIsActivated(true);
-        } else if (Boolean.FALSE.equals(request.isActivated())) {
-            banner.updateIsActivated(false);
-        }
+        if (request.isActivated() != null) banner.updateIsActivated(request.isActivated());
 
         if (imageFile != null) {
             deleteExistingBannerImage(banner.getImageUrl());
