@@ -482,15 +482,7 @@ public class AdminService {
         if (request.backgroundColorCode() != null) barBanner.updateBackgroundColorCode(request.backgroundColorCode());
         if (request.textColorCode() != null) barBanner.updateTextColorCode(request.textColorCode());
         if (request.linkUrl() != null) barBanner.updateLinkUrl(request.linkUrl());
-
-        if (Boolean.TRUE.equals(request.isActivated())) {
-            barBannerRepository.findByIsActivatedTrueAndIsDeletedFalse()
-                    .filter(b -> !b.getId().equals(id))
-                    .ifPresent(b -> b.updateIsActivated(false));
-            barBanner.updateIsActivated(true);
-        } else if (Boolean.FALSE.equals(request.isActivated())) {
-            barBanner.updateIsActivated(false);
-        }
+        if (request.isActivated() != null) barBanner.updateIsActivated(request.isActivated());
     }
 
     /**
