@@ -25,7 +25,7 @@ MESSAGE_SUCCESS="⏰ [$DEPLOYMENT_GROUP_NAME] OneTime 배포가 성공적으로 
 
 # 실패 시 상세 로그를 포함하여 디스코드 메시지를 보내는 함수
 send_discord_failure_message() {
-  # 로그를 가져오기 위해 최대 3번 재시도 (3초 간격)
+  # 로그를 가져오기 위해 최대 3번 재시도 (5초 간격)
   for i in {1..3}
   do
     echo "실패 로그 가져오기 시도 ($i/3)..."
@@ -34,7 +34,7 @@ send_discord_failure_message() {
       echo "실패 로그 가져오기 성공!"
       break
     fi
-    sleep 3
+    sleep 5
   done
 
   # 만약 3번 시도 후에도 로그가 없다면 기본 메시지 표시
