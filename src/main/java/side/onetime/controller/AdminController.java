@@ -288,25 +288,25 @@ public class AdminController {
     }
 
     /**
-     * 현재 활성화된 배너 조회 API.
+     * 현재 활성화된 배너 전체 조회 API.
      *
-     * @return 활성화된 배너 정보
+     * @return 활성화된 배너 응답 객체 리스트
      */
-    @GetMapping("/banners/activated")
-    public ResponseEntity<ApiResponse<GetBannerResponse>> getActivatedBanner() {
-        GetBannerResponse response = adminService.getActivatedBanner();
-        return ApiResponse.onSuccess(SuccessStatus._GET_ACTIVATED_BANNER, response);
+    @GetMapping("/banners/activated/all")
+    public ResponseEntity<ApiResponse<GetAllActivatedBannersResponse>> getAllActivatedBanners() {
+        GetAllActivatedBannersResponse response = adminService.getAllActivatedBanners();
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_ACTIVATED_BANNERS, response);
     }
 
     /**
-     * 현재 활성화된 띠배너 조회 API.
+     * 현재 활성화된 띠배너 전체 조회 API.
      *
-     * @return 활성화된 띠배너 정보
+     * @return 활성화된 띠배너 응답 객체 리스트
      */
-    @GetMapping("/bar-banners/activated")
-    public ResponseEntity<ApiResponse<GetBarBannerResponse>> getActivatedBarBanner() {
-        GetBarBannerResponse response = adminService.getActivatedBarBanner();
-        return ApiResponse.onSuccess(SuccessStatus._GET_ACTIVATED_BAR_BANNER, response);
+    @GetMapping("/bar-banners/activated/all")
+    public ResponseEntity<ApiResponse<GetAllActivatedBarBannersResponse>> getAllActivatedBarBanners() {
+        GetAllActivatedBarBannersResponse response = adminService.getAllActivatedBarBanners();
+        return ApiResponse.onSuccess(SuccessStatus._GET_ALL_ACTIVATED_BAR_BANNERS, response);
     }
 
     /**
