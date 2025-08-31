@@ -1,6 +1,7 @@
 package side.onetime.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AdminService {
@@ -553,8 +555,12 @@ public class AdminService {
      */
     private void deleteExistingBannerImage(String imageUrl) {
         if (imageUrl != null && !imageUrl.isBlank()) {
-            String imageFileName = S3Util.extractFileName(imageUrl);
-            s3Util.deleteFile(imageFileName);
+            try {
+                String imageFileKey = S3Util.extractKey(imageUrl);
+                s3Util.deleteFile(imageFileKey);
+            } catch (Exception e) {
+                log.warn("❌ 배너 이미지 삭제 예외 발생 - 요청 IMAGE_URI: {}", imageUrl, e);
+            }
         }
     }
 }
