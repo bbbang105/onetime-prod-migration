@@ -25,19 +25,25 @@ MESSAGE_SUCCESS="⏰ [$DEPLOYMENT_GROUP_NAME] OneTime 배포가 성공적으로 
 
 # 실패 시 상세 로그를 포함하여 디스코드 메시지를 보내는 함수
 send_discord_failure_message() {
-  INSTANCE_ID=$(curl -s http://169.254.169.254/latest/meta-data/instance-id)
+  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
+  INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
 
   # 재시도 로직
-  for i in {1..3}
-  do
-    echo "실패 로그 가져오기 시도 ($i/3)..."
-    ERROR_LOG=$(aws deploy get-deployment-instance --deployment-id "$DEPLOYMENT_ID" --instance-id "$INSTANCE_ID" --query 'instanceSummary.lifecycleEvents[?status==`Failed`].diagnostics.logTail' --output text)
-    if [ -n "$ERROR_LOG" ]; then
-      echo "실패 로그 가져오기 성공!"
-      break
-    fi
-    sleep 3
-  done
+  if [ -z "$INSTANCE_ID" ]; then
+    echo "인스턴스 ID를 가져오는 데 실패했습니다."
+    ERROR_LOG="EC2 메타데이터에서 인스턴스 ID를 가져올 수 없습니다. EC2 인스턴스 설정을 확인해주세요."
+  else
+    for i in {1..3}
+    do
+      echo "실패 로그 가져오기 시도 ($i/3)..."
+      ERROR_LOG=$(aws deploy get-deployment-instance --deployment-id "$DEPLOYMENT_ID" --instance-id "$INSTANCE_ID" --query 'instanceSummary.lifecycleEvents[?status==`Failed`].diagnostics.logTail' --output text)
+      if [ -n "$ERROR_LOG" ]; then
+        echo "실패 로그 가져오기 성공!"
+        break
+      fi
+      sleep 3
+    done
+  fi
 
   if [ -z "$ERROR_LOG" ]; then
     ERROR_LOG="CodeDeploy Agent에서 로그를 가져오는 데 실패했습니다. AWS 콘솔을 직접 확인해주세요."
