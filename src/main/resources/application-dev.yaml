@@ -90,6 +90,10 @@ management:
     web:
       exposure:
         include: health
+  metrics:
+    enable:
+      process.cpu: false
+      system.cpu: false
 
 logging:
   level:
@@ -99,4 +103,3 @@ logging:
     side.onetime.exception: debug
     org.hibernate.SQL: off
     org.hibernate.type.descriptor.sql.BasicBinder: off
-

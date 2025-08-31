@@ -10,8 +10,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders;
 import org.springframework.restdocs.payload.JsonFieldType;
+import org.springframework.web.multipart.MultipartFile;
 import side.onetime.auth.service.CustomUserDetailsService;
 import side.onetime.configuration.ControllerTestConfig;
 import side.onetime.controller.AdminController;
@@ -25,6 +27,7 @@ import side.onetime.util.JwtUtil;
 
 import java.util.List;
 
+import static com.epages.restdocs.apispec.MockMvcRestDocumentationWrapper.document;
 import static com.epages.restdocs.apispec.ResourceDocumentation.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -482,11 +485,55 @@ public class AdminControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("띠배너를 등록한다.")
+    @DisplayName("배너를 등록한다.")
     public void registerBanner() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
+
         RegisterBannerRequest request = new RegisterBannerRequest(
+                "OneTime",
+                "OneTime's Title",
+                "OneTime's Sub Title",
+                "#FFFFFF",
+                "https://www.link.com"
+        );
+        String requestContent = objectMapper.writeValueAsString(request);
+
+        // when
+        Mockito.doNothing().when(adminService).registerBanner(any(String.class), any(RegisterBannerRequest.class), any(MultipartFile.class));
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.multipart("/api/v1/admin/banners/register")
+                        .file(new MockMultipartFile("request", "", "application/json", requestContent.getBytes()))
+                        .file(new MockMultipartFile("image_file", "banner.png", "image/png", "banner-image-content".getBytes()))
+                        .header("Authorization", accessToken))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("201"))
+                .andExpect(jsonPath("$.message").value("배너 등록에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-register",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("배너를 등록한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("띠배너를 등록한다.")
+    public void registerBarBanner() throws Exception {
+        // given
+        String accessToken = "Bearer test.jwt.token";
+        RegisterBarBannerRequest request = new RegisterBarBannerRequest(
                 "최신 소식 안내",
                 "News",
                 "#FFFFFF",
@@ -496,10 +543,10 @@ public class AdminControllerTest extends ControllerTestConfig {
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
-        Mockito.doNothing().when(adminService).registerBanner(any(String.class), any(RegisterBannerRequest.class));
+        Mockito.doNothing().when(adminService).registerBarBanner(any(String.class), any(RegisterBarBannerRequest.class));
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/banners/register")
+        mockMvc.perform(RestDocumentationRequestBuilders.post("/api/v1/admin/bar-banners/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", accessToken)
                         .content(requestContent))
@@ -507,7 +554,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("201"))
                 .andExpect(jsonPath("$.message").value("띠배너 등록에 성공했습니다."))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-register",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-register",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
@@ -526,7 +573,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
-                                        .requestSchema(Schema.schema("RegisterBannerRequest"))
+                                        .requestSchema(Schema.schema("RegisterBarBannerRequest"))
                                         .responseSchema(Schema.schema("CommonSuccessResponse"))
                                         .build()
                         )
@@ -534,14 +581,13 @@ public class AdminControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("띠배너를 단건 조회한다.")
+    @DisplayName("배너를 단건 조회한다.")
     public void getBanner() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
         Long bannerId = 1L;
         GetBannerResponse response = new GetBannerResponse(
-                bannerId,
-                "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
+                bannerId, "OneTime", "OneTime's Title", "OneTime's Sub Title", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"
         );
 
         // when
@@ -553,14 +599,14 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("띠배너 단건 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("배너 단건 조회에 성공했습니다."))
                 .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-get-one",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Admin API")
-                                        .description("띠배너를 단건 조회한다.")
+                                        .description("배너를 단건 조회한다.")
                                         .pathParameters(
                                                 parameterWithName("id").description("조회할 배너 ID")
                                         )
@@ -570,10 +616,11 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("배너 정보"),
                                                 fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("배너 ID"),
-                                                fieldWithPath("payload.content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
-                                                fieldWithPath("payload.content_eng").type(JsonFieldType.STRING).description("영어 내용"),
-                                                fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
-                                                fieldWithPath("payload.text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
+                                                fieldWithPath("payload.organization").type(JsonFieldType.STRING).description("조직명"),
+                                                fieldWithPath("payload.title").type(JsonFieldType.STRING).description("제목"),
+                                                fieldWithPath("payload.sub_title").type(JsonFieldType.STRING).description("부제목"),
+                                                fieldWithPath("payload.color_code").type(JsonFieldType.STRING).description("색상 코드"),
+                                                fieldWithPath("payload.image_url").type(JsonFieldType.STRING).description("배너 이미지 URL"),
                                                 fieldWithPath("payload.is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
                                                 fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자"),
                                                 fieldWithPath("payload.link_url").type(JsonFieldType.STRING).description("링크 URL")
@@ -585,15 +632,66 @@ public class AdminControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("띠배너를 전체 조회한다.")
+    @DisplayName("띠배너를 단건 조회한다.")
+    public void getBarBanner() throws Exception {
+        // given
+        String accessToken = "Bearer test.jwt.token";
+        Long barBannerId = 1L;
+        GetBarBannerResponse response = new GetBarBannerResponse(
+                barBannerId,
+                "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"
+        );
+
+        // when
+        Mockito.when(adminService.getBarBanner(any(String.class), any(Long.class))).thenReturn(response);
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/bar-banners/{id}", barBannerId)
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("띠배너 단건 조회에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-get-one",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("띠배너를 단건 조회한다.")
+                                        .pathParameters(
+                                                parameterWithName("id").description("조회할 띠배너 ID")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("띠배너 정보"),
+                                                fieldWithPath("payload.id").type(JsonFieldType.NUMBER).description("띠배너 ID"),
+                                                fieldWithPath("payload.content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("payload.content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("payload.background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("payload.text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
+                                                fieldWithPath("payload.is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
+                                                fieldWithPath("payload.created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.link_url").type(JsonFieldType.STRING).description("링크 URL")
+                                        )
+                                        .responseSchema(Schema.schema("GetBarBannerResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("배너를 전체 조회한다.")
     public void getAllBanners() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
         int page = 1;
 
         List<GetBannerResponse> banners = List.of(
-                new GetBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"),
-                new GetBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com")
+                new GetBannerResponse(1L, "OneTime", "OneTime's Title", "OneTime's Sub Title", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"),
+                new GetBannerResponse(2L, "OneTime2", "OneTime's Title2", "OneTime's Sub Title2", "#000000", "https://www.image.com", true, "2025-08-27 12:00:00", "https://www.link.com")
         );
 
         PageInfo pageInfo = PageInfo.of(1, 20, 2, 1);
@@ -610,7 +708,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("띠배너 전체 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("배너 전체 조회에 성공했습니다."))
                 .andExpect(jsonPath("$.payload.banners[0].id").value(1L))
                 .andExpect(jsonPath("$.payload.banners[1].id").value(2L))
                 .andExpect(jsonPath("$.payload.page_info.page").value(1))
@@ -623,7 +721,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                         resource(
                                 ResourceSnippetParameters.builder()
                                         .tag("Admin API")
-                                        .description("띠배너를 전체 조회한다.")
+                                        .description("배너를 전체 조회한다.")
                                         .queryParameters(
                                                 parameterWithName("page").description("조회할 페이지 번호 (1부터 시작)")
                                         )
@@ -634,10 +732,11 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload").type(JsonFieldType.OBJECT).description("페이로드 객체"),
                                                 fieldWithPath("payload.banners").type(JsonFieldType.ARRAY).description("배너 목록"),
                                                 fieldWithPath("payload.banners[].id").type(JsonFieldType.NUMBER).description("배너 ID"),
-                                                fieldWithPath("payload.banners[].content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
-                                                fieldWithPath("payload.banners[].content_eng").type(JsonFieldType.STRING).description("영어 내용"),
-                                                fieldWithPath("payload.banners[].background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
-                                                fieldWithPath("payload.banners[].text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
+                                                fieldWithPath("payload.banners[].organization").type(JsonFieldType.STRING).description("조직명"),
+                                                fieldWithPath("payload.banners[].title").type(JsonFieldType.STRING).description("제목"),
+                                                fieldWithPath("payload.banners[].sub_title").type(JsonFieldType.STRING).description("부제목"),
+                                                fieldWithPath("payload.banners[].color_code").type(JsonFieldType.STRING).description("색상 코드"),
+                                                fieldWithPath("payload.banners[].image_url").type(JsonFieldType.STRING).description("배너 이미지 URL"),
                                                 fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
                                                 fieldWithPath("payload.banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
                                                 fieldWithPath("payload.banners[].link_url").type(JsonFieldType.STRING).description("링크 URL"),
@@ -653,12 +752,225 @@ public class AdminControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("띠배너를 수정한다.")
+    @DisplayName("띠배너를 전체 조회한다.")
+    public void getAllBarBanners() throws Exception {
+        // given
+        String accessToken = "Bearer test.jwt.token";
+        int page = 1;
+
+        List<GetBarBannerResponse> barBanners = List.of(
+                new GetBarBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"),
+                new GetBarBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com")
+        );
+
+        PageInfo pageInfo = PageInfo.of(1, 20, 2, 1);
+        GetAllBarBannersResponse response = GetAllBarBannersResponse.of(barBanners, pageInfo);
+
+        // when
+        Mockito.when(adminService.getAllBarBanners(any(String.class), any(Pageable.class)))
+                .thenReturn(response);
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/bar-banners/all")
+                        .header("Authorization", accessToken)
+                        .param("page", String.valueOf(page)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("띠배너 전체 조회에 성공했습니다."))
+                .andExpect(jsonPath("$.payload.bar_banners[0].id").value(1L))
+                .andExpect(jsonPath("$.payload.bar_banners[1].id").value(2L))
+                .andExpect(jsonPath("$.payload.page_info.page").value(1))
+                .andExpect(jsonPath("$.payload.page_info.size").value(20))
+                .andExpect(jsonPath("$.payload.page_info.total_elements").value(2))
+                .andExpect(jsonPath("$.payload.page_info.total_pages").value(1))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-get-all",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("띠배너를 전체 조회한다.")
+                                        .queryParameters(
+                                                parameterWithName("page").description("조회할 페이지 번호 (1부터 시작)")
+                                        )
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("페이로드 객체"),
+                                                fieldWithPath("payload.bar_banners").type(JsonFieldType.ARRAY).description("띠배너 목록"),
+                                                fieldWithPath("payload.bar_banners[].id").type(JsonFieldType.NUMBER).description("띠배너 ID"),
+                                                fieldWithPath("payload.bar_banners[].content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("payload.bar_banners[].content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("payload.bar_banners[].background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("payload.bar_banners[].text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
+                                                fieldWithPath("payload.bar_banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
+                                                fieldWithPath("payload.bar_banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.bar_banners[].link_url").type(JsonFieldType.STRING).description("링크 URL"),
+                                                fieldWithPath("payload.page_info.page").type(JsonFieldType.NUMBER).description("현재 페이지 번호"),
+                                                fieldWithPath("payload.page_info.size").type(JsonFieldType.NUMBER).description("페이지당 항목 수"),
+                                                fieldWithPath("payload.page_info.total_elements").type(JsonFieldType.NUMBER).description("전체 항목 수"),
+                                                fieldWithPath("payload.page_info.total_pages").type(JsonFieldType.NUMBER).description("전체 페이지 수")
+                                        )
+                                        .responseSchema(Schema.schema("GetAllBarBannersResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("활성화된 배너를 전체 조회한다.")
+    public void getAllActivatedBanners() throws Exception {
+        // given
+        List<GetBannerResponse> banners = List.of(
+                new GetBannerResponse(1L, "OneTime", "OneTime's Title", "OneTime's Sub Title", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"),
+                new GetBannerResponse(2L, "OneTime2", "OneTime's Title2", "OneTime's Sub Title2", "#000000", "https://www.image.com", true, "2025-08-27 12:00:00", "https://www.link.com")
+        );
+        GetAllActivatedBannersResponse response = GetAllActivatedBannersResponse.from(banners);
+
+        // when
+        Mockito.when(adminService.getAllActivatedBanners()).thenReturn(response);
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/banners/activated/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("활성화된 배너 전체 조회에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/activated-banner-get-all",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("활성화된 배너를 전체 조회한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("페이로드 객체"),
+                                                fieldWithPath("payload.banners").type(JsonFieldType.ARRAY).description("배너 목록"),
+                                                fieldWithPath("payload.banners[].id").type(JsonFieldType.NUMBER).description("배너 ID"),
+                                                fieldWithPath("payload.banners[].organization").type(JsonFieldType.STRING).description("조직명"),
+                                                fieldWithPath("payload.banners[].title").type(JsonFieldType.STRING).description("제목"),
+                                                fieldWithPath("payload.banners[].sub_title").type(JsonFieldType.STRING).description("부제목"),
+                                                fieldWithPath("payload.banners[].color_code").type(JsonFieldType.STRING).description("색상 코드"),
+                                                fieldWithPath("payload.banners[].image_url").type(JsonFieldType.STRING).description("배너 이미지 URL"),
+                                                fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
+                                                fieldWithPath("payload.banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.banners[].link_url").type(JsonFieldType.STRING).description("링크 URL")
+                                        )
+                                        .responseSchema(Schema.schema("GetAllActivatedBannersResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("활성화된 띠배너를 전체 조회한다.")
+    public void getAllActivatedBarBanners() throws Exception {
+        // given
+        List<GetBarBannerResponse> barBanners = List.of(
+                new GetBarBannerResponse(1L, "공지사항", "Notice", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com"),
+                new GetBarBannerResponse(2L, "공지사항2", "Notice2", "#FF5733", "#FFFFFF", true, "2025-04-01 12:00:00", "https://www.link.com")
+        );
+        GetAllActivatedBarBannersResponse response = GetAllActivatedBarBannersResponse.from(barBanners);
+
+        // when
+        Mockito.when(adminService.getAllActivatedBarBanners()).thenReturn(response);
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.get("/api/v1/admin/bar-banners/activated/all"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("활성화된 띠배너 전체 조회에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/activated-bar-banner-get-all",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("활성화된 띠배너를 전체 조회한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지"),
+                                                fieldWithPath("payload").type(JsonFieldType.OBJECT).description("페이로드 객체"),
+                                                fieldWithPath("payload.bar_banners").type(JsonFieldType.ARRAY).description("띠배너 목록"),
+                                                fieldWithPath("payload.bar_banners[].id").type(JsonFieldType.NUMBER).description("띠배너 ID"),
+                                                fieldWithPath("payload.bar_banners[].content_kor").type(JsonFieldType.STRING).description("한국어 내용"),
+                                                fieldWithPath("payload.bar_banners[].content_eng").type(JsonFieldType.STRING).description("영어 내용"),
+                                                fieldWithPath("payload.bar_banners[].background_color_code").type(JsonFieldType.STRING).description("배경 색상 코드"),
+                                                fieldWithPath("payload.bar_banners[].text_color_code").type(JsonFieldType.STRING).description("텍스트 색상 코드"),
+                                                fieldWithPath("payload.bar_banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
+                                                fieldWithPath("payload.bar_banners[].created_date").type(JsonFieldType.STRING).description("생성일자"),
+                                                fieldWithPath("payload.bar_banners[].link_url").type(JsonFieldType.STRING).description("링크 URL")
+                                        )
+                                        .responseSchema(Schema.schema("GetAllActivatedBarBannersResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("배너를 수정한다.")
     public void updateBanner() throws Exception {
         // given
         Long bannerId = 1L;
         String accessToken = "Bearer temp.jwt.access.token";
+
         UpdateBannerRequest request = new UpdateBannerRequest(
+                "Modified OneTime",
+                "Modified OneTime's Title",
+                "Modified OneTime's Sub Title",
+                "#000000",
+                true,
+                "https://www.link.com"
+        );
+        String requestContent = objectMapper.writeValueAsString(request);
+
+        // when
+        Mockito.doNothing().when(adminService).updateBanner(any(String.class), any(Long.class), any(UpdateBannerRequest.class), any(MultipartFile.class));
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.multipart("/api/v1/admin/banners/{id}", bannerId)
+                        .file(new MockMultipartFile("request", "", "application/json", requestContent.getBytes()))
+                        .file(new MockMultipartFile("image_file", "banner.png", "image/png", "banner-image-content".getBytes()))
+                        .header("Authorization", accessToken)
+                        .with(r -> {
+                            r.setMethod("PATCH");
+                            return r;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("배너 수정에 성공했습니다."))
+                .andDo(document("admin/banner-update",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("배너를 수정한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("띠배너를 수정한다.")
+    public void updateBarBanner() throws Exception {
+        // given
+        Long barBannerId = 1L;
+        String accessToken = "Bearer temp.jwt.access.token";
+        UpdateBarBannerRequest request = new UpdateBarBannerRequest(
                 "수정된 내용",
                 "modified content",
                 "#123456",
@@ -669,10 +981,10 @@ public class AdminControllerTest extends ControllerTestConfig {
         String requestContent = objectMapper.writeValueAsString(request);
 
         // when
-        Mockito.doNothing().when(adminService).updateBanner(any(String.class), eq(bannerId), any(UpdateBannerRequest.class));
+        Mockito.doNothing().when(adminService).updateBarBanner(any(String.class), eq(barBannerId), any(UpdateBarBannerRequest.class));
 
         // then
-        mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/admin/banners/{id}", bannerId)
+        mockMvc.perform(RestDocumentationRequestBuilders.patch("/api/v1/admin/bar-banners/{id}", barBannerId)
                         .header("Authorization", accessToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestContent))
@@ -680,7 +992,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("띠배너 수정에 성공했습니다."))
-                .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-update",
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-update",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(
@@ -700,7 +1012,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
                                                 fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
                                         )
-                                        .requestSchema(Schema.schema("UpdateBannerRequest"))
+                                        .requestSchema(Schema.schema("UpdateBarBannerRequest"))
                                         .responseSchema(Schema.schema("CommonSuccessResponse"))
                                         .build()
                         )
@@ -708,7 +1020,7 @@ public class AdminControllerTest extends ControllerTestConfig {
     }
 
     @Test
-    @DisplayName("띠배너를 삭제한다.")
+    @DisplayName("배너를 삭제한다.")
     public void deleteBanner() throws Exception {
         // given
         String accessToken = "Bearer test.jwt.token";
@@ -723,8 +1035,43 @@ public class AdminControllerTest extends ControllerTestConfig {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.is_success").value(true))
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("띠배너 삭제에 성공했습니다."))
+                .andExpect(jsonPath("$.message").value("배너 삭제에 성공했습니다."))
                 .andDo(MockMvcRestDocumentationWrapper.document("admin/banner-delete",
+                        preprocessRequest(prettyPrint()),
+                        preprocessResponse(prettyPrint()),
+                        resource(
+                                ResourceSnippetParameters.builder()
+                                        .tag("Admin API")
+                                        .description("배너를 삭제한다.")
+                                        .responseFields(
+                                                fieldWithPath("is_success").type(JsonFieldType.BOOLEAN).description("성공 여부"),
+                                                fieldWithPath("code").type(JsonFieldType.STRING).description("응답 코드"),
+                                                fieldWithPath("message").type(JsonFieldType.STRING).description("응답 메시지")
+                                        )
+                                        .responseSchema(Schema.schema("CommonSuccessResponse"))
+                                        .build()
+                        )
+                ));
+    }
+
+    @Test
+    @DisplayName("띠배너를 삭제한다.")
+    public void deleteBarBanner() throws Exception {
+        // given
+        String accessToken = "Bearer test.jwt.token";
+        Long barBannerId = 1L;
+
+        // when
+        Mockito.doNothing().when(adminService).deleteBarBanner(any(String.class), eq(barBannerId));
+
+        // then
+        mockMvc.perform(RestDocumentationRequestBuilders.delete("/api/v1/admin/bar-banners/{id}", barBannerId)
+                        .header("Authorization", accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.is_success").value(true))
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("띠배너 삭제에 성공했습니다."))
+                .andDo(MockMvcRestDocumentationWrapper.document("admin/bar-banner-delete",
                         preprocessRequest(prettyPrint()),
                         preprocessResponse(prettyPrint()),
                         resource(

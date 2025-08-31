@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import side.onetime.global.wrapper.CustomHttpRequestWrapper;
 
 import java.io.IOException;
+import java.util.Objects;
 
 @Component
 public class RequestWrapperFilter implements Filter {
@@ -13,8 +14,14 @@ public class RequestWrapperFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {
         if (request instanceof HttpServletRequest httpRequest) {
-            CustomHttpRequestWrapper wrapper = new CustomHttpRequestWrapper(httpRequest);
-            chain.doFilter(wrapper, response);
+            String contentType = httpRequest.getContentType();
+            CustomHttpRequestWrapper wrapper = null;
+
+            if (contentType != null && !contentType.startsWith("multipart/")) {
+                wrapper = new CustomHttpRequestWrapper(httpRequest);
+            }
+
+            chain.doFilter(Objects.requireNonNullElse(wrapper, request), response);
         } else {
             chain.doFilter(request, response);
         }

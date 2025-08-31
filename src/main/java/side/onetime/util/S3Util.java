@@ -10,6 +10,8 @@ import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.UUID;
 
 @Component
@@ -58,6 +60,25 @@ public class S3Util {
      */
     public String getPublicUrl(String fileName) {
         return String.format("https://%s.s3.%s.amazonaws.com/%s", bucket, region, fileName);
+    }
+
+    /**
+     * S3 퍼블릭 URL에서 파일 이름을 추출하는 메서드.
+     *
+     * @param fileUrl S3 퍼블릭 URL
+     * @return S3에 저장된 파일 이름
+     */
+    public static String extractKey(String fileUrl) {
+        try {
+            URL url = new URL(fileUrl);
+            String path = url.getPath();
+            if (path == null || path.length() <= 1) {
+                throw new IllegalArgumentException("유효하지 않은 S3 URL : " + fileUrl);
+            }
+            return path.startsWith("/") ? path.substring(1) : path;
+        } catch (MalformedURLException e) {
+            throw new IllegalArgumentException("잘못된 URL 형식: " + fileUrl);
+        }
     }
 
     /**

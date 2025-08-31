@@ -17,17 +17,20 @@ public class Banner extends BaseEntity {
     @Column(name = "banners_id")
     private Long id;
 
-    @Column(name = "content_kor", nullable = false, length = 200)
-    private String contentKor;
+    @Column(name = "organization", nullable = false, length = 200)
+    private String organization;
 
-    @Column(name = "content_eng", nullable = false, length = 200)
-    private String contentEng;
+    @Column(name = "title", nullable = false, length = 200)
+    private String title;
 
-    @Column(name = "background_color_code", nullable = false, length = 30)
-    private String backgroundColorCode;
+    @Column(name = "sub_title", nullable = false, length = 200)
+    private String subTitle;
 
-    @Column(name = "text_color_code", nullable = false, length = 30)
-    private String textColorCode;
+    @Column(name = "color_code", nullable = false, length = 30)
+    private String colorCode;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 
     @Column(name = "is_activated", nullable = false)
     private Boolean isActivated;
@@ -39,30 +42,35 @@ public class Banner extends BaseEntity {
     private String linkUrl;
 
     @Builder
-    public Banner(String contentKor, String contentEng, String backgroundColorCode, String textColorCode, String linkUrl) {
-        this.contentKor = contentKor;
-        this.contentEng = contentEng;
-        this.backgroundColorCode = backgroundColorCode;
-        this.textColorCode = textColorCode;
+    public Banner(String organization, String title, String subTitle, String colorCode, String imageUrl, String linkUrl) {
+        this.organization = organization;
+        this.title = title;
+        this.subTitle = subTitle;
+        this.colorCode = colorCode;
+        this.imageUrl = imageUrl;
         this.isActivated = false;
         this.isDeleted = false;
         this.linkUrl = linkUrl;
     }
 
-    public void updateContentKor(String contentKor) {
-        this.contentKor = contentKor;
+    public void updateOrganization(String organization) {
+        this.organization = organization;
     }
 
-    public void updateContentEng(String contentEng) {
-        this.contentEng = contentEng;
+    public void updateTitle(String title) {
+        this.title = title;
     }
 
-    public void updateBackgroundColorCode(String backgroundColorCode) {
-        this.backgroundColorCode = backgroundColorCode;
+    public void updateSubTitle(String subTitle) {
+        this.subTitle = subTitle;
     }
 
-    public void updateTextColorCode(String textColorCode) {
-        this.textColorCode = textColorCode;
+    public void updateColorCode(String colorCode) {
+        this.colorCode = colorCode;
+    }
+
+    public void updateImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public void updateIsActivated(Boolean isActivated) {
@@ -75,5 +83,6 @@ public class Banner extends BaseEntity {
 
     public void markAsDeleted() {
         this.isDeleted = true;
+        this.isActivated = false;
     }
 }
