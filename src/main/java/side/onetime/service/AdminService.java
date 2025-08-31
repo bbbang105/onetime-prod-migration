@@ -281,12 +281,10 @@ public class AdminService {
     @Transactional
     public void registerBanner(String authorizationHeader, RegisterBannerRequest request, MultipartFile imageFile) {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
-        Banner newBanner = request.toEntity();
+        Banner newBanner = bannerRepository.save(request.toEntity());
 
-        String imageUrl = uploadBannerImage(imageFile);
+        String imageUrl = uploadBannerImage(newBanner.getId(), imageFile);
         newBanner.updateImageUrl(imageUrl);
-
-        bannerRepository.save(newBanner);
     }
 
     /**
@@ -456,7 +454,7 @@ public class AdminService {
         if (imageFile != null) {
             deleteExistingBannerImage(banner.getImageUrl());
 
-            String newImageUrl = uploadBannerImage(imageFile);
+            String newImageUrl = uploadBannerImage(banner.getId(), imageFile);
             banner.updateImageUrl(newImageUrl);
         }
     }
@@ -499,11 +497,10 @@ public class AdminService {
         jwtUtil.getAdminUserFromHeader(authorizationHeader);
         Banner banner = bannerRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new CustomException(AdminErrorStatus._NOT_FOUND_BANNER));
+        banner.markAsDeleted();
 
         String imageUrl = banner.getImageUrl();
         deleteExistingBannerImage(imageUrl);
-
-        banner.markAsDeleted();
     }
 
     /**
@@ -527,13 +524,14 @@ public class AdminService {
      * S3에 배너 이미지를 업로드하는 메서드.
      * 주어진 이벤트 ID를 기반으로 QR 코드를 생성한 후, S3에 업로드합니다.
      *
+     * @param bannerId 업로드할 배너의 ID
      * @param imageFile 업로드할 이미지 파일
      * @return S3에 업로드된 이미지 Public URL
      * @throws CustomException S3 업로드 실패 시 발생
      */
-    private String uploadBannerImage(MultipartFile imageFile) {
+    private String uploadBannerImage(Long bannerId, MultipartFile imageFile) {
         try {
-            String imageFileName = s3Util.uploadImage("banner", imageFile);
+            String imageFileName = s3Util.uploadImage("banner/" + bannerId, imageFile);
             return s3Util.getPublicUrl(imageFileName);
         } catch (Exception e) {
             throw new CustomException(AdminErrorStatus._FAILED_UPLOAD_BANNER_IMAGE);

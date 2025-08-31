@@ -29,7 +29,7 @@ public class Banner extends BaseEntity {
     @Column(name = "color_code", nullable = false, length = 30)
     private String colorCode;
 
-    @Column(name = "image_url", nullable = false)
+    @Column(name = "image_url")
     private String imageUrl;
 
     @Column(name = "is_activated", nullable = false)
