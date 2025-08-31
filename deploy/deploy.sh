@@ -70,6 +70,7 @@ if [ -z "$IS_GREEN" ]; then
   done
 
   echo ">>> 3. nginx 라우팅 변경 및 reload"
+  sudo cp "$GREEN_NGINX_CONF" "$NGINX_CONF"
   NGINX_OUTPUT=$(sudo docker exec nginx nginx -s reload 2>&1)
   if [ $? -ne 0 ]; then
     send_discord_failure_message "$NGINX_OUTPUT"
@@ -109,6 +110,7 @@ else
   done
 
   echo ">>> 3. nginx 라우팅 변경 및 reload"
+  sudo cp "$BLUE_NGINX_CONF" "$NGINX_CONF"
   NGINX_OUTPUT=$(sudo docker exec nginx nginx -s reload 2>&1)
   if [ $? -ne 0 ]; then
     send_discord_failure_message "$NGINX_OUTPUT"
