@@ -25,7 +25,25 @@ MESSAGE_SUCCESS="⏰ [$DEPLOYMENT_GROUP_NAME] OneTime 배포가 성공적으로 
 
 # 실패 시 상세 로그를 포함하여 디스코드 메시지를 보내는 함수
 send_discord_failure_message() {
-  ERROR_LOG=$(aws deploy get-deployment-instance --deployment-id $DEPLOYMENT_ID --instance-id $(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id) --query 'instanceSummary.lifecycleEvents[?status==`Failed`].diagnostics.logTail' --output text | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
+  # 로그를 가져오기 위해 최대 3번 재시도 (3초 간격)
+  for i in {1..3}
+  do
+    echo "실패 로그 가져오기 시도 ($i/3)..."
+    ERROR_LOG=$(aws deploy get-deployment-instance --deployment-id $DEPLOYMENT_ID --instance-id $(wget -q -O - http://169.254.169.254/latest/meta-data/instance-id) --query 'instanceSummary.lifecycleEvents[?status==`Failed`].diagnostics.logTail' --output text)
+    if [ -n "$ERROR_LOG" ]; then
+      echo "실패 로그 가져오기 성공!"
+      break
+    fi
+    sleep 3
+  done
+
+  # 만약 3번 시도 후에도 로그가 없다면 기본 메시지 표시
+  if [ -z "$ERROR_LOG" ]; then
+    ERROR_LOG="CodeDeploy Agent에서 로그를 가져오는 데 실패했습니다. AWS 콘솔을 직접 확인해주세요."
+  fi
+
+  # JSON 특수문자 이스케이프 처리
+  ERROR_LOG=$(echo "$ERROR_LOG" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
   DEPLOYMENT_URL="https://ap-northeast-2.console.aws.amazon.com/codesuite/codedeploy/deployments/${DEPLOYMENT_ID}?region=ap-northeast-2"
   JSON_PAYLOAD=$(cat <<EOF
 {
