@@ -23,35 +23,20 @@ DOCKER_COMPOSE_FILE="/home/ubuntu/docker-compose.yaml"
 HEALTH_CHECK_ENDPOINT="/"
 MESSAGE_SUCCESS="⏰ [$DEPLOYMENT_GROUP_NAME] OneTime 배포가 성공적으로 수행되었습니다!"
 
-# 실패 시 상세 로그를 포함하여 디스코드 메시지를 보내는 함수
+# 실패 시 캡처된 에러 로그를 포함하여 디스코드 메시지를 보내는 함수
 send_discord_failure_message() {
-  TOKEN=$(curl -s -X PUT "http://169.254.169.254/latest/api/token" -H "X-aws-ec2-metadata-token-ttl-seconds: 21600")
-  INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.254.169.254/latest/meta-data/instance-id)
+  local captured_error="$1" # 캡처된 에러 메시지를 인자로 받음
 
-  # 재시도 로직
-  if [ -z "$INSTANCE_ID" ]; then
-    echo "인스턴스 ID를 가져오는 데 실패했습니다."
-    ERROR_LOG="EC2 메타데이터에서 인스턴스 ID를 가져올 수 없습니다. EC2 인스턴스 설정을 확인해주세요."
-  else
-    for i in {1..3}
-    do
-      echo "실패 로그 가져오기 시도 ($i/3)..."
-      ERROR_LOG=$(aws deploy get-deployment-instance --deployment-id "$DEPLOYMENT_ID" --instance-id "$INSTANCE_ID" --query 'instanceSummary.lifecycleEvents[?status==`Failed`].diagnostics.logTail' --output text)
-      if [ -n "$ERROR_LOG" ]; then
-        echo "실패 로그 가져오기 성공!"
-        break
-      fi
-      sleep 3
-    done
+  # 인자로 받은 에러가 없으면 기본 메시지 사용
+  if [ -z "$captured_error" ]; then
+    captured_error="실패 로그를 직접 캡처하지 못했습니다. AWS CodeDeploy 콘솔을 확인해주세요."
   fi
 
-  if [ -z "$ERROR_LOG" ]; then
-    ERROR_LOG="CodeDeploy Agent에서 로그를 가져오는 데 실패했습니다. AWS 콘솔을 직접 확인해주세요."
-  fi
+  # JSON 형식에 맞게 이스케이프 처리 (줄바꿈, 따옴표 등)
+  local ERROR_LOG=$(echo "$captured_error" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g' | sed ':a;N;$!ba;s/\n/\\n/g')
+  local DEPLOYMENT_URL="https://ap-northeast-2.console.aws.amazon.com/codesuite/codedeploy/deployments/${DEPLOYMENT_ID}?region=ap-northeast-2"
 
-  ERROR_LOG=$(echo "$ERROR_LOG" | sed 's/\\/\\\\/g' | sed 's/"/\\"/g')
-  DEPLOYMENT_URL="https://ap-northeast-2.console.aws.amazon.com/codesuite/codedeploy/deployments/${DEPLOYMENT_ID}?region=ap-northeast-2"
-  JSON_PAYLOAD=$(cat <<EOF
+  local JSON_PAYLOAD=$(cat <<EOF
 {
   "content": "🚨 [${DEPLOYMENT_GROUP_NAME}] OneTime 배포 실패!\\n\\n**에러 로그:**\\n\`\`\`\\n${ERROR_LOG}\\n\`\`\`\\n[자세히 보기](${DEPLOYMENT_URL})"
 }
