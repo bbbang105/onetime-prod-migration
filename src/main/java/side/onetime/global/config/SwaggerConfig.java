@@ -37,28 +37,30 @@ public class SwaggerConfig {
 			// ✅ Swagger 전용 ObjectMapper 사용
 			ObjectMapper swaggerMapper = Json.mapper();
 			ClassPathResource resource = new ClassPathResource("static/docs/open-api-3.0.1.json");
-			InputStream inputStream = resource.getInputStream();
+			try (InputStream inputStream = resource.getInputStream()) {
+				// REST Docs에서 생성한 open-api JSON -> OpenAPI 객체로 변환
+				OpenAPI restDocsOpenAPI = swaggerMapper.readValue(inputStream, OpenAPI.class);
 
-			// ✅ REST Docs에서 생성한 open-api JSON -> OpenAPI 객체로 변환
-			OpenAPI restDocsOpenAPI = swaggerMapper.readValue(inputStream, OpenAPI.class);
+				// REST Docs Paths 적용
+				if (restDocsOpenAPI.getPaths() != null) {
+					openAPI.setPaths(restDocsOpenAPI.getPaths());
+				}
 
-			// ✅ REST Docs Paths 적용
-			openAPI.setPaths(restDocsOpenAPI.getPaths());
+				// REST Docs Components + Security 병합
+				Components components = restDocsOpenAPI.getComponents() != null
+					? restDocsOpenAPI.getComponents()
+					: new Components();
 
-			// ✅ REST Docs Components + Security 병합
-			Components components = restDocsOpenAPI.getComponents();
-			SecurityScheme bearerAuth = new SecurityScheme()
-				.type(SecurityScheme.Type.HTTP)
-				.scheme("bearer")
-				.bearerFormat("JWT")
-				.in(SecurityScheme.In.HEADER)
-				.name("Authorization");
+				SecurityScheme bearerAuth = new SecurityScheme()
+					.type(SecurityScheme.Type.HTTP)
+					.scheme("bearer")
+					.bearerFormat("JWT");
 
-			components.addSecuritySchemes("bearerAuth", bearerAuth);
+				components.addSecuritySchemes("bearerAuth", bearerAuth);
 
-			openAPI.components(components)
-				.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
-
+				openAPI.components(components)
+					.addSecurityItem(new SecurityRequirement().addList("bearerAuth"));
+			}
 		} catch (Exception e) {
 			throw new CustomException(ErrorStatus._FAILED_TRANSLATE_SWAGGER);
 		}
