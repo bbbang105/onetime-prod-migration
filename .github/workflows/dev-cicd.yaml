@@ -2,84 +2,67 @@ name: 🚀 Build & Deploy workflow on dev environment
 
 on:
   pull_request:
-    branches: [develop, 'release/v**'] # develop 또는 release 브랜치에 PR 생성 시 실행
+    branches: [develop, 'release/v**']
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  build-and-push:
+    name: Build and Push to ECR
     runs-on: ubuntu-latest
+    environment: dev
     steps:
-      # 1. GitHub 리포지토리에서 코드 체크아웃
       - name: ✅ 브랜치 체크아웃
         uses: actions/checkout@v3
-
-      # 2. Gradle로 프로젝트 빌드
+      - name: cache-gradle
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
       - name: 📦 프로젝트 빌드
         run: ./gradlew clean build
-
-      # 3. 빌드 결과를 아티팩트로 저장
-      - name: 📦 빌드 결과 저장
-        uses: actions/upload-artifact@v4
+      - name: 🏗️ Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: 🏗️ Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: 🔐 AWS ECR 로그인
+        uses: aws-actions/configure-aws-credentials@v5
         with:
-          name: build-artifacts
-          path: build/libs/*.jar
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2
+      - name: 🐳 ECR 로그인
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: 📦 Docker 이미지 빌드 및 ECR 푸시 (for ARM64)
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: dev/onetime-backend
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          docker buildx build --platform linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
 
   deploy:
-    needs: build
-    environment: dev # GitHub Actions의 dev 환경 Secrets 사용
+    name: Deploy to Server
+    needs: build-and-push
     runs-on: ubuntu-latest
+    environment: dev
     steps:
-      # 1. GitHub 리포지토리에서 코드 체크아웃
-      - name: ✅ 브랜치 체크아웃
-        uses: actions/checkout@v3
-
-      # 2. 빌드 결과 다운로드
-      - name: 📦 빌드 결과 다운로드
-        uses: actions/download-artifact@v4
-        with:
-          name: build-artifacts
-
-      # 3. 현재 타임스탬프 생성
-      - name: 🕒 타임스탬프 생성
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
-
-      # 4. dev 환경의 .env 파일 생성
-      - name: ⚙️ .env 파일 복원
-        run: |
-          echo "${{ secrets.ENV_FILE }}" > .env
-
-      # 5. dev 환경의 docker-compose.yaml 생성
-      - name: 🐋 docker-compose.yaml 복원
-        run: |
-          echo "${{ secrets.DOCKER_COMPOSE_FILE }}" > docker-compose.yaml
-
-      # 6. 필요한 파일 압축
-      - name: 📦 배포 패키지 압축
-        run: |
-          mkdir temp_deploy_package
-          cp -r *.jar .env Dockerfile docker-compose.yaml appspec.yml deploy/ temp_deploy_package/
-          cd temp_deploy_package && zip -r ../build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip . && cd ..
-          rm -rf temp_deploy_package
-
-      # 7. AWS Credentials 설정
-      - name: 🌎 AWS 자격 증명 설정
+      - name: 🔐 AWS 자격 증명 설정
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-northeast-2
-
-      # 8. S3 버킷으로 파일 업로드
-      - name: 🚛 S3에 파일 업로드
-        run: aws s3 cp build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip s3://${{ secrets.S3_BUCKET_NAME }}/dev/build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip
-
-      # 9. CodeDeploy를 통해 배포 수행
-      - name: 🚀 CodeDeploy로 EC2 배포
+      - name: 🚀 서버에 배포 스크립트 실행
         run: |
-          aws deploy create-deployment \
-            --application-name ${{ secrets.CODEDEPLOY_APP_NAME }} \
-            --deployment-group-name ${{ secrets.CODEDEPLOY_DEV_GROUP }} \
-            --s3-location bucket=${{ secrets.S3_BUCKET_NAME }},key=dev/build-${{ env.TIMESTAMP }}-${{ github.sha }}.zip,bundleType=zip
+          aws ssm send-command \
+            --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploying from GitHub Actions ${{ github.sha }}" \
+            --parameters '{"commands":["cd /home/ubuntu/deploy && ./deploy.sh ${{ github.sha }}"]}'

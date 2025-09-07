@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT}
+  forward-headers-strategy: native
 
 spring:
   datasource:
@@ -75,6 +76,7 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
+    persist-authorization: true
   api-docs:
     path: /v3/api-docs
   show-actuator: false
