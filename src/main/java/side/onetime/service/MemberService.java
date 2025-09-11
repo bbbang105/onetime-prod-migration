@@ -22,7 +22,7 @@ import side.onetime.exception.status.ScheduleErrorStatus;
 import side.onetime.repository.EventRepository;
 import side.onetime.repository.MemberRepository;
 import side.onetime.repository.ScheduleRepository;
-import side.onetime.repository.SelectionRepository;
+import side.onetime.repository.SelectionBatchRepository;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,8 +34,8 @@ public class MemberService {
 
     private final EventRepository eventRepository;
     private final MemberRepository memberRepository;
-    private final SelectionRepository selectionRepository;
     private final ScheduleRepository scheduleRepository;
+    private final SelectionBatchRepository selectionBatchRepository;
 
     /**
      * 멤버 등록 메서드.
@@ -65,7 +65,7 @@ public class MemberService {
         } else {
             selections = createMembersDateSelections(event, member, registerMemberRequest);
         }
-        selectionRepository.saveAll(selections);
+        selectionBatchRepository.insertAll(selections);
 
         return RegisterMemberResponse.of(member, event);
     }

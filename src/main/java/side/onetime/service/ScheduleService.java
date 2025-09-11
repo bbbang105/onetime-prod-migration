@@ -35,6 +35,7 @@ public class ScheduleService {
     private final SelectionRepository selectionRepository;
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final SelectionBatchRepository selectionBatchRepository;
 
     /**
      * 요일 스케줄 등록 메서드 (비로그인).
@@ -69,8 +70,7 @@ public class ScheduleService {
             }
         }
         selectionRepository.deleteAllByMember(member);
-        selectionRepository.flush();
-        selectionRepository.saveAll(selections);
+        selectionBatchRepository.insertAll(selections);
     }
 
     /**
@@ -103,9 +103,7 @@ public class ScheduleService {
         }
 
         List<DaySchedule> daySchedules = createDayScheduleRequest.daySchedules();
-        List<Selection> newSelections = new ArrayList<>();
-        List<Schedule> allSchedules = new ArrayList<>();
-
+        List<Selection> selections = new ArrayList<>();
         for (DaySchedule daySchedule : daySchedules) {
             String day = daySchedule.day();
             List<String> times = daySchedule.times();
@@ -114,16 +112,15 @@ public class ScheduleService {
 
             for (Schedule schedule : schedules) {
                 if (times.contains(schedule.getTime())) {
-                    newSelections.add(Selection.builder()
+                    selections.add(Selection.builder()
                             .user(user)
                             .schedule(schedule)
                             .build());
                 }
             }
-            allSchedules.addAll(schedules);
         }
-        selectionRepository.deleteAllByUserAndScheduleIn(user, allSchedules);
-        selectionRepository.saveAll(newSelections);
+        selectionRepository.deleteAllByUserAndEvent(user, event);
+        selectionBatchRepository.insertAll(selections);
     }
 
     /**
@@ -159,8 +156,7 @@ public class ScheduleService {
             }
         }
         selectionRepository.deleteAllByMember(member);
-        selectionRepository.flush();
-        selectionRepository.saveAll(selections);
+        selectionBatchRepository.insertAll(selections);
     }
 
     /**
@@ -193,9 +189,7 @@ public class ScheduleService {
         }
 
         List<DateSchedule> dateSchedules = createDateScheduleRequest.dateSchedules();
-        List<Selection> newSelections = new ArrayList<>();
-        List<Schedule> allSchedules = new ArrayList<>();
-
+        List<Selection> selections = new ArrayList<>();
         for (DateSchedule dateSchedule : dateSchedules) {
             String date = dateSchedule.date();
             List<String> times = dateSchedule.times();
@@ -205,18 +199,15 @@ public class ScheduleService {
 
             for (Schedule schedule : schedules) {
                 if (times.contains(schedule.getTime())) {
-                    newSelections.add(Selection.builder()
+                    selections.add(Selection.builder()
                             .user(user)
                             .schedule(schedule)
                             .build());
                 }
             }
-
-            allSchedules.addAll(schedules);
         }
-
-        selectionRepository.deleteAllByUserAndScheduleIn(user, allSchedules);
-        selectionRepository.saveAll(newSelections);
+        selectionRepository.deleteAllByUserAndEvent(user, event);
+        selectionBatchRepository.insertAll(selections);
     }
 
     /**
