@@ -449,6 +449,7 @@ public class AdminService {
         if (request.organization() != null) banner.updateOrganization(request.organization());
         if (request.title() != null) banner.updateTitle(request.title());
         if (request.subTitle() != null) banner.updateSubTitle(request.subTitle());
+        if (request.buttonText() != null) banner.updateButtonText(request.buttonText());
         if (request.colorCode() != null) banner.updateColorCode(request.colorCode());
         if (request.linkUrl() != null) banner.updateLinkUrl(request.linkUrl());
         if (request.isActivated() != null) banner.updateIsActivated(request.isActivated());

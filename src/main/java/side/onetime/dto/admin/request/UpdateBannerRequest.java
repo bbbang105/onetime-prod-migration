@@ -2,6 +2,7 @@ package side.onetime.dto.admin.request;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -15,6 +16,9 @@ public record UpdateBannerRequest(
 
         @Size(max = 200, message = "부제목은 최대 200자까지 가능합니다.")
         String subTitle,
+
+        @Size(max = 200, message = "버튼 텍스트는 최대 200자까지 가능합니다.")
+        String buttonText,
 
         @Size(max = 30, message = "색상 값은 최대 30자까지 가능합니다.")
         String colorCode,
