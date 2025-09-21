@@ -1,5 +1,6 @@
 server:
   port: ${SERVER_PORT}
+  forward-headers-strategy: native
 
 spring:
   datasource:
@@ -75,6 +76,7 @@ springdoc:
     path: /swagger-ui.html
     tags-sorter: alpha
     operations-sorter: alpha
+    persist-authorization: true
   api-docs:
     path: /v3/api-docs
   show-actuator: false
@@ -90,6 +92,10 @@ management:
     web:
       exposure:
         include: health
+  metrics:
+    enable:
+      process.cpu: false
+      system.cpu: false
 
 logging:
   level:
@@ -99,4 +105,3 @@ logging:
     side.onetime.exception: debug
     org.hibernate.SQL: off
     org.hibernate.type.descriptor.sql.BasicBinder: off
-

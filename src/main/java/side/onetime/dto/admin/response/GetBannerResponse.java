@@ -9,10 +9,12 @@ import java.time.format.DateTimeFormatter;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public record GetBannerResponse(
         Long id,
-        String contentKor,
-        String contentEng,
-        String backgroundColorCode,
-        String textColorCode,
+        String organization,
+        String title,
+        String subTitle,
+        String buttonText,
+        String colorCode,
+        String imageUrl,
         Boolean isActivated,
         String createdDate,
         String linkUrl
@@ -20,10 +22,12 @@ public record GetBannerResponse(
     public static GetBannerResponse from(Banner banner) {
         return new GetBannerResponse(
                 banner.getId(),
-                banner.getContentKor(),
-                banner.getContentEng(),
-                banner.getBackgroundColorCode(),
-                banner.getTextColorCode(),
+                banner.getOrganization(),
+                banner.getTitle(),
+                banner.getSubTitle(),
+                banner.getButtonText(),
+                banner.getColorCode(),
+                banner.getImageUrl(),
                 banner.getIsActivated(),
                 banner.getCreatedDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                 banner.getLinkUrl()

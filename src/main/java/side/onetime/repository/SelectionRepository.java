@@ -1,6 +1,7 @@
 package side.onetime.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import side.onetime.domain.*;
@@ -9,9 +10,13 @@ import java.util.List;
 
 public interface SelectionRepository extends JpaRepository<Selection, Long> {
 
-    void deleteAllByMember(Member member);
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Selection s WHERE s.member = :member")
+    void deleteAllByMember(@Param("member") Member member);
 
-    void deleteAllByUserAndScheduleIn(User user, List<Schedule> schedules);
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM Selection s WHERE s.user = :user AND s.schedule.event = :event")
+    void deleteAllByUserAndEvent(@Param("user") User user, @Param("event") Event event);
 
     @Query("""
         SELECT s FROM Selection s
@@ -37,16 +42,16 @@ public interface SelectionRepository extends JpaRepository<Selection, Long> {
     @Query("""
         SELECT s FROM Selection s
         JOIN FETCH s.schedule sc
-        JOIN FETCH sc.event
-        WHERE s.user = :user
+        JOIN FETCH sc.event e
+        WHERE e = :event AND (s.user.id IN :userIds OR s.member.id IN :memberIds)
     """)
-    List<Selection> findAllByUserWithScheduleAndEvent(@Param("user") User user);
+    List<Selection> findAllByUserIdsOrMemberIdsWithScheduleAndEvent(@Param("event") Event event, @Param("userIds") List<Long> userIds, @Param("memberIds") List<Long> memberIds);
 
     @Query("""
         SELECT s FROM Selection s
         JOIN FETCH s.schedule sc
         JOIN FETCH sc.event e
-        WHERE e = :event AND (s.user.id IN :userIds OR s.member.id IN :memberIds)
+        WHERE s.user = :user AND e = :event
     """)
-    List<Selection> findAllByUserIdsOrMemberIdsWithScheduleAndEvent(@Param("event") Event event, @Param("userIds") List<Long> userIds, @Param("memberIds") List<Long> memberIds);
+    List<Selection> findAllByUserAndEventWithScheduleAndEvent(@Param("user") User user, @Param("event") Event event);
 }

@@ -66,12 +66,18 @@ public enum SuccessStatus implements BaseCode {
     _GET_ALL_DASHBOARD_EVENTS(HttpStatus.OK, "200", "관리자 이벤트 대시보드 정보 조회에 성공했습니다."),
     _GET_ALL_DASHBOARD_USERS(HttpStatus.OK, "200", "관리자 유저 대시보드 정보 조회에 성공했습니다."),
     // Banner
-    _REGISTER_BANNER(HttpStatus.CREATED, "201", "띠배너 등록에 성공했습니다."),
-    _GET_BANNER(HttpStatus.OK, "200", "띠배너 단건 조회에 성공했습니다."),
-    _GET_ACTIVATED_BANNER(HttpStatus.OK, "200", "활성화된 띠배너 조회에 성공했습니다."),
-    _GET_ALL_BANNERS(HttpStatus.OK, "200", "띠배너 전체 조회에 성공했습니다."),
-    _UPDATE_BANNER(HttpStatus.OK, "200", "띠배너 수정에 성공했습니다."),
-    _DELETE_BANNER(HttpStatus.OK, "200", "띠배너 삭제에 성공했습니다."),
+    _REGISTER_BANNER(HttpStatus.CREATED, "201", "배너 등록에 성공했습니다."),
+    _REGISTER_BAR_BANNER(HttpStatus.CREATED, "201", "띠배너 등록에 성공했습니다."),
+    _GET_BANNER(HttpStatus.OK, "200", "배너 단건 조회에 성공했습니다."),
+    _GET_BAR_BANNER(HttpStatus.OK, "200", "띠배너 단건 조회에 성공했습니다."),
+    _GET_ALL_ACTIVATED_BANNERS(HttpStatus.OK, "200", "활성화된 배너 전체 조회에 성공했습니다."),
+    _GET_ALL_ACTIVATED_BAR_BANNERS(HttpStatus.OK, "200", "활성화된 띠배너 전체 조회에 성공했습니다."),
+    _GET_ALL_BANNERS(HttpStatus.OK, "200", "배너 전체 조회에 성공했습니다."),
+    _GET_ALL_BAR_BANNERS(HttpStatus.OK, "200", "띠배너 전체 조회에 성공했습니다."),
+    _UPDATE_BANNER(HttpStatus.OK, "200", "배너 수정에 성공했습니다."),
+    _UPDATE_BAR_BANNER(HttpStatus.OK, "200", "띠배너 수정에 성공했습니다."),
+    _DELETE_BANNER(HttpStatus.OK, "200", "배너 삭제에 성공했습니다."),
+    _DELETE_BAR_BANNER(HttpStatus.OK, "200", "띠배너 삭제에 성공했습니다."),
     ;
 
     private final HttpStatus httpStatus;
