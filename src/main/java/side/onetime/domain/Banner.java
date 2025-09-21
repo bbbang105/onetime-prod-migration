@@ -26,6 +26,9 @@ public class Banner extends BaseEntity {
     @Column(name = "sub_title", nullable = false, length = 200)
     private String subTitle;
 
+    @Column(name = "button_text", nullable = false, length = 200)
+    private String buttonText;
+
     @Column(name = "color_code", nullable = false, length = 30)
     private String colorCode;
 
@@ -42,10 +45,11 @@ public class Banner extends BaseEntity {
     private String linkUrl;
 
     @Builder
-    public Banner(String organization, String title, String subTitle, String colorCode, String imageUrl, String linkUrl) {
+    public Banner(String organization, String title, String subTitle, String buttonText, String colorCode, String imageUrl, String linkUrl) {
         this.organization = organization;
         this.title = title;
         this.subTitle = subTitle;
+        this.buttonText = buttonText;
         this.colorCode = colorCode;
         this.imageUrl = imageUrl;
         this.isActivated = false;
@@ -63,6 +67,10 @@ public class Banner extends BaseEntity {
 
     public void updateSubTitle(String subTitle) {
         this.subTitle = subTitle;
+    }
+
+    public void updateButtonText(String buttonText) {
+        this.buttonText = buttonText;
     }
 
     public void updateColorCode(String colorCode) {

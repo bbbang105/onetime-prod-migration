@@ -494,6 +494,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                 "OneTime",
                 "OneTime's Title",
                 "OneTime's Sub Title",
+                "OneTime's Button Text",
                 "#FFFFFF",
                 "https://www.link.com"
         );
@@ -587,7 +588,7 @@ public class AdminControllerTest extends ControllerTestConfig {
         String accessToken = "Bearer test.jwt.token";
         Long bannerId = 1L;
         GetBannerResponse response = new GetBannerResponse(
-                bannerId, "OneTime", "OneTime's Title", "OneTime's Sub Title", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"
+                bannerId, "OneTime", "OneTime's Title", "OneTime's Sub Title", "OneTime's Button Text", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"
         );
 
         // when
@@ -619,6 +620,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.organization").type(JsonFieldType.STRING).description("조직명"),
                                                 fieldWithPath("payload.title").type(JsonFieldType.STRING).description("제목"),
                                                 fieldWithPath("payload.sub_title").type(JsonFieldType.STRING).description("부제목"),
+                                                fieldWithPath("payload.button_text").type(JsonFieldType.STRING).description("버튼 텍스트"),
                                                 fieldWithPath("payload.color_code").type(JsonFieldType.STRING).description("색상 코드"),
                                                 fieldWithPath("payload.image_url").type(JsonFieldType.STRING).description("배너 이미지 URL"),
                                                 fieldWithPath("payload.is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
@@ -690,8 +692,8 @@ public class AdminControllerTest extends ControllerTestConfig {
         int page = 1;
 
         List<GetBannerResponse> banners = List.of(
-                new GetBannerResponse(1L, "OneTime", "OneTime's Title", "OneTime's Sub Title", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"),
-                new GetBannerResponse(2L, "OneTime2", "OneTime's Title2", "OneTime's Sub Title2", "#000000", "https://www.image.com", true, "2025-08-27 12:00:00", "https://www.link.com")
+                new GetBannerResponse(1L, "OneTime", "OneTime's Title", "OneTime's Sub Title", "OneTime's Button Text", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"),
+                new GetBannerResponse(2L, "OneTime2", "OneTime's Title2", "OneTime's Sub Title2", "OneTime's Button Text2", "#000000", "https://www.image.com", true, "2025-08-27 12:00:00", "https://www.link.com")
         );
 
         PageInfo pageInfo = PageInfo.of(1, 20, 2, 1);
@@ -735,6 +737,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.banners[].organization").type(JsonFieldType.STRING).description("조직명"),
                                                 fieldWithPath("payload.banners[].title").type(JsonFieldType.STRING).description("제목"),
                                                 fieldWithPath("payload.banners[].sub_title").type(JsonFieldType.STRING).description("부제목"),
+                                                fieldWithPath("payload.banners[].button_text").type(JsonFieldType.STRING).description("버튼 텍스트"),
                                                 fieldWithPath("payload.banners[].color_code").type(JsonFieldType.STRING).description("색상 코드"),
                                                 fieldWithPath("payload.banners[].image_url").type(JsonFieldType.STRING).description("배너 이미지 URL"),
                                                 fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
@@ -824,8 +827,8 @@ public class AdminControllerTest extends ControllerTestConfig {
     public void getAllActivatedBanners() throws Exception {
         // given
         List<GetBannerResponse> banners = List.of(
-                new GetBannerResponse(1L, "OneTime", "OneTime's Title", "OneTime's Sub Title", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"),
-                new GetBannerResponse(2L, "OneTime2", "OneTime's Title2", "OneTime's Sub Title2", "#000000", "https://www.image.com", true, "2025-08-27 12:00:00", "https://www.link.com")
+                new GetBannerResponse(1L, "OneTime", "OneTime's Title", "OneTime's Sub Title", "OneTime's Button Text", "#FFFFFF", "https://www.image.com", true, "2025-08-26 12:00:00", "https://www.link.com"),
+                new GetBannerResponse(2L, "OneTime2", "OneTime's Title2", "OneTime's Sub Title2", "OneTime's Button Text2", "#000000", "https://www.image.com", true, "2025-08-27 12:00:00", "https://www.link.com")
         );
         GetAllActivatedBannersResponse response = GetAllActivatedBannersResponse.from(banners);
 
@@ -855,6 +858,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                                                 fieldWithPath("payload.banners[].organization").type(JsonFieldType.STRING).description("조직명"),
                                                 fieldWithPath("payload.banners[].title").type(JsonFieldType.STRING).description("제목"),
                                                 fieldWithPath("payload.banners[].sub_title").type(JsonFieldType.STRING).description("부제목"),
+                                                fieldWithPath("payload.banners[].button_text").type(JsonFieldType.STRING).description("버튼 텍스트"),
                                                 fieldWithPath("payload.banners[].color_code").type(JsonFieldType.STRING).description("색상 코드"),
                                                 fieldWithPath("payload.banners[].image_url").type(JsonFieldType.STRING).description("배너 이미지 URL"),
                                                 fieldWithPath("payload.banners[].is_activated").type(JsonFieldType.BOOLEAN).description("활성화 여부"),
@@ -925,6 +929,7 @@ public class AdminControllerTest extends ControllerTestConfig {
                 "Modified OneTime",
                 "Modified OneTime's Title",
                 "Modified OneTime's Sub Title",
+                "Modified OneTime's Button Text",
                 "#000000",
                 true,
                 "https://www.link.com"
