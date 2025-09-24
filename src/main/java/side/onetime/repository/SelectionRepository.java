@@ -4,17 +4,20 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import side.onetime.domain.*;
+import side.onetime.domain.Event;
+import side.onetime.domain.Member;
+import side.onetime.domain.Selection;
+import side.onetime.domain.User;
 
 import java.util.List;
 
 public interface SelectionRepository extends JpaRepository<Selection, Long> {
 
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query("DELETE FROM Selection s WHERE s.member = :member")
     void deleteAllByMember(@Param("member") Member member);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying
     @Query("DELETE FROM Selection s WHERE s.user = :user AND s.schedule.event = :event")
     void deleteAllByUserAndEvent(@Param("user") User user, @Param("event") Event event);
 
