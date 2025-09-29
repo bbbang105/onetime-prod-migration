@@ -21,6 +21,12 @@ public interface BannerRepository extends JpaRepository<Banner, Long> {
     long countByIsDeletedFalse();
 
     @Modifying
-    @Query("UPDATE Banner b SET b.clickCount = b.clickCount + 1 WHERE b.id = :id")
+    @Query("""
+        UPDATE Banner b
+            SET b.clickCount = b.clickCount + 1
+        WHERE b.id = :id
+            AND b.isActivated = true
+            AND b.isDeleted = false
+    """)
     void increaseClickCount(@Param("id") Long id);
 }
