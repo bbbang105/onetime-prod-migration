@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class LoggingInterceptor implements HandlerInterceptor {
 
-    private static final String START_TIME = "startTime";
-
     /**
      * 요청 전 처리 로직을 수행합니다.
      */
@@ -29,7 +27,7 @@ public class LoggingInterceptor implements HandlerInterceptor {
      */
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
-		Long start = (Long) request.getAttribute(START_TIME);
+		Long start = (Long) request.getAttribute("startTime");
 		long duration = System.currentTimeMillis() - (start != null ? start : 0L);
 		int status = response.getStatus();
 		String method = request.getMethod();
