@@ -1,0 +1,4690 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "OneTime API Documentation",
+    "description" : "Spring REST Docs with Swagger UI.",
+    "version" : "0.0.1"
+  },
+  "servers" : [ {
+    "url" : "https://onetime-test.store"
+  } ],
+  "tags" : [ ],
+  "paths" : {
+    "/api/v1/events" : {
+      "post" : {
+        "tags" : [ "Event API" ],
+        "summary" : "이벤트를 생성한다.(토큰 유무에 따라 로그인/비로그인 구분)",
+        "description" : "이벤트를 생성한다.(토큰 유무에 따라 로그인/비로그인 구분)",
+        "operationId" : "event/create",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/CreateEventRequestSchema"
+              },
+              "examples" : {
+                "event/create" : {
+                  "value" : "{\n  \"title\" : \"Sample Event\",\n  \"start_time\" : \"10:00\",\n  \"end_time\" : \"12:00\",\n  \"category\" : \"DATE\",\n  \"ranges\" : [ \"2024.11.13\" ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CreateEventResponseSchema"
+                },
+                "examples" : {
+                  "event/create" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"이벤트 생성에 성공했습니다.\",\n  \"payload\" : {\n    \"event_id\" : \"6565325d-eea4-47aa-b473-6dbee8b9178d\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fixed-schedules" : {
+      "get" : {
+        "tags" : [ "Fixed API" ],
+        "summary" : "고정 스케줄을 조회한다.",
+        "description" : "고정 스케줄을 조회한다.",
+        "operationId" : "fixed/getAll",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-fixed-schedules927826401"
+                },
+                "examples" : {
+                  "fixed/getAll" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 고정 스케줄 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"schedules\" : [ {\n      \"time_point\" : \"월\",\n      \"times\" : [ \"08:00\", \"08:30\", \"09:00\" ]\n    }, {\n      \"time_point\" : \"화\",\n      \"times\" : [ \"10:00\", \"10:30\", \"11:00\" ]\n    }, {\n      \"time_point\" : \"수\",\n      \"times\" : [ \"14:00\", \"14:30\", \"15:00\" ]\n    }, {\n      \"time_point\" : \"목\",\n      \"times\" : [ \"16:00\", \"16:30\", \"17:00\" ]\n    }, {\n      \"time_point\" : \"금\",\n      \"times\" : [ \"18:00\", \"18:30\", \"19:00\" ]\n    }, {\n      \"time_point\" : \"토\",\n      \"times\" : [ \"20:00\", \"20:30\", \"21:00\" ]\n    }, {\n      \"time_point\" : \"일\",\n      \"times\" : [ \"22:00\", \"22:30\", \"23:00\" ]\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "Fixed API" ],
+        "summary" : "고정 스케줄을 수정한다.",
+        "description" : "고정 스케줄을 수정한다.",
+        "operationId" : "fixed/create",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-fixed-schedules187947422"
+              },
+              "examples" : {
+                "fixed/create" : {
+                  "value" : "{\n  \"schedules\" : [ {\n    \"time_point\" : \"월\",\n    \"times\" : [ \"08:00\", \"08:30\", \"09:00\" ]\n  }, {\n    \"time_point\" : \"화\",\n    \"times\" : [ \"10:00\", \"10:30\", \"11:00\" ]\n  }, {\n    \"time_point\" : \"수\",\n    \"times\" : [ \"14:00\", \"14:30\", \"15:00\" ]\n  }, {\n    \"time_point\" : \"목\",\n    \"times\" : [ \"16:00\", \"16:30\", \"17:00\" ]\n  } ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-fixed-schedules-1529947151"
+                },
+                "examples" : {
+                  "fixed/create" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 고정 스케줄 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/all" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "전체 관리자 정보를 조회한다. (마스터 관리자만 가능)",
+        "description" : "전체 관리자 정보를 조회한다. (마스터 관리자만 가능)",
+        "operationId" : "admin/get-all",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAllAdminUserDetailResponse"
+                },
+                "examples" : {
+                  "admin/get-all" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"전체 관리자 정보 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"id\" : 1,\n    \"name\" : \"마스터 관리자\",\n    \"email\" : \"master@example.com\",\n    \"admin_status\" : \"MASTER\"\n  }, {\n    \"id\" : 2,\n    \"name\" : \"일반 관리자\",\n    \"email\" : \"admin@example.com\",\n    \"admin_status\" : \"APPROVED\"\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/login" : {
+      "post" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "관리자 계정 로그인을 진행한다.",
+        "description" : "관리자 계정 로그인을 진행한다.",
+        "operationId" : "admin/login",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LoginAdminUserRequest"
+              },
+              "examples" : {
+                "admin/login" : {
+                  "value" : "{\n  \"email\" : \"admin@example.com\",\n  \"password\" : \"Password123!\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/LoginAdminUserResponse"
+                },
+                "examples" : {
+                  "admin/login" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"관리자 계정 로그인에 성공했습니다.\",\n  \"payload\" : {\n    \"access_token\" : \"temp.jwt.access.token\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/profile" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "관리자 프로필 조회를 진행한다.",
+        "description" : "관리자 프로필 조회를 진행한다.",
+        "operationId" : "admin/profile",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAdminUserProfileResponse"
+                },
+                "examples" : {
+                  "admin/profile" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"관리자 프로필 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"name\" : \"관리자 이름\",\n    \"email\" : \"admin@example.com\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/register" : {
+      "post" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "관리자 회원가입을 진행한다.",
+        "description" : "관리자 회원가입을 진행한다.",
+        "operationId" : "admin/register",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterAdminUserRequest"
+              },
+              "examples" : {
+                "admin/register" : {
+                  "value" : "{\n  \"name\" : \"관리자 이름\",\n  \"email\" : \"admin@example.com\",\n  \"password\" : \"Password123!\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonSuccessResponse"
+                },
+                "examples" : {
+                  "admin/register" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"관리자 계정 등록에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/status" : {
+      "patch" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "관리자 권한을 수정한다. (마스터 관리자만 가능)",
+        "description" : "관리자 권한을 수정한다. (마스터 관리자만 가능)",
+        "operationId" : "admin/update-status",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateAdminUserStatusRequest"
+              },
+              "examples" : {
+                "admin/update-status" : {
+                  "value" : "{\n  \"id\" : 2,\n  \"admin_status\" : \"APPROVED\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonSuccessResponse"
+                },
+                "examples" : {
+                  "admin/update-status" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"관리자 권한 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/withdraw" : {
+      "post" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "관리자 계정을 탈퇴한다.",
+        "description" : "관리자 계정을 탈퇴한다.",
+        "operationId" : "admin/withdraw",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonSuccessResponse"
+                },
+                "examples" : {
+                  "admin/withdraw" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"관리자 계정 탈퇴에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}" : {
+      "get" : {
+        "tags" : [ "Event API" ],
+        "summary" : "이벤트를 조회한다.",
+        "description" : "이벤트를 조회한다.",
+        "operationId" : "event/get",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "조회할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetEventResponseSchema"
+                },
+                "examples" : {
+                  "event/get" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"이벤트 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"event_id\" : \"1f4c4558-97f8-49c1-aec4-f681173534d0\",\n    \"title\" : \"Sample Event\",\n    \"start_time\" : \"10:00\",\n    \"end_time\" : \"12:00\",\n    \"category\" : \"DATE\",\n    \"ranges\" : [ \"2024.11.13\" ],\n    \"event_status\" : \"CREATOR\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Event API" ],
+        "summary" : "유저가 생성한 이벤트를 삭제한다.",
+        "description" : "유저가 생성한 이벤트를 삭제한다.",
+        "operationId" : "event/remove-user-created-event",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "삭제할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/RemoveUserCreatedEventResponseSchema"
+                },
+                "examples" : {
+                  "event/remove-user-created-event" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저가 생성한 이벤트 삭제에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Event API" ],
+        "summary" : "유저가 생성한 이벤트를 수정한다.",
+        "description" : "유저가 생성한 이벤트를 수정한다.",
+        "operationId" : "event/modify-user-created-event-title",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "수정할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-events-event_id1666935626"
+              },
+              "examples" : {
+                "event/modify-user-created-event-title" : {
+                  "value" : "{\n  \"title\" : \"수정된 이벤트 제목\",\n  \"start_time\" : \"09:00\",\n  \"end_time\" : \"18:00\",\n  \"ranges\" : [ \"2024.12.10\", \"2024.12.11\" ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ModifyUserCreatedEventTitleResponseSchema"
+                },
+                "examples" : {
+                  "event/modify-user-created-event-title" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저가 생성한 이벤트 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/members/action-login" : {
+      "post" : {
+        "tags" : [ "Member API" ],
+        "summary" : "멤버 로그인을 진행한다.",
+        "description" : "멤버 로그인을 진행한다.",
+        "operationId" : "member/login",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-members-action-login-1923712789"
+              },
+              "examples" : {
+                "member/login" : {
+                  "value" : "{\n  \"event_id\" : \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\" : \"existingMember\",\n  \"pin\" : \"1234\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-members-action-register1632683266"
+                },
+                "examples" : {
+                  "member/login" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"멤버 로그인에 성공했습니다.\",\n  \"payload\" : {\n    \"member_id\" : \"789e0123-e45b-67c8-d901-234567890abc\",\n    \"category\" : \"DATE\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/members/action-register" : {
+      "post" : {
+        "tags" : [ "Member API" ],
+        "summary" : "멤버를 등록한다.",
+        "description" : "멤버를 등록한다.",
+        "operationId" : "member/register",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-members-action-register946525738"
+              },
+              "examples" : {
+                "member/register" : {
+                  "value" : "{\n  \"event_id\" : \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\" : \"newMember\",\n  \"pin\" : \"1234\",\n  \"schedules\" : [ {\n    \"time_point\" : \"2024.12.01\",\n    \"times\" : [ \"09:00\", \"10:00\" ]\n  }, {\n    \"time_point\" : \"2024.12.02\",\n    \"times\" : [ \"11:00\", \"12:00\" ]\n  } ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-members-action-register1632683266"
+                },
+                "examples" : {
+                  "member/register" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"멤버 등록에 성공했습니다.\",\n  \"payload\" : {\n    \"member_id\" : \"789e0123-e45b-67c8-d901-234567890abc\",\n    \"category\" : \"CATEGORY\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/date" : {
+      "post" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "날짜 스케줄을 등록한다. (비로그인의 경우에는 멤버 ID가 필수 값)",
+        "description" : "날짜 스케줄을 등록한다. (비로그인의 경우에는 멤버 ID가 필수 값)",
+        "operationId" : "schedule/create-date-authenticated",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-schedules-date-1423118481"
+              },
+              "examples" : {
+                "schedule/create-date-authenticated" : {
+                  "value" : "{\n  \"event_id\" : \"123e4567-e89b-12d3-a456-426614174000\",\n  \"member_id\" : \"789e0123-e45b-67c8-d901-234567890abc\",\n  \"schedules\" : [ {\n    \"times\" : [ \"09:00\", \"10:00\" ],\n    \"time_point\" : \"2024.12.01\"\n  } ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "schedule/create-date-authenticated" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"날짜 스케줄 등록에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/day" : {
+      "post" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "요일 스케줄을 등록한다. (비로그인의 경우에는 멤버 ID가 필수 값)",
+        "description" : "요일 스케줄을 등록한다. (비로그인의 경우에는 멤버 ID가 필수 값)",
+        "operationId" : "schedule/create-day-anonymous",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-schedules-day485021249"
+              },
+              "examples" : {
+                "schedule/create-day-anonymous" : {
+                  "value" : "{\n  \"event_id\" : \"123e4567-e89b-12d3-a456-426614174000\",\n  \"member_id\" : \"789e0123-e45b-67c8-d901-234567890abc\",\n  \"schedules\" : [ {\n    \"times\" : [ \"09:00\", \"10:00\" ],\n    \"time_point\" : \"월\"\n  } ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "schedule/create-day-anonymous" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"요일 스케줄 등록에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tokens/action-reissue" : {
+      "post" : {
+        "tags" : [ "Token API" ],
+        "summary" : "액세스 토큰을 재발행한다.",
+        "description" : "액세스 토큰을 재발행한다.",
+        "operationId" : "token/reissue",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-tokens-action-reissue-1852733133"
+              },
+              "examples" : {
+                "token/reissue" : {
+                  "value" : "{\n  \"refresh_token\" : \"sampleOldRefreshToken\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-tokens-action-reissue-869168215"
+                },
+                "examples" : {
+                  "token/reissue" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"토큰 재발행에 성공했습니다.\",\n  \"payload\" : {\n    \"access_token\" : \"newAccessToken\",\n    \"refresh_token\" : \"newRefreshToken\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/urls/action-original" : {
+      "post" : {
+        "tags" : [ "URL API" ],
+        "summary" : "단축 URL을 원본 URL로 변환한다.",
+        "description" : "단축 URL을 원본 URL로 변환한다.",
+        "operationId" : "url/convert-to-original",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-urls-action-original-209534800"
+              },
+              "examples" : {
+                "url/convert-to-original" : {
+                  "value" : "{\n  \"shorten_url\" : \"https://short.ly/abc123\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-urls-action-original-1188642833"
+                },
+                "examples" : {
+                  "url/convert-to-original" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"원본 URL 변환에 성공했습니다.\",\n  \"payload\" : {\n    \"original_url\" : \"https://example.com/event/123e4567-e89b-12d3-a456-426614174000\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/urls/action-shorten" : {
+      "post" : {
+        "tags" : [ "URL API" ],
+        "summary" : "원본 URL을 단축 URL로 변환한다.",
+        "description" : "원본 URL을 단축 URL로 변환한다.",
+        "operationId" : "url/convert-to-shorten",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-urls-action-shorten1745576439"
+              },
+              "examples" : {
+                "url/convert-to-shorten" : {
+                  "value" : "{\n  \"original_url\" : \"https://example.com/event/123e4567-e89b-12d3-a456-426614174000\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-urls-action-shorten1006350093"
+                },
+                "examples" : {
+                  "url/convert-to-shorten" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"단축 URL 변환에 성공했습니다.\",\n  \"payload\" : {\n    \"shorten_url\" : \"https://short.ly/abc123\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/action-withdraw" : {
+      "post" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저가 서비스를 탈퇴한다.",
+        "description" : "유저가 서비스를 탈퇴한다.",
+        "operationId" : "user/withdraw-service",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "user/withdraw-service" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 서비스 탈퇴에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/logout" : {
+      "post" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저가 로그아웃한다.",
+        "description" : "유저가 로그아웃한다.",
+        "operationId" : "user/logout",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/LogoutUserRequestSchema"
+              },
+              "examples" : {
+                "user/logout" : {
+                  "value" : "{\n  \"refresh_token\" : \"sampleRefreshToken\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "user/logout" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 로그아웃에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/onboarding" : {
+      "post" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저 온보딩을 진행한다.",
+        "description" : "유저 온보딩을 진행한다.",
+        "operationId" : "user/onboard",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/OnboardUserRequestSchema"
+              },
+              "examples" : {
+                "user/onboard" : {
+                  "value" : "{\n  \"register_token\" : \"sampleRegisterToken\",\n  \"nickname\" : \"UserNickname\",\n  \"service_policy_agreement\" : true,\n  \"privacy_policy_agreement\" : true,\n  \"marketing_policy_agreement\" : false,\n  \"sleep_start_time\" : \"23:30\",\n  \"sleep_end_time\" : \"07:00\",\n  \"language\" : \"KOR\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/OnboardUserResponseSchema"
+                },
+                "examples" : {
+                  "user/onboard" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"유저 온보딩에 성공했습니다.\",\n  \"payload\" : {\n    \"access_token\" : \"sampleAccessToken\",\n    \"refresh_token\" : \"sampleRefreshToken\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/policy" : {
+      "get" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저 약관 동의 여부를 조회한다.",
+        "description" : "유저 약관 동의 여부를 조회한다.",
+        "operationId" : "user/get-policy-agreement",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetUserPolicyAgreementResponseSchema"
+                },
+                "examples" : {
+                  "user/get-policy-agreement" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 약관 동의 여부 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"service_policy_agreement\" : true,\n    \"privacy_policy_agreement\" : true,\n    \"marketing_policy_agreement\" : false\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저 약관 동의 여부를 수정한다.",
+        "description" : "유저 약관 동의 여부를 수정한다.",
+        "operationId" : "user/update-policy-agreement",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateUserPolicyAgreementRequestSchema"
+              },
+              "examples" : {
+                "user/update-policy-agreement" : {
+                  "value" : "{\n  \"service_policy_agreement\" : true,\n  \"privacy_policy_agreement\" : true,\n  \"marketing_policy_agreement\" : false\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "user/update-policy-agreement" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 약관 동의 여부 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/profile" : {
+      "get" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저 정보를 조회한다.",
+        "description" : "유저 정보를 조회한다.",
+        "operationId" : "user/get-profile",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetUserProfileResponseSchema"
+                },
+                "examples" : {
+                  "user/get-profile" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 정보 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"nickname\" : \"UserNickname\",\n    \"email\" : \"user@example.com\",\n    \"language\" : \"KOR\",\n    \"social_platform\" : \"google\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/sleep-time" : {
+      "get" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저 수면 시간을 조회한다.",
+        "description" : "유저 수면 시간을 조회한다.",
+        "operationId" : "user/get-sleep-time",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetUserSleepTimeResponseSchema"
+                },
+                "examples" : {
+                  "user/get-sleep-time" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 수면 시간 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"sleep_start_time\" : \"23:30\",\n    \"sleep_end_time\" : \"07:00\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저 수면 시간을 수정한다.",
+        "description" : "유저 수면 시간을 수정한다.",
+        "operationId" : "user/update-sleep-time",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateUserSleepTimeRequestSchema"
+              },
+              "examples" : {
+                "user/update-sleep-time" : {
+                  "value" : "{\n  \"sleep_start_time\" : \"22:00\",\n  \"sleep_end_time\" : \"06:30\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "user/update-sleep-time" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 수면 시간 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/banners/all" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "배너를 전체 조회한다.",
+        "description" : "배너를 전체 조회한다.",
+        "operationId" : "admin/banner-get-all",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "조회할 페이지 번호 (1부터 시작)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAllBannersResponse"
+                },
+                "examples" : {
+                  "admin/banner-get-all" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"배너 전체 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"banners\" : [ {\n      \"id\" : 1,\n      \"organization\" : \"OneTime\",\n      \"title\" : \"OneTime's Title\",\n      \"sub_title\" : \"OneTime's Sub Title\",\n      \"button_text\" : \"OneTime's Button Text\",\n      \"color_code\" : \"#FFFFFF\",\n      \"image_url\" : \"https://www.image.com\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-08-26 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    }, {\n      \"id\" : 2,\n      \"organization\" : \"OneTime2\",\n      \"title\" : \"OneTime's Title2\",\n      \"sub_title\" : \"OneTime's Sub Title2\",\n      \"button_text\" : \"OneTime's Button Text2\",\n      \"color_code\" : \"#000000\",\n      \"image_url\" : \"https://www.image.com\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-08-27 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    } ],\n    \"page_info\" : {\n      \"page\" : 1,\n      \"size\" : 20,\n      \"total_elements\" : 2,\n      \"total_pages\" : 1\n    }\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/banners/register" : {
+      "post" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "배너를 등록한다.",
+        "description" : "배너를 등록한다.",
+        "operationId" : "admin/banner-register",
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "admin/banner-register" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"배너 등록에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/banners/{id}" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "배너를 단건 조회한다.",
+        "description" : "배너를 단건 조회한다.",
+        "operationId" : "admin/banner-get-one",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "조회할 배너 ID",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetBannerResponse"
+                },
+                "examples" : {
+                  "admin/banner-get-one" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"배너 단건 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"id\" : 1,\n    \"organization\" : \"OneTime\",\n    \"title\" : \"OneTime's Title\",\n    \"sub_title\" : \"OneTime's Sub Title\",\n    \"button_text\" : \"OneTime's Button Text\",\n    \"color_code\" : \"#FFFFFF\",\n    \"image_url\" : \"https://www.image.com\",\n    \"is_activated\" : true,\n    \"created_date\" : \"2025-08-26 12:00:00\",\n    \"link_url\" : \"https://www.link.com\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "배너를 삭제한다.",
+        "description" : "배너를 삭제한다.",
+        "operationId" : "admin/banner-delete",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonSuccessResponse"
+                },
+                "examples" : {
+                  "admin/banner-delete" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"배너 삭제에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "배너를 수정한다.",
+        "description" : "배너를 수정한다.",
+        "operationId" : "admin/banner-update",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "admin/banner-update" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"배너 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/bar-banners/all" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "띠배너를 전체 조회한다.",
+        "description" : "띠배너를 전체 조회한다.",
+        "operationId" : "admin/bar-banner-get-all",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "조회할 페이지 번호 (1부터 시작)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAllBarBannersResponse"
+                },
+                "examples" : {
+                  "admin/bar-banner-get-all" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"띠배너 전체 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"bar_banners\" : [ {\n      \"id\" : 1,\n      \"content_kor\" : \"공지사항\",\n      \"content_eng\" : \"Notice\",\n      \"background_color_code\" : \"#FF5733\",\n      \"text_color_code\" : \"#FFFFFF\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-04-01 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    }, {\n      \"id\" : 2,\n      \"content_kor\" : \"공지사항2\",\n      \"content_eng\" : \"Notice2\",\n      \"background_color_code\" : \"#FF5733\",\n      \"text_color_code\" : \"#FFFFFF\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-04-01 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    } ],\n    \"page_info\" : {\n      \"page\" : 1,\n      \"size\" : 20,\n      \"total_elements\" : 2,\n      \"total_pages\" : 1\n    }\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/bar-banners/register" : {
+      "post" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "띠배너를 등록한다.",
+        "description" : "띠배너를 등록한다.",
+        "operationId" : "admin/bar-banner-register",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/RegisterBarBannerRequest"
+              },
+              "examples" : {
+                "admin/bar-banner-register" : {
+                  "value" : "{\n  \"content_kor\" : \"최신 소식 안내\",\n  \"content_eng\" : \"News\",\n  \"background_color_code\" : \"#FFFFFF\",\n  \"text_color_code\" : \"#FFFFFF\",\n  \"link_url\" : \"https://www.link.com\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "201" : {
+            "description" : "201",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonSuccessResponse"
+                },
+                "examples" : {
+                  "admin/bar-banner-register" : {
+                    "value" : "{\n  \"code\" : \"201\",\n  \"message\" : \"띠배너 등록에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/bar-banners/{id}" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "띠배너를 단건 조회한다.",
+        "description" : "띠배너를 단건 조회한다.",
+        "operationId" : "admin/bar-banner-get-one",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "조회할 띠배너 ID",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetBarBannerResponse"
+                },
+                "examples" : {
+                  "admin/bar-banner-get-one" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"띠배너 단건 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"id\" : 1,\n    \"content_kor\" : \"공지사항\",\n    \"content_eng\" : \"Notice\",\n    \"background_color_code\" : \"#FF5733\",\n    \"text_color_code\" : \"#FFFFFF\",\n    \"is_activated\" : true,\n    \"created_date\" : \"2025-04-01 12:00:00\",\n    \"link_url\" : \"https://www.link.com\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "띠배너를 삭제한다.",
+        "description" : "띠배너를 삭제한다.",
+        "operationId" : "admin/bar-banner-delete",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonSuccessResponse"
+                },
+                "examples" : {
+                  "admin/bar-banner-delete" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"띠배너 삭제에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "띠배너를 수정한다.",
+        "description" : "띠배너를 수정한다.",
+        "operationId" : "admin/bar-banner-update",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/UpdateBarBannerRequest"
+              },
+              "examples" : {
+                "admin/bar-banner-update" : {
+                  "value" : "{\n  \"content_kor\" : \"수정된 내용\",\n  \"content_eng\" : \"modified content\",\n  \"background_color_code\" : \"#123456\",\n  \"text_color_code\" : \"#FFFFFF\",\n  \"is_activated\" : true,\n  \"link_url\" : \"https://www.link.com\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/CommonSuccessResponse"
+                },
+                "examples" : {
+                  "admin/bar-banner-update" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"띠배너 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dashboard/events" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "관리자 이벤트 대시보드 정보를 조회한다.",
+        "description" : "관리자 이벤트 대시보드 정보를 조회한다.",
+        "operationId" : "admin/dashboard-events",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "조회할 페이지 번호 (1부터 시작)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "keyword",
+          "in" : "query",
+          "description" : "정렬 기준 필드명 (예: created_date, end_time 등)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sorting",
+          "in" : "query",
+          "description" : "정렬 방향 (asc 또는 desc)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAllDashboardEventsResponse"
+                },
+                "examples" : {
+                  "admin/dashboard-events" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"관리자 이벤트 대시보드 정보 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"events\" : [ {\n      \"id\" : 100,\n      \"event_id\" : \"1\",\n      \"title\" : \"이벤트 제목\",\n      \"start_time\" : \"10:00\",\n      \"end_time\" : \"12:00\",\n      \"category\" : \"DATE\",\n      \"participant_count\" : 10,\n      \"created_date\" : \"2025-03-01 12:00:00\",\n      \"ranges\" : [ \"2025.04.01\" ]\n    } ],\n    \"page_info\" : {\n      \"page\" : 1,\n      \"size\" : 20,\n      \"total_elements\" : 1,\n      \"total_pages\" : 1\n    }\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/dashboard/users" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "관리자 유저 대시보드 정보를 조회한다.",
+        "description" : "관리자 유저 대시보드 정보를 조회한다.",
+        "operationId" : "admin/dashboard-users",
+        "parameters" : [ {
+          "name" : "page",
+          "in" : "query",
+          "description" : "조회할 페이지 번호 (1부터 시작)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "keyword",
+          "in" : "query",
+          "description" : "정렬 기준 필드명 (예: created_date, email 등)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "sorting",
+          "in" : "query",
+          "description" : "정렬 방향 (asc 또는 desc)",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAllDashboardUsersResponse"
+                },
+                "examples" : {
+                  "admin/dashboard-users" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"관리자 유저 대시보드 정보 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"users\" : [ {\n      \"id\" : 1,\n      \"name\" : \"홍길동\",\n      \"email\" : \"hong@example.com\",\n      \"nickname\" : \"길동이\",\n      \"provider\" : \"KAKAO\",\n      \"provider_id\" : \"kakao_123\",\n      \"service_policy_agreement\" : true,\n      \"privacy_policy_agreement\" : true,\n      \"marketing_policy_agreement\" : false,\n      \"sleep_start_time\" : \"23:00\",\n      \"sleep_end_time\" : \"07:00\",\n      \"language\" : \"KOR\",\n      \"participation_count\" : 3,\n      \"created_date\" : \"2025-03-01 12:00:00\"\n    } ],\n    \"page_info\" : {\n      \"page\" : 1,\n      \"size\" : 20,\n      \"total_elements\" : 1,\n      \"total_pages\" : 1\n    }\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/qr/{event_id}" : {
+      "get" : {
+        "tags" : [ "Event API" ],
+        "summary" : "이벤트 QR 코드를 조회한다.",
+        "description" : "이벤트 QR 코드를 조회한다.",
+        "operationId" : "event/get-event-qr-code",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "조회할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetEventQrCodeResponseSchema"
+                },
+                "examples" : {
+                  "event/get-event-qr-code" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"이벤트 QR 코드 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"qr_code_img_url\" : \"https://example.com/qr-code-image.png\"\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/user/all" : {
+      "get" : {
+        "tags" : [ "Event API" ],
+        "summary" : "유저가 참여한 이벤트 목록을 조회한다.",
+        "description" : "유저가 참여한 이벤트 목록을 조회한다.",
+        "operationId" : "event/get-user-participated-events",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetUserParticipatedEventsResponseSchema"
+                },
+                "examples" : {
+                  "event/get-user-participated-events" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 참여 이벤트 목록 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"event_id\" : \"199f5b03-b1ae-4386-b08d-56157d9cb9ab\",\n    \"category\" : \"DATE\",\n    \"title\" : \"Sample Event\",\n    \"created_date\" : \"2024.11.13\",\n    \"participant_count\" : 10,\n    \"event_status\" : \"CREATOR\",\n    \"most_possible_times\" : [ {\n      \"time_point\" : \"2024.11.13\",\n      \"start_time\" : \"10:00\",\n      \"end_time\" : \"10:30\",\n      \"possible_count\" : 5,\n      \"possible_names\" : [ \"User1\", \"User2\" ],\n      \"impossible_names\" : [ \"User3\" ]\n    } ]\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/most" : {
+      "get" : {
+        "tags" : [ "Event API" ],
+        "summary" : "가장 많이 되는 시간을 조회한다.",
+        "description" : "가장 많이 되는 시간을 조회한다.",
+        "operationId" : "event/get-most-possible-time",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "조회할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetMostPossibleTimeResponseSchema"
+                },
+                "examples" : {
+                  "event/get-most-possible-time" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"가장 많이 되는 시간 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"time_point\" : \"2024.11.13\",\n    \"start_time\" : \"10:00\",\n    \"end_time\" : \"10:30\",\n    \"possible_count\" : 5,\n    \"possible_names\" : [ \"User1\", \"User2\" ],\n    \"impossible_names\" : [ \"User3\" ]\n  }, {\n    \"time_point\" : \"2024.11.13\",\n    \"start_time\" : \"11:00\",\n    \"end_time\" : \"11:30\",\n    \"possible_count\" : 4,\n    \"possible_names\" : [ \"User1\", \"User3\" ],\n    \"impossible_names\" : [ \"User2\" ]\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/participants" : {
+      "get" : {
+        "tags" : [ "Event API" ],
+        "summary" : "이벤트 참여자 목록을 조회한다.",
+        "description" : "이벤트 참여자 목록을 조회한다.",
+        "operationId" : "event/get-participants",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "조회할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetParticipantsResponseSchema"
+                },
+                "examples" : {
+                  "event/get-participants" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"참여자 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"members\" : [ {\n      \"id\" : 1,\n      \"name\" : \"Member1\"\n    }, {\n      \"id\" : 2,\n      \"name\" : \"Member2\"\n    } ],\n    \"users\" : [ {\n      \"id\" : 101,\n      \"name\" : \"User1\"\n    }, {\n      \"id\" : 102,\n      \"name\" : \"User2\"\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/members/name/action-check" : {
+      "post" : {
+        "tags" : [ "Member API" ],
+        "summary" : "멤버 이름 중복 확인을 진행한다.",
+        "description" : "멤버 이름 중복 확인을 진행한다.",
+        "operationId" : "member/check-duplicate",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-members-name-action-check-1509950010"
+              },
+              "examples" : {
+                "member/check-duplicate" : {
+                  "value" : "{\n  \"event_id\" : \"123e4567-e89b-12d3-a456-426614174000\",\n  \"name\" : \"duplicateCheckName\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-members-name-action-check-143782741"
+                },
+                "examples" : {
+                  "member/check-duplicate" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"멤버 이름 중복 확인에 성공했습니다.\",\n  \"payload\" : {\n    \"is_possible\" : true\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/date/{event_id}" : {
+      "get" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "이벤트에 대한 모든 날짜 스케줄을 조회한다.",
+        "description" : "이벤트에 대한 모든 날짜 스케줄을 조회한다.",
+        "operationId" : "schedule/get-all-date-schedules",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-date-event_id-735087003"
+                },
+                "examples" : {
+                  "schedule/get-all-date-schedules" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"전체 날짜 스케줄 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"name\" : \"Test Member\",\n    \"schedules\" : [ {\n      \"times\" : [ \"09:00\", \"10:00\" ],\n      \"time_point\" : \"2024-12-01\"\n    } ]\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/day/{event_id}" : {
+      "get" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "이벤트에 대한 모든 요일 스케줄을 조회한다.",
+        "description" : "이벤트에 대한 모든 요일 스케줄을 조회한다.",
+        "operationId" : "schedule/get-all-day-schedules",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-day-event_id361082201"
+                },
+                "examples" : {
+                  "schedule/get-all-day-schedules" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"전체 요일 스케줄 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"name\" : \"Test Member\",\n    \"schedules\" : [ {\n      \"times\" : [ \"09:00\", \"10:00\" ],\n      \"time_point\" : \"월\"\n    } ]\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/users/profile/action-update" : {
+      "patch" : {
+        "tags" : [ "User API" ],
+        "summary" : "유저 정보를 수정한다.",
+        "description" : "유저 정보를 수정한다.",
+        "operationId" : "user/update-profile",
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-users-profile-action-update1430954811"
+              },
+              "examples" : {
+                "user/update-profile" : {
+                  "value" : "{\n  \"nickname\" : \"NewNickname\",\n  \"language\" : \"ENG\"\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-users-sleep-time710843682"
+                },
+                "examples" : {
+                  "user/update-profile" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"유저 정보 수정에 성공했습니다.\",\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/banners/activated/all" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "활성화된 배너를 전체 조회한다.",
+        "description" : "활성화된 배너를 전체 조회한다.",
+        "operationId" : "admin/activated-banner-get-all",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAllActivatedBannersResponse"
+                },
+                "examples" : {
+                  "admin/activated-banner-get-all" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"활성화된 배너 전체 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"banners\" : [ {\n      \"id\" : 1,\n      \"organization\" : \"OneTime\",\n      \"title\" : \"OneTime's Title\",\n      \"sub_title\" : \"OneTime's Sub Title\",\n      \"button_text\" : \"OneTime's Button Text\",\n      \"color_code\" : \"#FFFFFF\",\n      \"image_url\" : \"https://www.image.com\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-08-26 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    }, {\n      \"id\" : 2,\n      \"organization\" : \"OneTime2\",\n      \"title\" : \"OneTime's Title2\",\n      \"sub_title\" : \"OneTime's Sub Title2\",\n      \"button_text\" : \"OneTime's Button Text2\",\n      \"color_code\" : \"#000000\",\n      \"image_url\" : \"https://www.image.com\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-08-27 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/bar-banners/activated/all" : {
+      "get" : {
+        "tags" : [ "Admin API" ],
+        "summary" : "활성화된 띠배너를 전체 조회한다.",
+        "description" : "활성화된 띠배너를 전체 조회한다.",
+        "operationId" : "admin/activated-bar-banner-get-all",
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetAllActivatedBarBannersResponse"
+                },
+                "examples" : {
+                  "admin/activated-bar-banner-get-all" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"활성화된 띠배너 전체 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"bar_banners\" : [ {\n      \"id\" : 1,\n      \"content_kor\" : \"공지사항\",\n      \"content_eng\" : \"Notice\",\n      \"background_color_code\" : \"#FF5733\",\n      \"text_color_code\" : \"#FFFFFF\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-04-01 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    }, {\n      \"id\" : 2,\n      \"content_kor\" : \"공지사항2\",\n      \"content_eng\" : \"Notice2\",\n      \"background_color_code\" : \"#FF5733\",\n      \"text_color_code\" : \"#FFFFFF\",\n      \"is_activated\" : true,\n      \"created_date\" : \"2025-04-01 12:00:00\",\n      \"link_url\" : \"https://www.link.com\"\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/events/{event_id}/most/filtering" : {
+      "post" : {
+        "tags" : [ "Event API" ],
+        "summary" : "필터링한 참여자들의 가장 많이 되는 시간을 조회한다.",
+        "description" : "필터링한 참여자들의 가장 많이 되는 시간을 조회한다.",
+        "operationId" : "event/get-filtered-most-possible-times",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "조회할 이벤트의 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-schedules-day-event_id-filtering-80838870"
+              },
+              "examples" : {
+                "event/get-filtered-most-possible-times" : {
+                  "value" : "{\n  \"users\" : [ 1, 2 ],\n  \"members\" : [ 3 ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/GetFilteredMostPossibleTimeResponseSchema"
+                },
+                "examples" : {
+                  "event/get-filtered-most-possible-times" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"필터링한 참여자의 시간 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"time_point\" : \"2025.07.13\",\n    \"start_time\" : \"10:00\",\n    \"end_time\" : \"10:30\",\n    \"possible_count\" : 3,\n    \"possible_names\" : [ \"User1\", \"User2\", \"Member3\" ],\n    \"impossible_names\" : [ ]\n  }, {\n    \"time_point\" : \"2025.07.13\",\n    \"start_time\" : \"11:00\",\n    \"end_time\" : \"11:30\",\n    \"possible_count\" : 3,\n    \"possible_names\" : [ \"User1\", \"User2\", \"Member3\" ],\n    \"impossible_names\" : [ ]\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/date/{event_id}/filtering" : {
+      "post" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "참여자 필터링 날짜 스케줄을 조회한다.",
+        "description" : "참여자 필터링 날짜 스케줄을 조회한다.",
+        "operationId" : "schedule/get-filtered-date",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-schedules-day-event_id-filtering-80838870"
+              },
+              "examples" : {
+                "schedule/get-filtered-date" : {
+                  "value" : "{\n  \"users\" : [ 1, 2 ],\n  \"members\" : [ 3 ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-date-event_id-filtering-184406207"
+                },
+                "examples" : {
+                  "schedule/get-filtered-date" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"참여자 필터링 날짜 스케줄 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"name\" : \"memberName1\",\n    \"schedules\" : [ {\n      \"times\" : [ \"09:00\", \"10:00\" ],\n      \"time_point\" : \"2024.12.01\"\n    } ]\n  }, {\n    \"name\" : \"memberName2\",\n    \"schedules\" : [ {\n      \"times\" : [ \"11:00\", \"12:00\" ],\n      \"time_point\" : \"2024.12.02\"\n    } ]\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/date/{event_id}/user" : {
+      "get" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "개인 날짜 스케줄을 조회한다. (로그인 유저)",
+        "description" : "개인 날짜 스케줄을 조회한다. (로그인 유저)",
+        "operationId" : "schedule/get-user-date",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-date-event_id-user-1766468563"
+                },
+                "examples" : {
+                  "schedule/get-user-date" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"개인(로그인) 날짜 스케줄 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"name\" : \"userNickname\",\n    \"schedules\" : [ {\n      \"times\" : [ \"09:00\", \"10:00\" ],\n      \"time_point\" : \"2024.12.01\"\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/date/{event_id}/{member_id}" : {
+      "get" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "개인 날짜 스케줄을 조회한다. (비로그인 유저)",
+        "description" : "개인 날짜 스케줄을 조회한다. (비로그인 유저)",
+        "operationId" : "schedule/get-member-date",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "member_id",
+          "in" : "path",
+          "description" : "멤버 ID [예시 : 789e0123-e45b-67c8-d901-234567890abc]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-date-event_id-member_id-893097784"
+                },
+                "examples" : {
+                  "schedule/get-member-date" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"개인(비로그인) 날짜 스케줄 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"name\" : \"memberName\",\n    \"schedules\" : [ {\n      \"times\" : [ \"09:00\", \"10:00\" ],\n      \"time_point\" : \"2024.12.01\"\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/day/{event_id}/filtering" : {
+      "post" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "참여자 필터링 요일 스케줄을 조회한다.",
+        "description" : "참여자 필터링 요일 스케줄을 조회한다.",
+        "operationId" : "schedule/get-filtered-day-schedules",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json;charset=UTF-8" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/api-v1-schedules-day-event_id-filtering-80838870"
+              },
+              "examples" : {
+                "schedule/get-filtered-day-schedules" : {
+                  "value" : "{\n  \"users\" : [ 1, 2 ],\n  \"members\" : [ 3 ]\n}"
+                }
+              }
+            }
+          }
+        },
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-day-event_id-filtering542384661"
+                },
+                "examples" : {
+                  "schedule/get-filtered-day-schedules" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"참여자 필터링 요일 스케줄 조회에 성공했습니다.\",\n  \"payload\" : [ {\n    \"name\" : \"Test Member\",\n    \"schedules\" : [ {\n      \"times\" : [ \"09:00\", \"10:00\" ],\n      \"time_point\" : \"월\"\n    } ]\n  } ],\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/day/{event_id}/user" : {
+      "get" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "개인 요일 스케줄을 조회한다. (로그인 유저)",
+        "description" : "개인 요일 스케줄을 조회한다. (로그인 유저)",
+        "operationId" : "schedule/get-user-day-schedules",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-day-event_id-user1388746317"
+                },
+                "examples" : {
+                  "schedule/get-user-day-schedules" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"개인(로그인) 요일 스케줄 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"name\" : \"Test User\",\n    \"schedules\" : [ {\n      \"times\" : [ \"13:00\", \"14:00\" ],\n      \"time_point\" : \"수\"\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/schedules/day/{event_id}/{member_id}" : {
+      "get" : {
+        "tags" : [ "Schedule API" ],
+        "summary" : "개인 요일 스케줄을 조회한다. (비로그인 유저)",
+        "description" : "개인 요일 스케줄을 조회한다. (비로그인 유저)",
+        "operationId" : "schedule/get-member-day-schedules",
+        "parameters" : [ {
+          "name" : "event_id",
+          "in" : "path",
+          "description" : "이벤트 ID [예시 : dd099816-2b09-4625-bf95-319672c25659]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "member_id",
+          "in" : "path",
+          "description" : "멤버 ID [예시 : 789e0123-e45b-67c8-d901-234567890abc]",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200",
+            "content" : {
+              "application/json;charset=UTF-8" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/api-v1-schedules-day-event_id-member_id-2071885996"
+                },
+                "examples" : {
+                  "schedule/get-member-day-schedules" : {
+                    "value" : "{\n  \"code\" : \"200\",\n  \"message\" : \"개인(비로그인) 요일 스케줄 조회에 성공했습니다.\",\n  \"payload\" : {\n    \"name\" : \"Test Member\",\n    \"schedules\" : [ {\n      \"times\" : [ \"11:00\", \"12:00\" ],\n      \"time_point\" : \"화\"\n    } ]\n  },\n  \"is_success\" : true\n}"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "GetAdminUserProfileResponse" : {
+        "title" : "GetAdminUserProfileResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "email", "name" ],
+            "type" : "object",
+            "properties" : {
+              "name" : {
+                "type" : "string",
+                "description" : "관리자 이름"
+              },
+              "email" : {
+                "type" : "string",
+                "description" : "관리자 이메일"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetAllBarBannersResponse" : {
+        "title" : "GetAllBarBannersResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "bar_banners" ],
+            "type" : "object",
+            "properties" : {
+              "page_info" : {
+                "required" : [ "page", "size", "total_elements", "total_pages" ],
+                "type" : "object",
+                "properties" : {
+                  "size" : {
+                    "type" : "number",
+                    "description" : "페이지당 항목 수"
+                  },
+                  "total_elements" : {
+                    "type" : "number",
+                    "description" : "전체 항목 수"
+                  },
+                  "total_pages" : {
+                    "type" : "number",
+                    "description" : "전체 페이지 수"
+                  },
+                  "page" : {
+                    "type" : "number",
+                    "description" : "현재 페이지 번호"
+                  }
+                }
+              },
+              "bar_banners" : {
+                "type" : "array",
+                "description" : "띠배너 목록",
+                "items" : {
+                  "required" : [ "background_color_code", "content_eng", "content_kor", "created_date", "id", "is_activated", "link_url", "text_color_code" ],
+                  "type" : "object",
+                  "properties" : {
+                    "is_activated" : {
+                      "type" : "boolean",
+                      "description" : "활성화 여부"
+                    },
+                    "text_color_code" : {
+                      "type" : "string",
+                      "description" : "텍스트 색상 코드"
+                    },
+                    "link_url" : {
+                      "type" : "string",
+                      "description" : "링크 URL"
+                    },
+                    "created_date" : {
+                      "type" : "string",
+                      "description" : "생성일자"
+                    },
+                    "background_color_code" : {
+                      "type" : "string",
+                      "description" : "배경 색상 코드"
+                    },
+                    "content_eng" : {
+                      "type" : "string",
+                      "description" : "영어 내용"
+                    },
+                    "content_kor" : {
+                      "type" : "string",
+                      "description" : "한국어 내용"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "띠배너 ID"
+                    }
+                  }
+                }
+              }
+            },
+            "description" : "페이로드 객체"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-day-event_id-filtering-80838870" : {
+        "required" : [ "members", "users" ],
+        "type" : "object",
+        "properties" : {
+          "members" : {
+            "type" : "array",
+            "description" : "조회할 멤버 ID 목록",
+            "items" : {
+              "oneOf" : [ {
+                "type" : "object"
+              }, {
+                "type" : "boolean"
+              }, {
+                "type" : "string"
+              }, {
+                "type" : "number"
+              } ]
+            }
+          },
+          "users" : {
+            "type" : "array",
+            "description" : "조회할 유저 ID 목록",
+            "items" : {
+              "oneOf" : [ {
+                "type" : "object"
+              }, {
+                "type" : "boolean"
+              }, {
+                "type" : "string"
+              }, {
+                "type" : "number"
+              } ]
+            }
+          }
+        }
+      },
+      "GetBarBannerResponse" : {
+        "title" : "GetBarBannerResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "background_color_code", "content_eng", "content_kor", "created_date", "id", "is_activated", "link_url", "text_color_code" ],
+            "type" : "object",
+            "properties" : {
+              "is_activated" : {
+                "type" : "boolean",
+                "description" : "활성화 여부"
+              },
+              "text_color_code" : {
+                "type" : "string",
+                "description" : "텍스트 색상 코드"
+              },
+              "link_url" : {
+                "type" : "string",
+                "description" : "링크 URL"
+              },
+              "created_date" : {
+                "type" : "string",
+                "description" : "생성일자"
+              },
+              "background_color_code" : {
+                "type" : "string",
+                "description" : "배경 색상 코드"
+              },
+              "content_eng" : {
+                "type" : "string",
+                "description" : "영어 내용"
+              },
+              "content_kor" : {
+                "type" : "string",
+                "description" : "한국어 내용"
+              },
+              "id" : {
+                "type" : "number",
+                "description" : "띠배너 ID"
+              }
+            },
+            "description" : "띠배너 정보"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "ModifyUserCreatedEventTitleResponseSchema" : {
+        "title" : "ModifyUserCreatedEventTitleResponseSchema",
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-day-event_id-user1388746317" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "name" ],
+            "type" : "object",
+            "properties" : {
+              "schedules" : {
+                "type" : "array",
+                "items" : {
+                  "required" : [ "time_point", "times" ],
+                  "type" : "object",
+                  "properties" : {
+                    "times" : {
+                      "type" : "array",
+                      "description" : "스케줄 시간 목록",
+                      "items" : {
+                        "oneOf" : [ {
+                          "type" : "object"
+                        }, {
+                          "type" : "boolean"
+                        }, {
+                          "type" : "string"
+                        }, {
+                          "type" : "number"
+                        } ]
+                      }
+                    },
+                    "time_point" : {
+                      "type" : "string",
+                      "description" : "요일"
+                    }
+                  }
+                }
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "사용자 이름"
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-date-event_id-member_id-893097784" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "name" ],
+            "type" : "object",
+            "properties" : {
+              "schedules" : {
+                "type" : "array",
+                "items" : {
+                  "required" : [ "time_point", "times" ],
+                  "type" : "object",
+                  "properties" : {
+                    "times" : {
+                      "type" : "array",
+                      "description" : "스케줄 시간 목록",
+                      "items" : {
+                        "oneOf" : [ {
+                          "type" : "object"
+                        }, {
+                          "type" : "boolean"
+                        }, {
+                          "type" : "string"
+                        }, {
+                          "type" : "number"
+                        } ]
+                      }
+                    },
+                    "time_point" : {
+                      "type" : "string",
+                      "description" : "날짜"
+                    }
+                  }
+                }
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "멤버 이름"
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-events-event_id1666935626" : {
+        "required" : [ "end_time", "ranges", "start_time", "title" ],
+        "type" : "object",
+        "properties" : {
+          "start_time" : {
+            "type" : "string",
+            "description" : "시작 시간 (HH:mm)"
+          },
+          "ranges" : {
+            "type" : "array",
+            "description" : "수정할 설문 범위 [예: 날짜 리스트]",
+            "items" : {
+              "oneOf" : [ {
+                "type" : "object"
+              }, {
+                "type" : "boolean"
+              }, {
+                "type" : "string"
+              }, {
+                "type" : "number"
+              } ]
+            }
+          },
+          "end_time" : {
+            "type" : "string",
+            "description" : "종료 시간 (HH:mm)"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "새로운 이벤트 제목"
+          }
+        }
+      },
+      "CreateEventRequestSchema" : {
+        "title" : "CreateEventRequestSchema",
+        "required" : [ "category", "end_time", "ranges", "start_time", "title" ],
+        "type" : "object",
+        "properties" : {
+          "start_time" : {
+            "type" : "string",
+            "description" : "이벤트 시작 시간"
+          },
+          "ranges" : {
+            "type" : "array",
+            "description" : "이벤트 날짜 또는 요일 범위",
+            "items" : {
+              "oneOf" : [ {
+                "type" : "object"
+              }, {
+                "type" : "boolean"
+              }, {
+                "type" : "string"
+              }, {
+                "type" : "number"
+              } ]
+            }
+          },
+          "end_time" : {
+            "type" : "string",
+            "description" : "이벤트 종료 시간"
+          },
+          "category" : {
+            "type" : "string",
+            "description" : "이벤트 카테고리"
+          },
+          "title" : {
+            "type" : "string",
+            "description" : "이벤트 제목"
+          }
+        }
+      },
+      "GetEventResponseSchema" : {
+        "title" : "GetEventResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "category", "end_time", "event_id", "event_status", "ranges", "start_time", "title" ],
+            "type" : "object",
+            "properties" : {
+              "start_time" : {
+                "type" : "string",
+                "description" : "이벤트 시작 시간"
+              },
+              "event_id" : {
+                "type" : "string",
+                "description" : "이벤트 ID"
+              },
+              "ranges" : {
+                "type" : "array",
+                "description" : "이벤트 날짜 또는 요일 범위",
+                "items" : {
+                  "oneOf" : [ {
+                    "type" : "object"
+                  }, {
+                    "type" : "boolean"
+                  }, {
+                    "type" : "string"
+                  }, {
+                    "type" : "number"
+                  } ]
+                }
+              },
+              "end_time" : {
+                "type" : "string",
+                "description" : "이벤트 종료 시간"
+              },
+              "category" : {
+                "type" : "string",
+                "description" : "이벤트 카테고리"
+              },
+              "title" : {
+                "type" : "string",
+                "description" : "이벤트 제목"
+              },
+              "event_status" : {
+                "type" : "string",
+                "description" : "이벤트 상태 (로그인 유저만 반환)"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "LoginAdminUserResponse" : {
+        "title" : "LoginAdminUserResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "access_token" ],
+            "type" : "object",
+            "properties" : {
+              "access_token" : {
+                "type" : "string",
+                "description" : "액세스 토큰"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-tokens-action-reissue-869168215" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "access_token", "refresh_token" ],
+            "type" : "object",
+            "properties" : {
+              "access_token" : {
+                "type" : "string",
+                "description" : "새로운 액세스 토큰"
+              },
+              "refresh_token" : {
+                "type" : "string",
+                "description" : "새로운 리프레쉬 토큰"
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-date-event_id-user-1766468563" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "name" ],
+            "type" : "object",
+            "properties" : {
+              "schedules" : {
+                "type" : "array",
+                "items" : {
+                  "required" : [ "time_point", "times" ],
+                  "type" : "object",
+                  "properties" : {
+                    "times" : {
+                      "type" : "array",
+                      "description" : "스케줄 시간 목록",
+                      "items" : {
+                        "oneOf" : [ {
+                          "type" : "object"
+                        }, {
+                          "type" : "boolean"
+                        }, {
+                          "type" : "string"
+                        }, {
+                          "type" : "number"
+                        } ]
+                      }
+                    },
+                    "time_point" : {
+                      "type" : "string",
+                      "description" : "날짜"
+                    }
+                  }
+                }
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "유저 닉네임"
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "OnboardUserRequestSchema" : {
+        "title" : "OnboardUserRequestSchema",
+        "required" : [ "language", "marketing_policy_agreement", "nickname", "privacy_policy_agreement", "register_token", "service_policy_agreement", "sleep_end_time", "sleep_start_time" ],
+        "type" : "object",
+        "properties" : {
+          "sleep_end_time" : {
+            "type" : "string",
+            "description" : "수면 종료 시간 (예: 07:00)"
+          },
+          "service_policy_agreement" : {
+            "type" : "boolean",
+            "description" : "서비스 이용약관 동의 여부"
+          },
+          "register_token" : {
+            "type" : "string",
+            "description" : "레지스터 토큰"
+          },
+          "nickname" : {
+            "type" : "string",
+            "description" : "유저 닉네임"
+          },
+          "sleep_start_time" : {
+            "type" : "string",
+            "description" : "수면 시작 시간 (예: 23:30)"
+          },
+          "marketing_policy_agreement" : {
+            "type" : "boolean",
+            "description" : "마케팅 정보 수신 동의 여부"
+          },
+          "language" : {
+            "type" : "string",
+            "description" : "언어 (예: KOR, ENG)"
+          },
+          "privacy_policy_agreement" : {
+            "type" : "boolean",
+            "description" : "개인정보 수집 및 이용 동의 여부"
+          }
+        }
+      },
+      "api-v1-tokens-action-reissue-1852733133" : {
+        "required" : [ "refresh_token" ],
+        "type" : "object",
+        "properties" : {
+          "refresh_token" : {
+            "type" : "string",
+            "description" : "기존 리프레쉬 토큰"
+          }
+        }
+      },
+      "CommonSuccessResponse" : {
+        "title" : "CommonSuccessResponse",
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "LogoutUserRequestSchema" : {
+        "title" : "LogoutUserRequestSchema",
+        "required" : [ "refresh_token" ],
+        "type" : "object",
+        "properties" : {
+          "refresh_token" : {
+            "type" : "string",
+            "description" : "리프레쉬 토큰"
+          }
+        }
+      },
+      "GetUserPolicyAgreementResponseSchema" : {
+        "title" : "GetUserPolicyAgreementResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "marketing_policy_agreement", "privacy_policy_agreement", "service_policy_agreement" ],
+            "type" : "object",
+            "properties" : {
+              "service_policy_agreement" : {
+                "type" : "boolean",
+                "description" : "서비스 이용약관 동의 여부"
+              },
+              "marketing_policy_agreement" : {
+                "type" : "boolean",
+                "description" : "마케팅 정보 수신 동의 여부"
+              },
+              "privacy_policy_agreement" : {
+                "type" : "boolean",
+                "description" : "개인정보 수집 및 이용 동의 여부"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-day485021249" : {
+        "required" : [ "event_id", "member_id" ],
+        "type" : "object",
+        "properties" : {
+          "member_id" : {
+            "type" : "string",
+            "description" : "멤버 ID"
+          },
+          "event_id" : {
+            "type" : "string",
+            "description" : "이벤트 ID"
+          },
+          "schedules" : {
+            "type" : "array",
+            "items" : {
+              "required" : [ "time_point", "times" ],
+              "type" : "object",
+              "properties" : {
+                "times" : {
+                  "type" : "array",
+                  "description" : "스케줄 시간 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                },
+                "time_point" : {
+                  "type" : "string",
+                  "description" : "요일"
+                }
+              }
+            }
+          }
+        }
+      },
+      "api-v1-fixed-schedules927826401" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "HTTP 상태 코드"
+          },
+          "payload" : {
+            "required" : [ "schedules" ],
+            "type" : "object",
+            "properties" : {
+              "schedules" : {
+                "type" : "array",
+                "description" : "고정 스케줄 목록",
+                "items" : {
+                  "required" : [ "time_point", "times" ],
+                  "type" : "object",
+                  "properties" : {
+                    "times" : {
+                      "type" : "array",
+                      "description" : "시간 목록",
+                      "items" : {
+                        "oneOf" : [ {
+                          "type" : "object"
+                        }, {
+                          "type" : "boolean"
+                        }, {
+                          "type" : "string"
+                        }, {
+                          "type" : "number"
+                        } ]
+                      }
+                    },
+                    "time_point" : {
+                      "type" : "string",
+                      "description" : "요일"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-fixed-schedules187947422" : {
+        "required" : [ "schedules" ],
+        "type" : "object",
+        "properties" : {
+          "schedules" : {
+            "type" : "array",
+            "description" : "고정 스케줄 목록",
+            "items" : {
+              "required" : [ "time_point", "times" ],
+              "type" : "object",
+              "properties" : {
+                "times" : {
+                  "type" : "array",
+                  "description" : "시간 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                },
+                "time_point" : {
+                  "type" : "string",
+                  "description" : "요일"
+                }
+              }
+            }
+          }
+        }
+      },
+      "RegisterAdminUserRequest" : {
+        "title" : "RegisterAdminUserRequest",
+        "required" : [ "email", "name", "password" ],
+        "type" : "object",
+        "properties" : {
+          "password" : {
+            "type" : "string",
+            "description" : "비밀번호"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "이름"
+          },
+          "email" : {
+            "type" : "string",
+            "description" : "이메일"
+          }
+        }
+      },
+      "GetUserParticipatedEventsResponseSchema" : {
+        "title" : "GetUserParticipatedEventsResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "description" : "참여 이벤트 목록",
+            "items" : {
+              "required" : [ "category", "created_date", "event_id", "event_status", "most_possible_times", "participant_count", "title" ],
+              "type" : "object",
+              "properties" : {
+                "participant_count" : {
+                  "type" : "number",
+                  "description" : "참여자 수"
+                },
+                "event_id" : {
+                  "type" : "string",
+                  "description" : "이벤트 ID"
+                },
+                "created_date" : {
+                  "type" : "string",
+                  "description" : "이벤트 생성일"
+                },
+                "most_possible_times" : {
+                  "type" : "array",
+                  "description" : "가장 많이 가능한 시간대",
+                  "items" : {
+                    "required" : [ "end_time", "impossible_names", "possible_count", "possible_names", "start_time", "time_point" ],
+                    "type" : "object",
+                    "properties" : {
+                      "start_time" : {
+                        "type" : "string",
+                        "description" : "시작 시간"
+                      },
+                      "time_point" : {
+                        "type" : "string",
+                        "description" : "날짜 또는 요일"
+                      },
+                      "end_time" : {
+                        "type" : "string",
+                        "description" : "종료 시간"
+                      },
+                      "possible_names" : {
+                        "type" : "array",
+                        "description" : "참여 가능한 유저 이름 목록",
+                        "items" : {
+                          "oneOf" : [ {
+                            "type" : "object"
+                          }, {
+                            "type" : "boolean"
+                          }, {
+                            "type" : "string"
+                          }, {
+                            "type" : "number"
+                          } ]
+                        }
+                      },
+                      "possible_count" : {
+                        "type" : "number",
+                        "description" : "가능한 참여자 수"
+                      },
+                      "impossible_names" : {
+                        "type" : "array",
+                        "description" : "참여 불가능한 유저 이름 목록",
+                        "items" : {
+                          "oneOf" : [ {
+                            "type" : "object"
+                          }, {
+                            "type" : "boolean"
+                          }, {
+                            "type" : "string"
+                          }, {
+                            "type" : "number"
+                          } ]
+                        }
+                      }
+                    }
+                  }
+                },
+                "title" : {
+                  "type" : "string",
+                  "description" : "이벤트 제목"
+                },
+                "category" : {
+                  "type" : "string",
+                  "description" : "이벤트 카테고리"
+                },
+                "event_status" : {
+                  "type" : "string",
+                  "description" : "이벤트 참여 상태"
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "RegisterBarBannerRequest" : {
+        "title" : "RegisterBarBannerRequest",
+        "required" : [ "background_color_code", "content_eng", "content_kor", "text_color_code" ],
+        "type" : "object",
+        "properties" : {
+          "text_color_code" : {
+            "type" : "string",
+            "description" : "텍스트 색상 코드"
+          },
+          "link_url" : {
+            "type" : "string",
+            "description" : "링크 URL",
+            "nullable" : true
+          },
+          "background_color_code" : {
+            "type" : "string",
+            "description" : "배경 색상 코드"
+          },
+          "content_eng" : {
+            "type" : "string",
+            "description" : "영어 내용"
+          },
+          "content_kor" : {
+            "type" : "string",
+            "description" : "한국어 내용"
+          }
+        }
+      },
+      "api-v1-urls-action-original-209534800" : {
+        "required" : [ "shorten_url" ],
+        "type" : "object",
+        "properties" : {
+          "shorten_url" : {
+            "type" : "string",
+            "description" : "복원할 단축 URL"
+          }
+        }
+      },
+      "LoginAdminUserRequest" : {
+        "title" : "LoginAdminUserRequest",
+        "required" : [ "email", "password" ],
+        "type" : "object",
+        "properties" : {
+          "password" : {
+            "type" : "string",
+            "description" : "비밀번호"
+          },
+          "email" : {
+            "type" : "string",
+            "description" : "이메일"
+          }
+        }
+      },
+      "api-v1-members-name-action-check-1509950010" : {
+        "required" : [ "event_id", "name" ],
+        "type" : "object",
+        "properties" : {
+          "event_id" : {
+            "type" : "string",
+            "description" : "이벤트 ID"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "확인할 멤버 이름"
+          }
+        }
+      },
+      "GetUserSleepTimeResponseSchema" : {
+        "title" : "GetUserSleepTimeResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "sleep_end_time", "sleep_start_time" ],
+            "type" : "object",
+            "properties" : {
+              "sleep_end_time" : {
+                "type" : "string",
+                "description" : "수면 종료 시간 (HH:mm)"
+              },
+              "sleep_start_time" : {
+                "type" : "string",
+                "description" : "수면 시작 시간 (HH:mm)"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-members-action-login-1923712789" : {
+        "required" : [ "event_id", "name", "pin" ],
+        "type" : "object",
+        "properties" : {
+          "event_id" : {
+            "type" : "string",
+            "description" : "이벤트 ID"
+          },
+          "pin" : {
+            "type" : "string",
+            "description" : "멤버 PIN"
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "멤버 이름"
+          }
+        }
+      },
+      "api-v1-fixed-schedules-1529947151" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "HTTP 상태 코드"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetBannerResponse" : {
+        "title" : "GetBannerResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "button_text", "color_code", "created_date", "id", "image_url", "is_activated", "link_url", "organization", "sub_title", "title" ],
+            "type" : "object",
+            "properties" : {
+              "sub_title" : {
+                "type" : "string",
+                "description" : "부제목"
+              },
+              "is_activated" : {
+                "type" : "boolean",
+                "description" : "활성화 여부"
+              },
+              "image_url" : {
+                "type" : "string",
+                "description" : "배너 이미지 URL"
+              },
+              "organization" : {
+                "type" : "string",
+                "description" : "조직명"
+              },
+              "link_url" : {
+                "type" : "string",
+                "description" : "링크 URL"
+              },
+              "created_date" : {
+                "type" : "string",
+                "description" : "생성일자"
+              },
+              "button_text" : {
+                "type" : "string",
+                "description" : "버튼 텍스트"
+              },
+              "id" : {
+                "type" : "number",
+                "description" : "배너 ID"
+              },
+              "title" : {
+                "type" : "string",
+                "description" : "제목"
+              },
+              "color_code" : {
+                "type" : "string",
+                "description" : "색상 코드"
+              }
+            },
+            "description" : "배너 정보"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-members-action-register946525738" : {
+        "required" : [ "event_id", "name", "pin", "schedules" ],
+        "type" : "object",
+        "properties" : {
+          "event_id" : {
+            "type" : "string",
+            "description" : "이벤트 ID"
+          },
+          "pin" : {
+            "type" : "string",
+            "description" : "멤버 PIN"
+          },
+          "schedules" : {
+            "type" : "array",
+            "description" : "스케줄 목록",
+            "items" : {
+              "required" : [ "time_point", "times" ],
+              "type" : "object",
+              "properties" : {
+                "times" : {
+                  "type" : "array",
+                  "description" : "시간 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                },
+                "time_point" : {
+                  "type" : "string",
+                  "description" : "스케줄 날짜"
+                }
+              }
+            }
+          },
+          "name" : {
+            "type" : "string",
+            "description" : "멤버 이름"
+          }
+        }
+      },
+      "api-v1-schedules-day-event_id-filtering542384661" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "required" : [ "name" ],
+              "type" : "object",
+              "properties" : {
+                "schedules" : {
+                  "type" : "array",
+                  "items" : {
+                    "required" : [ "time_point", "times" ],
+                    "type" : "object",
+                    "properties" : {
+                      "times" : {
+                        "type" : "array",
+                        "description" : "스케줄 시간 목록",
+                        "items" : {
+                          "oneOf" : [ {
+                            "type" : "object"
+                          }, {
+                            "type" : "boolean"
+                          }, {
+                            "type" : "string"
+                          }, {
+                            "type" : "number"
+                          } ]
+                        }
+                      },
+                      "time_point" : {
+                        "type" : "string",
+                        "description" : "요일"
+                      }
+                    }
+                  }
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "참여자 이름"
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-date-1423118481" : {
+        "required" : [ "event_id" ],
+        "type" : "object",
+        "properties" : {
+          "member_id" : {
+            "type" : "string",
+            "description" : "멤버 ID (로그인 유저는 필요 없음)",
+            "nullable" : true
+          },
+          "event_id" : {
+            "type" : "string",
+            "description" : "이벤트 ID"
+          },
+          "schedules" : {
+            "type" : "array",
+            "items" : {
+              "required" : [ "time_point", "times" ],
+              "type" : "object",
+              "properties" : {
+                "times" : {
+                  "type" : "array",
+                  "description" : "스케줄 시간 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                },
+                "time_point" : {
+                  "type" : "string",
+                  "description" : "날짜"
+                }
+              }
+            }
+          }
+        }
+      },
+      "RemoveUserCreatedEventResponseSchema" : {
+        "title" : "RemoveUserCreatedEventResponseSchema",
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-date-event_id-filtering-184406207" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "required" : [ "name" ],
+              "type" : "object",
+              "properties" : {
+                "schedules" : {
+                  "type" : "array",
+                  "items" : {
+                    "required" : [ "time_point", "times" ],
+                    "type" : "object",
+                    "properties" : {
+                      "times" : {
+                        "type" : "array",
+                        "description" : "스케줄 시간 목록",
+                        "items" : {
+                          "oneOf" : [ {
+                            "type" : "object"
+                          }, {
+                            "type" : "boolean"
+                          }, {
+                            "type" : "string"
+                          }, {
+                            "type" : "number"
+                          } ]
+                        }
+                      },
+                      "time_point" : {
+                        "type" : "string",
+                        "description" : "날짜"
+                      }
+                    }
+                  }
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "참여자 이름"
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-members-name-action-check-143782741" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "HTTP 상태 코드"
+          },
+          "payload" : {
+            "required" : [ "is_possible" ],
+            "type" : "object",
+            "properties" : {
+              "is_possible" : {
+                "type" : "boolean",
+                "description" : "이름 사용 가능 여부"
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetFilteredMostPossibleTimeResponseSchema" : {
+        "title" : "GetFilteredMostPossibleTimeResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "description" : "가장 많이 되는 시간 목록",
+            "items" : {
+              "required" : [ "end_time", "impossible_names", "possible_count", "possible_names", "start_time", "time_point" ],
+              "type" : "object",
+              "properties" : {
+                "start_time" : {
+                  "type" : "string",
+                  "description" : "시작 시간"
+                },
+                "time_point" : {
+                  "type" : "string",
+                  "description" : "날짜 또는 요일"
+                },
+                "end_time" : {
+                  "type" : "string",
+                  "description" : "종료 시간"
+                },
+                "possible_names" : {
+                  "type" : "array",
+                  "description" : "가능한 참여자 이름 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                },
+                "possible_count" : {
+                  "type" : "number",
+                  "description" : "가능한 참여자 수"
+                },
+                "impossible_names" : {
+                  "type" : "array",
+                  "description" : "참여 불가능한 이름 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-urls-action-original-1188642833" : {
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "original_url" ],
+            "type" : "object",
+            "properties" : {
+              "original_url" : {
+                "type" : "string",
+                "description" : "복원된 원본 URL"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-date-event_id-735087003" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "required" : [ "name" ],
+              "type" : "object",
+              "properties" : {
+                "schedules" : {
+                  "type" : "array",
+                  "items" : {
+                    "required" : [ "time_point", "times" ],
+                    "type" : "object",
+                    "properties" : {
+                      "times" : {
+                        "type" : "array",
+                        "description" : "스케줄 시간 목록",
+                        "items" : {
+                          "oneOf" : [ {
+                            "type" : "object"
+                          }, {
+                            "type" : "boolean"
+                          }, {
+                            "type" : "string"
+                          }, {
+                            "type" : "number"
+                          } ]
+                        }
+                      },
+                      "time_point" : {
+                        "type" : "string",
+                        "description" : "날짜"
+                      }
+                    }
+                  }
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "멤버 이름"
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetMostPossibleTimeResponseSchema" : {
+        "title" : "GetMostPossibleTimeResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "description" : "가장 많이 되는 시간 목록",
+            "items" : {
+              "required" : [ "end_time", "impossible_names", "possible_count", "possible_names", "start_time", "time_point" ],
+              "type" : "object",
+              "properties" : {
+                "start_time" : {
+                  "type" : "string",
+                  "description" : "시작 시간"
+                },
+                "time_point" : {
+                  "type" : "string",
+                  "description" : "날짜 또는 요일"
+                },
+                "end_time" : {
+                  "type" : "string",
+                  "description" : "종료 시간"
+                },
+                "possible_names" : {
+                  "type" : "array",
+                  "description" : "가능한 참여자 이름 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                },
+                "possible_count" : {
+                  "type" : "number",
+                  "description" : "가능한 참여자 수"
+                },
+                "impossible_names" : {
+                  "type" : "array",
+                  "description" : "참여 불가능한 이름 목록",
+                  "items" : {
+                    "oneOf" : [ {
+                      "type" : "object"
+                    }, {
+                      "type" : "boolean"
+                    }, {
+                      "type" : "string"
+                    }, {
+                      "type" : "number"
+                    } ]
+                  }
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetAllActivatedBarBannersResponse" : {
+        "title" : "GetAllActivatedBarBannersResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "bar_banners" ],
+            "type" : "object",
+            "properties" : {
+              "bar_banners" : {
+                "type" : "array",
+                "description" : "띠배너 목록",
+                "items" : {
+                  "required" : [ "background_color_code", "content_eng", "content_kor", "created_date", "id", "is_activated", "link_url", "text_color_code" ],
+                  "type" : "object",
+                  "properties" : {
+                    "is_activated" : {
+                      "type" : "boolean",
+                      "description" : "활성화 여부"
+                    },
+                    "text_color_code" : {
+                      "type" : "string",
+                      "description" : "텍스트 색상 코드"
+                    },
+                    "link_url" : {
+                      "type" : "string",
+                      "description" : "링크 URL"
+                    },
+                    "created_date" : {
+                      "type" : "string",
+                      "description" : "생성일자"
+                    },
+                    "background_color_code" : {
+                      "type" : "string",
+                      "description" : "배경 색상 코드"
+                    },
+                    "content_eng" : {
+                      "type" : "string",
+                      "description" : "영어 내용"
+                    },
+                    "content_kor" : {
+                      "type" : "string",
+                      "description" : "한국어 내용"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "띠배너 ID"
+                    }
+                  }
+                }
+              }
+            },
+            "description" : "페이로드 객체"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetUserProfileResponseSchema" : {
+        "title" : "GetUserProfileResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "email", "language", "nickname", "social_platform" ],
+            "type" : "object",
+            "properties" : {
+              "nickname" : {
+                "type" : "string",
+                "description" : "유저 닉네임"
+              },
+              "language" : {
+                "type" : "string",
+                "description" : "유저 언어"
+              },
+              "social_platform" : {
+                "type" : "string",
+                "description" : "유저 소셜 로그인 플랫폼"
+              },
+              "email" : {
+                "type" : "string",
+                "description" : "유저 이메일"
+              }
+            },
+            "description" : "유저 정보 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-members-action-register1632683266" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "HTTP 상태 코드"
+          },
+          "payload" : {
+            "required" : [ "category", "member_id" ],
+            "type" : "object",
+            "properties" : {
+              "member_id" : {
+                "type" : "string",
+                "description" : "멤버 ID"
+              },
+              "category" : {
+                "type" : "string",
+                "description" : "이벤트 카테고리"
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-schedules-day-event_id-member_id-2071885996" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "name" ],
+            "type" : "object",
+            "properties" : {
+              "schedules" : {
+                "type" : "array",
+                "items" : {
+                  "required" : [ "time_point", "times" ],
+                  "type" : "object",
+                  "properties" : {
+                    "times" : {
+                      "type" : "array",
+                      "description" : "스케줄 시간 목록",
+                      "items" : {
+                        "oneOf" : [ {
+                          "type" : "object"
+                        }, {
+                          "type" : "boolean"
+                        }, {
+                          "type" : "string"
+                        }, {
+                          "type" : "number"
+                        } ]
+                      }
+                    },
+                    "time_point" : {
+                      "type" : "string",
+                      "description" : "요일"
+                    }
+                  }
+                }
+              },
+              "name" : {
+                "type" : "string",
+                "description" : "멤버 이름"
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetEventQrCodeResponseSchema" : {
+        "title" : "GetEventQrCodeResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "qr_code_img_url" ],
+            "type" : "object",
+            "properties" : {
+              "qr_code_img_url" : {
+                "type" : "string",
+                "description" : "QR 코드 이미지 URL"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "UpdateBarBannerRequest" : {
+        "title" : "UpdateBarBannerRequest",
+        "type" : "object",
+        "properties" : {
+          "is_activated" : {
+            "type" : "boolean",
+            "description" : "활성화 여부",
+            "nullable" : true
+          },
+          "text_color_code" : {
+            "type" : "string",
+            "description" : "텍스트 색상 코드",
+            "nullable" : true
+          },
+          "link_url" : {
+            "type" : "string",
+            "description" : "링크 URL",
+            "nullable" : true
+          },
+          "background_color_code" : {
+            "type" : "string",
+            "description" : "배경 색상 코드",
+            "nullable" : true
+          },
+          "content_eng" : {
+            "type" : "string",
+            "description" : "영어 내용",
+            "nullable" : true
+          },
+          "content_kor" : {
+            "type" : "string",
+            "description" : "한국어 내용",
+            "nullable" : true
+          }
+        }
+      },
+      "api-v1-schedules-day-event_id361082201" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "items" : {
+              "required" : [ "name" ],
+              "type" : "object",
+              "properties" : {
+                "schedules" : {
+                  "type" : "array",
+                  "items" : {
+                    "required" : [ "time_point", "times" ],
+                    "type" : "object",
+                    "properties" : {
+                      "times" : {
+                        "type" : "array",
+                        "description" : "스케줄 시간 목록",
+                        "items" : {
+                          "oneOf" : [ {
+                            "type" : "object"
+                          }, {
+                            "type" : "boolean"
+                          }, {
+                            "type" : "string"
+                          }, {
+                            "type" : "number"
+                          } ]
+                        }
+                      },
+                      "time_point" : {
+                        "type" : "string",
+                        "description" : "요일"
+                      }
+                    }
+                  }
+                },
+                "name" : {
+                  "type" : "string",
+                  "description" : "멤버 이름"
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetAllDashboardEventsResponse" : {
+        "title" : "GetAllDashboardEventsResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "events" ],
+            "type" : "object",
+            "properties" : {
+              "page_info" : {
+                "required" : [ "page", "size", "total_elements", "total_pages" ],
+                "type" : "object",
+                "properties" : {
+                  "size" : {
+                    "type" : "number",
+                    "description" : "페이지당 항목 수"
+                  },
+                  "total_elements" : {
+                    "type" : "number",
+                    "description" : "전체 항목 수"
+                  },
+                  "total_pages" : {
+                    "type" : "number",
+                    "description" : "전체 페이지 수"
+                  },
+                  "page" : {
+                    "type" : "number",
+                    "description" : "현재 페이지 번호"
+                  }
+                }
+              },
+              "events" : {
+                "type" : "array",
+                "description" : "이벤트 리스트",
+                "items" : {
+                  "required" : [ "category", "created_date", "end_time", "event_id", "id", "participant_count", "ranges", "start_time", "title" ],
+                  "type" : "object",
+                  "properties" : {
+                    "start_time" : {
+                      "type" : "string",
+                      "description" : "시작 시간"
+                    },
+                    "participant_count" : {
+                      "type" : "number",
+                      "description" : "참여 인원 수"
+                    },
+                    "event_id" : {
+                      "type" : "string",
+                      "description" : "이벤트 외부 식별자 (UUID)"
+                    },
+                    "ranges" : {
+                      "type" : "array",
+                      "description" : "이벤트 날짜 또는 요일 범위",
+                      "items" : {
+                        "oneOf" : [ {
+                          "type" : "object"
+                        }, {
+                          "type" : "boolean"
+                        }, {
+                          "type" : "string"
+                        }, {
+                          "type" : "number"
+                        } ]
+                      }
+                    },
+                    "end_time" : {
+                      "type" : "string",
+                      "description" : "종료 시간"
+                    },
+                    "created_date" : {
+                      "type" : "string",
+                      "description" : "생성일자"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "이벤트 내부 ID"
+                    },
+                    "category" : {
+                      "type" : "string",
+                      "description" : "카테고리 (DATE 또는 DAY)"
+                    },
+                    "title" : {
+                      "type" : "string",
+                      "description" : "이벤트 제목"
+                    }
+                  }
+                }
+              }
+            },
+            "description" : "페이로드 객체"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "UpdateUserSleepTimeRequestSchema" : {
+        "title" : "UpdateUserSleepTimeRequestSchema",
+        "required" : [ "sleep_end_time", "sleep_start_time" ],
+        "type" : "object",
+        "properties" : {
+          "sleep_end_time" : {
+            "type" : "string",
+            "description" : "수면 종료 시간 (HH:mm)"
+          },
+          "sleep_start_time" : {
+            "type" : "string",
+            "description" : "수면 시작 시간 (HH:mm)"
+          }
+        }
+      },
+      "UpdateAdminUserStatusRequest" : {
+        "title" : "UpdateAdminUserStatusRequest",
+        "required" : [ "admin_status", "id" ],
+        "type" : "object",
+        "properties" : {
+          "admin_status" : {
+            "type" : "string",
+            "description" : "변경할 관리자 상태 (MASTER, APPROVED, PENDING_APPROVAL)"
+          },
+          "id" : {
+            "type" : "number",
+            "description" : "수정 대상 관리자 ID"
+          }
+        }
+      },
+      "GetParticipantsResponseSchema" : {
+        "title" : "GetParticipantsResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "members", "users" ],
+            "type" : "object",
+            "properties" : {
+              "members" : {
+                "type" : "array",
+                "description" : "멤버 목록",
+                "items" : {
+                  "required" : [ "id", "name" ],
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string",
+                      "description" : "멤버 이름"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "멤버 ID"
+                    }
+                  }
+                }
+              },
+              "users" : {
+                "type" : "array",
+                "description" : "유저 목록",
+                "items" : {
+                  "required" : [ "id", "name" ],
+                  "type" : "object",
+                  "properties" : {
+                    "name" : {
+                      "type" : "string",
+                      "description" : "유저 이름"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "유저 ID"
+                    }
+                  }
+                }
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetAllBannersResponse" : {
+        "title" : "GetAllBannersResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "banners" ],
+            "type" : "object",
+            "properties" : {
+              "page_info" : {
+                "required" : [ "page", "size", "total_elements", "total_pages" ],
+                "type" : "object",
+                "properties" : {
+                  "size" : {
+                    "type" : "number",
+                    "description" : "페이지당 항목 수"
+                  },
+                  "total_elements" : {
+                    "type" : "number",
+                    "description" : "전체 항목 수"
+                  },
+                  "total_pages" : {
+                    "type" : "number",
+                    "description" : "전체 페이지 수"
+                  },
+                  "page" : {
+                    "type" : "number",
+                    "description" : "현재 페이지 번호"
+                  }
+                }
+              },
+              "banners" : {
+                "type" : "array",
+                "description" : "배너 목록",
+                "items" : {
+                  "required" : [ "button_text", "color_code", "created_date", "id", "image_url", "is_activated", "link_url", "organization", "sub_title", "title" ],
+                  "type" : "object",
+                  "properties" : {
+                    "sub_title" : {
+                      "type" : "string",
+                      "description" : "부제목"
+                    },
+                    "is_activated" : {
+                      "type" : "boolean",
+                      "description" : "활성화 여부"
+                    },
+                    "image_url" : {
+                      "type" : "string",
+                      "description" : "배너 이미지 URL"
+                    },
+                    "organization" : {
+                      "type" : "string",
+                      "description" : "조직명"
+                    },
+                    "link_url" : {
+                      "type" : "string",
+                      "description" : "링크 URL"
+                    },
+                    "created_date" : {
+                      "type" : "string",
+                      "description" : "생성일자"
+                    },
+                    "button_text" : {
+                      "type" : "string",
+                      "description" : "버튼 텍스트"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "배너 ID"
+                    },
+                    "title" : {
+                      "type" : "string",
+                      "description" : "제목"
+                    },
+                    "color_code" : {
+                      "type" : "string",
+                      "description" : "색상 코드"
+                    }
+                  }
+                }
+              }
+            },
+            "description" : "페이로드 객체"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetAllActivatedBannersResponse" : {
+        "title" : "GetAllActivatedBannersResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "banners" ],
+            "type" : "object",
+            "properties" : {
+              "banners" : {
+                "type" : "array",
+                "description" : "배너 목록",
+                "items" : {
+                  "required" : [ "button_text", "color_code", "created_date", "id", "image_url", "is_activated", "link_url", "organization", "sub_title", "title" ],
+                  "type" : "object",
+                  "properties" : {
+                    "sub_title" : {
+                      "type" : "string",
+                      "description" : "부제목"
+                    },
+                    "is_activated" : {
+                      "type" : "boolean",
+                      "description" : "활성화 여부"
+                    },
+                    "image_url" : {
+                      "type" : "string",
+                      "description" : "배너 이미지 URL"
+                    },
+                    "organization" : {
+                      "type" : "string",
+                      "description" : "조직명"
+                    },
+                    "link_url" : {
+                      "type" : "string",
+                      "description" : "링크 URL"
+                    },
+                    "created_date" : {
+                      "type" : "string",
+                      "description" : "생성일자"
+                    },
+                    "button_text" : {
+                      "type" : "string",
+                      "description" : "버튼 텍스트"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "배너 ID"
+                    },
+                    "title" : {
+                      "type" : "string",
+                      "description" : "제목"
+                    },
+                    "color_code" : {
+                      "type" : "string",
+                      "description" : "색상 코드"
+                    }
+                  }
+                }
+              }
+            },
+            "description" : "페이로드 객체"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "OnboardUserResponseSchema" : {
+        "title" : "OnboardUserResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "access_token", "refresh_token" ],
+            "type" : "object",
+            "properties" : {
+              "access_token" : {
+                "type" : "string",
+                "description" : "액세스 토큰"
+              },
+              "refresh_token" : {
+                "type" : "string",
+                "description" : "리프레쉬 토큰"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-users-profile-action-update1430954811" : {
+        "required" : [ "language", "nickname" ],
+        "type" : "object",
+        "properties" : {
+          "nickname" : {
+            "type" : "string",
+            "description" : "수정할 닉네임"
+          },
+          "language" : {
+            "type" : "string",
+            "description" : "수정할 언어"
+          }
+        }
+      },
+      "UpdateUserPolicyAgreementRequestSchema" : {
+        "title" : "UpdateUserPolicyAgreementRequestSchema",
+        "required" : [ "marketing_policy_agreement", "privacy_policy_agreement", "service_policy_agreement" ],
+        "type" : "object",
+        "properties" : {
+          "service_policy_agreement" : {
+            "type" : "boolean",
+            "description" : "서비스 이용약관 동의 여부"
+          },
+          "marketing_policy_agreement" : {
+            "type" : "boolean",
+            "description" : "마케팅 정보 수신 동의 여부"
+          },
+          "privacy_policy_agreement" : {
+            "type" : "boolean",
+            "description" : "개인정보 수집 및 이용 동의 여부"
+          }
+        }
+      },
+      "CreateEventResponseSchema" : {
+        "title" : "CreateEventResponseSchema",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "event_id" ],
+            "type" : "object",
+            "properties" : {
+              "event_id" : {
+                "type" : "string",
+                "description" : "생성된 이벤트의 UUID (형식: UUID)"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-urls-action-shorten1006350093" : {
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "shorten_url" ],
+            "type" : "object",
+            "properties" : {
+              "shorten_url" : {
+                "type" : "string",
+                "description" : "생성된 단축 URL"
+              }
+            },
+            "description" : "응답 데이터"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetAllAdminUserDetailResponse" : {
+        "title" : "GetAllAdminUserDetailResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "type" : "array",
+            "description" : "응답 데이터",
+            "items" : {
+              "required" : [ "admin_status", "email", "id", "name" ],
+              "type" : "object",
+              "properties" : {
+                "name" : {
+                  "type" : "string",
+                  "description" : "관리자 이름"
+                },
+                "admin_status" : {
+                  "type" : "string",
+                  "description" : "관리자 상태 (MASTER, APPROVED, PENDING_APPROVAL)"
+                },
+                "id" : {
+                  "type" : "number",
+                  "description" : "관리자 ID"
+                },
+                "email" : {
+                  "type" : "string",
+                  "description" : "관리자 이메일"
+                }
+              }
+            }
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "GetAllDashboardUsersResponse" : {
+        "title" : "GetAllDashboardUsersResponse",
+        "required" : [ "code", "is_success", "message", "payload" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "payload" : {
+            "required" : [ "users" ],
+            "type" : "object",
+            "properties" : {
+              "page_info" : {
+                "required" : [ "page", "size", "total_elements", "total_pages" ],
+                "type" : "object",
+                "properties" : {
+                  "size" : {
+                    "type" : "number",
+                    "description" : "페이지당 항목 수"
+                  },
+                  "total_elements" : {
+                    "type" : "number",
+                    "description" : "전체 항목 수"
+                  },
+                  "total_pages" : {
+                    "type" : "number",
+                    "description" : "전체 페이지 수"
+                  },
+                  "page" : {
+                    "type" : "number",
+                    "description" : "현재 페이지 번호"
+                  }
+                }
+              },
+              "users" : {
+                "type" : "array",
+                "description" : "사용자 리스트",
+                "items" : {
+                  "required" : [ "created_date", "email", "id", "language", "marketing_policy_agreement", "name", "nickname", "participation_count", "privacy_policy_agreement", "provider", "provider_id", "service_policy_agreement", "sleep_end_time", "sleep_start_time" ],
+                  "type" : "object",
+                  "properties" : {
+                    "sleep_end_time" : {
+                      "type" : "string",
+                      "description" : "수면 종료 시간"
+                    },
+                    "service_policy_agreement" : {
+                      "type" : "boolean",
+                      "description" : "서비스 정책 동의 여부"
+                    },
+                    "sleep_start_time" : {
+                      "type" : "string",
+                      "description" : "수면 시작 시간"
+                    },
+                    "marketing_policy_agreement" : {
+                      "type" : "boolean",
+                      "description" : "마케팅 정책 동의 여부"
+                    },
+                    "language" : {
+                      "type" : "string",
+                      "description" : "선호 언어"
+                    },
+                    "participation_count" : {
+                      "type" : "number",
+                      "description" : "참여한 이벤트 수"
+                    },
+                    "provider" : {
+                      "type" : "string",
+                      "description" : "소셜 로그인 제공자"
+                    },
+                    "nickname" : {
+                      "type" : "string",
+                      "description" : "닉네임"
+                    },
+                    "name" : {
+                      "type" : "string",
+                      "description" : "이름"
+                    },
+                    "provider_id" : {
+                      "type" : "string",
+                      "description" : "소셜 로그인 식별자"
+                    },
+                    "created_date" : {
+                      "type" : "string",
+                      "description" : "생성일자"
+                    },
+                    "id" : {
+                      "type" : "number",
+                      "description" : "사용자 ID"
+                    },
+                    "email" : {
+                      "type" : "string",
+                      "description" : "이메일"
+                    },
+                    "privacy_policy_agreement" : {
+                      "type" : "boolean",
+                      "description" : "개인정보 정책 동의 여부"
+                    }
+                  }
+                }
+              }
+            },
+            "description" : "페이로드 객체"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-users-sleep-time710843682" : {
+        "required" : [ "code", "is_success", "message" ],
+        "type" : "object",
+        "properties" : {
+          "code" : {
+            "type" : "string",
+            "description" : "응답 코드"
+          },
+          "message" : {
+            "type" : "string",
+            "description" : "응답 메시지"
+          },
+          "is_success" : {
+            "type" : "boolean",
+            "description" : "성공 여부"
+          }
+        }
+      },
+      "api-v1-urls-action-shorten1745576439" : {
+        "required" : [ "original_url" ],
+        "type" : "object",
+        "properties" : {
+          "original_url" : {
+            "type" : "string",
+            "description" : "단축할 원본 URL"
+          }
+        }
+      }
+    }
+  }
+}
